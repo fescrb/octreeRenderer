@@ -1,7 +1,9 @@
 project(octreeRenderer)
 
-cmake_minimum_required(2.6)
+cmake_minimum_required(VERSION 2.6)
 
-#find_package(OpenCL REQUIRED)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+
+find_package(OpenCL REQUIRED)
 
 add_subdirectory(src)
