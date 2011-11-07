@@ -9,11 +9,11 @@ class OpenCLContext :
 	public Context {
 
 	public:
-						 OpenCLContext();
-		virtual 		~OpenCLContext();
+							 OpenCLContext();
+		virtual 			~OpenCLContext();
 
 	private:
-		cl_context 		 m_context;
+		cl_platform_id		 m_platform_id;
 
 };
 
