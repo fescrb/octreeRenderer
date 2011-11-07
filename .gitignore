@@ -4,3 +4,4 @@ obj/*
 octreeRenderer.layout
 .cproject
 .project
+*.*~
