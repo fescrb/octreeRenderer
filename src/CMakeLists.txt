@@ -1,8 +1,11 @@
 include_directories(.)
 
-include_directories(${OpenCL_INCLUDE_DIR})
-include_directories(OpenCL)
-add_subdirectory(OpenCL)
+# Add OpenCL subdirectory only if we can.
+if(USE_OPENCL)
+     include_directories(${OpenCL_INCLUDE_DIR})
+     include_directories(OpenCL)
+     add_subdirectory(OpenCL)#
+endif(USE_OPENCL)
 
 include(CMakeSources.cmake)
 
