@@ -13,7 +13,7 @@ class OpenCLContext :
 		virtual 			~OpenCLContext();
 
 	private:
-		cl_platform_id		 m_platform_id;
+		cl_platform_id		*m_PlatformIDs;
 
 };
 
