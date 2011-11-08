@@ -3,5 +3,5 @@ set(sources ${sources}
 			main.cpp )
 
 set(headers ${headers}
+			Device.h
 			Context.h
-			Device.h )
