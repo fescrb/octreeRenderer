@@ -1,6 +1,8 @@
 #include "OpenCLUtils.h"
 
-const char* errorToCString(cl_int error_number) {
+#include "OpenCLExtra.h"
+
+const char* clErrorToCString(cl_int error_number) {
 	switch(error_number) {
 		case CL_SUCCESS:
 			return "CL_SUCCESS";
@@ -44,7 +46,67 @@ const char* errorToCString(cl_int error_number) {
 			return "CL_INVALID_CONTEXT";
 		case CL_INVALID_QUEUE_PROPERTIES:
 			return "CL_INVALID_QUEUE_PROPERTIES";
+		case CL_INVALID_COMMAND_QUEUE:
+			return "CL_INVALID_COMMAND_QUEUE";
+		case CL_INVALID_HOST_PTR:
+			return "CL_INVALID_HOST_PTR";
+		case CL_INVALID_MEM_OBJECT:
+			return "CL_INVALID_MEM_OBJECT";
+		case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR:
+			return "CL_INVALID_IMAGE_FORMAT_DESCRIPTOR";
+		case CL_INVALID_IMAGE_SIZE:
+			return "CL_INVALID_IMAGE_SIZE";
+		case CL_INVALID_SAMPLER:
+			return "CL_INVALID_SAMPLER";
+		case CL_INVALID_BINARY:
+			return "CL_INVALID_BINARY";
+		case CL_INVALID_BUILD_OPTIONS:
+			return "CL_INVALID_BUILD_OPTIONS";
+		case CL_INVALID_PROGRAM:
+			return "CL_INVALID_PROGRAM";
+		case CL_INVALID_PROGRAM_EXECUTABLE:
+			return "CL_INVALID_PROGRAM_EXECUTABLE";
+		case CL_INVALID_KERNEL_NAME:
+			return "CL_INVALID_KERNEL_NAME";
+		case CL_INVALID_KERNEL_DEFINITION:
+			return "CL_INVALID_KERNEL_DEFINITION";
+		case CL_INVALID_KERNEL:
+			return "CL_INVALID_KERNEL";
+		case CL_INVALID_ARG_INDEX:
+			return "CL_INVALID_ARG_INDEX";
+		case CL_INVALID_ARG_VALUE:
+			return "CL_INVALID_ARG_VALUE";
+		case CL_INVALID_ARG_SIZE:
+			return "CL_INVALID_ARG_SIZE";
+		case CL_INVALID_KERNEL_ARGS:
+			return "CL_INVALID_KERNEL_ARGS";
+		case CL_INVALID_WORK_DIMENSION:
+			return "CL_INVALID_WORK_DIMENSION";
+		case CL_INVALID_WORK_GROUP_SIZE:
+			return "CL_INVALID_WORK_GROUP_SIZE";
+		case CL_INVALID_WORK_ITEM_SIZE:
+			return "CL_INVALID_WORK_ITEM_SIZE";
+		case CL_INVALID_GLOBAL_OFFSET:
+			return "CL_INVALID_GLOBAL_OFFSET";
+		case CL_INVALID_EVENT_WAIT_LIST:
+			return "CL_INVALID_EVENT_WAIT_LIST";
+		case CL_INVALID_EVENT:
+			return "CL_INVALID_EVENT";
+		case CL_INVALID_OPERATION:
+			return "CL_INVALID_OPERATION";
+		case CL_INVALID_GL_OBJECT:
+			return "CL_INVALID_GL_OBJECT";
+		case CL_INVALID_BUFFER_SIZE:
+			return "CL_INVALID_BUFFER_SIZE";
+		case CL_INVALID_MIP_LEVEL:
+			return "CL_INVALID_MIP_LEVEL";
+		case CL_INVALID_GLOBAL_WORK_SIZE:
+			return "CL_INVALID_GLOBAL_WORK_SIZE";
+		case CL_INVALID_PROPERTY:
+			return "CL_INVALID_PROPERTY";
+		case CL_NO_ICD_FOUND:
+			return "CL_NO_ICD_FOUND: OpenCL has found no .icd files.";
 		default:
-			return "Error number invalid or unknown.";
+			return "Error number invalid or unknown";
 	}
 }

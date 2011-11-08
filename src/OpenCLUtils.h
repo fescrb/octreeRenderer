@@ -3,6 +3,6 @@
 
 #include <CL/cl.h>
 
-const char* errorToCString(cl_int error_number);
+const char* clErrorToCString(cl_int error_number);
 
 #endif //_OPENCL_UTILS_H
