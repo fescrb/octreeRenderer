@@ -1,4 +1,7 @@
-set(sources Device.cpp
+set(sources ${sources}
+			Device.cpp
 			main.cpp )
 
-set(headers Device.h )
+set(headers ${headers}
+			Context.h
+			Device.h )
