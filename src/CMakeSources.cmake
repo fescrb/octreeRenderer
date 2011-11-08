@@ -1,9 +1,7 @@
-set(sources Device.cpp
-			OpenCLContext.cpp
-			OpenCLUtils.cpp
+set(sources ${sources}
+			Device.cpp
 			main.cpp )
 
-set(headers Context.h
-			OpenCLContext.h
-			OpenCLUtils.h
+set(headers ${headers}
+			Context.h
 			Device.h )
