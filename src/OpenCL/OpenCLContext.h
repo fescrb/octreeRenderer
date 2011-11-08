@@ -2,6 +2,7 @@
 #define _OPENCL_CONTEXT_H
 
 #include "Context.h"
+#include "OpenCLPlatform.h"
 
 #include <CL/cl.h>
 
@@ -13,7 +14,8 @@ class OpenCLContext :
 		virtual 			~OpenCLContext();
 
 	private:
-		cl_platform_id		*m_PlatformIDs;
+		unsigned int		 m_numberOfPlatforms;
+		OpenCLPlatform		*m_aPlatforms;
 
 };
 

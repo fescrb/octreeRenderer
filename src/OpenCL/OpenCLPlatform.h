@@ -6,7 +6,7 @@
 class OpenCLPlatform {
 
 	public:
-								 OpenCLPlatform(cl_platform_id);
+								 OpenCLPlatform(cl_platform_id platform_id);
 		virtual 				~OpenCLPlatform();
 	private:
 		cl_platform_id 			 m_PlatformID;

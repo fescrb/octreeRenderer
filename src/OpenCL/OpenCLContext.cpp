@@ -5,17 +5,32 @@
 
 OpenCLContext::OpenCLContext() {
 	cl_uint num_of_platforms = 0;
-	cl_platform_id plat;
+
 	// We get the number of platforms.
 	cl_int err = clGetPlatformIDs(0, NULL, &num_of_platforms);
+
+	// If error, we print to stdout and leave.
+	if(clIsError(err)){
+		printf("Error: %s.\n", clErrorToCString(err)); return;
+	}
+
+	m_numberOfPlatforms = num_of_platforms;
+
+	// We allocate memory for the list of platforms and retrieve it.
+	m_aPlatforms = (OpenCLPlatform*) malloc(sizeof(OpenCLPlatform)*m_numberOfPlatforms + 1);
+	cl_platform_id *platform_ids = (cl_platform_id*) malloc(sizeof(cl_platform_id)*m_numberOfPlatforms + 1);
+
+	err = clGetPlatformIDs(num_of_platforms, platform_ids, NULL);
 
 	if(clIsError(err)){
 		printf("Error: %s.\n", clErrorToCString(err)); return;
 	}
 
-	m_PlatformIDs = (cl_platform_id*) malloc(sizeof(cl_platform_id)*num_of_platforms + 1);
+	for(int i = 0; i < m_numberOfPlatforms; i++) {
+		m_aPlatforms[i] = OpenCLPlatform(platform_ids[i]);
+	}
 
-	err = clGetPlatformIDs(num_of_platforms, m_PlatformIDs, NULL);
+
 }
 
 OpenCLContext::~OpenCLContext() {
