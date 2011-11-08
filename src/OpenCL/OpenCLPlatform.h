@@ -3,6 +3,8 @@
 
 #include <CL/cl.h>
 
+class OpenCLDevice;
+
 class OpenCLPlatform {
 
 	public:
@@ -10,6 +12,9 @@ class OpenCLPlatform {
 		virtual 				~OpenCLPlatform();
 	private:
 		cl_platform_id 			 m_PlatformID;
+
+		unsigned int	 		 m_numberOfDevices;
+		OpenCLDevice 		   **m_apDevices;
 };
 
 #endif //_OPENCL_PLATFORM_H

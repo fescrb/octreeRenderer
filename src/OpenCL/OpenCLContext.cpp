@@ -1,8 +1,6 @@
 #include "OpenCLContext.h"
 #include "OpenCLUtils.h"
 
-#include <stdio.h>
-
 OpenCLContext::OpenCLContext() {
 	cl_uint num_of_platforms = 0;
 
@@ -11,7 +9,7 @@ OpenCLContext::OpenCLContext() {
 
 	// If error, we print to stdout and leave.
 	if(clIsError(err)){
-		printf("Error: %s.\n", clErrorToCString(err)); return;
+		clPrintError(err); return;
 	}
 
 	m_numberOfPlatforms = num_of_platforms;
@@ -23,14 +21,13 @@ OpenCLContext::OpenCLContext() {
 	err = clGetPlatformIDs(num_of_platforms, platform_ids, NULL);
 
 	if(clIsError(err)){
-		printf("Error: %s.\n", clErrorToCString(err)); return;
+		clPrintError(err); return;
 	}
 
+	// We initialize the platforms.
 	for(int i = 0; i < m_numberOfPlatforms; i++) {
 		m_aPlatforms[i] = OpenCLPlatform(platform_ids[i]);
 	}
-
-
 }
 
 OpenCLContext::~OpenCLContext() {
