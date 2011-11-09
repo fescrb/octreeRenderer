@@ -110,3 +110,18 @@ const char* clErrorToCString(cl_int error_number) {
 			return "Error number invalid or unknown";
 	}
 }
+
+const char* clDeviceTypeToCString(cl_device_type device_type){
+	switch(device_type){
+		case CL_DEVICE_TYPE_GPU:
+			return "GPU";
+		case CL_DEVICE_TYPE_CPU:
+			return "CPU";
+		case CL_DEVICE_TYPE_ACCELERATOR:
+			return "Accelerator";
+		case CL_DEVICE_TYPE_DEFAULT:
+			return "Default";
+		default:
+			return "Device type invalid or unknown";
+	}
+}

@@ -82,6 +82,7 @@ void OpenCLDeviceInfo::printInfo(){
 	printf("Device Name:                    %s\n", m_sDeviceName);
 	printf("Vendor Name:                    %s\n", m_sDeviceVendorString);
 	printf("OpenCL Version:                 %s\n", m_sOpenCLVersionString);
+	printf("Device Type:                    %s\n", clDeviceTypeToCString(m_deviceType));
 	printf("Maximum Compute Units:          %d\n", m_maxComputeUnits);
 	printf("Maximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
 }

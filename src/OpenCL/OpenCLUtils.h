@@ -14,4 +14,6 @@ inline void clPrintError(cl_int error_code) {
 	printf("Error: %s.\n", clErrorToCString(error_code));
 }
 
+const char* clDeviceTypeToCString(cl_device_type device_type);
+
 #endif //_OPENCL_UTILS_H
