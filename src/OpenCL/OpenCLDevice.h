@@ -3,6 +3,7 @@
 
 #include "Device.h"
 #include <CL/cl.h>
+#include "OpenCLDeviceInfo.h"
 
 class OpenCLDevice:
 	public Device{
@@ -14,6 +15,8 @@ class OpenCLDevice:
 	private:
 
 		cl_device_id 		 m_DeviceID;
+
+		OpenCLDeviceInfo 	*m_pDeviceInfo;
 };
 
 #endif //_OPENCL_DEVICE_H
