@@ -19,6 +19,7 @@ class OpenCLDeviceInfo {
 		cl_device_type	 m_deviceType;
 		unsigned int 	 m_maxComputeUnits;
 		unsigned int 	 m_maxComputeUnitFrequency;
+		unsigned long	 m_globalMemorySize;
 };
 
 #endif //_OPENCL_DEVICE_INFO_H

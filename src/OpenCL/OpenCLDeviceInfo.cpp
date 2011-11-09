@@ -50,20 +50,20 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 	// Find the number of compute units. We know the size of an integer, so we don't ask for it.
 	cl_uint maxComputeUnits;
 	err = clGetDeviceInfo(device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(cl_uint), &maxComputeUnits, NULL);
-	m_maxComputeUnits = maxComputeUnits;
 
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
+	m_maxComputeUnits = maxComputeUnits;
 
 	// Find the frequency of the compute units. Same as before, we needn't query the size.
 	cl_uint maxClockFrequency;
 	err = clGetDeviceInfo(device, CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(cl_uint), &maxClockFrequency, NULL);
-	m_maxComputeUnitFrequency = maxClockFrequency;
 
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
+	m_maxComputeUnitFrequency = maxClockFrequency;
 
 	// We now query the device type. No need to check size.
 	err = clGetDeviceInfo(device, CL_DEVICE_TYPE, sizeof(cl_device_type), &m_deviceType, NULL);
@@ -71,6 +71,14 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
+
+	cl_ulong globalMemSize;
+	err = clGetDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &globalMemSize, NULL);
+
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+	m_globalMemorySize = globalMemSize;
 }
 
 OpenCLDeviceInfo::~OpenCLDeviceInfo(){
@@ -85,4 +93,5 @@ void OpenCLDeviceInfo::printInfo(){
 	printf("Device Type:                    %s\n", clDeviceTypeToCString(m_deviceType));
 	printf("Maximum Compute Units:          %d\n", m_maxComputeUnits);
 	printf("Maximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
+	printf("Global Memory Size:             %lu bytes\n", m_globalMemorySize);
 }
