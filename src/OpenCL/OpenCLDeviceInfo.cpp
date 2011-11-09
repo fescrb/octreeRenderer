@@ -2,6 +2,8 @@
 
 #include "OpenCLUtils.h"
 
+#include <stdio.h>
+
 OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 	// To get the device name, first we get the length.
 	size_t stringSize;
@@ -37,4 +39,10 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 
 OpenCLDeviceInfo::~OpenCLDeviceInfo(){
 
+}
+
+void OpenCLDeviceInfo::printInfo(){
+	printf("\nDevice Name:                    %s\n", m_sDeviceName);
+	printf("\nMaximum Compute Units:          %d\n", m_maxComputeUnits);
+	printf("\nMaximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
 }

@@ -5,14 +5,16 @@
 
 class OpenCLDeviceInfo {
 	public:
-					 OpenCLDeviceInfo(cl_device_id device);
-		virtual 	~OpenCLDeviceInfo();
+					 	 OpenCLDeviceInfo(cl_device_id device);
+		virtual 		~OpenCLDeviceInfo();
+
+		void	 	 	 printInfo();
 
 	private:
-		char		*m_sDeviceName;
+		char			*m_sDeviceName;
 
-		unsigned int m_maxComputeUnits;
-		unsigned int m_maxComputeUnitFrequency;
+		unsigned int 	 m_maxComputeUnits;
+		unsigned int 	 m_maxComputeUnitFrequency;
 };
 
 #endif //_OPENCL_DEVICE_INFO_H

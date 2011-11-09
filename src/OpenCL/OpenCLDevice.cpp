@@ -9,3 +9,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id)
 OpenCLDevice::~OpenCLDevice(){
 
 }
+
+void OpenCLDevice::printInfo() {
+	m_pDeviceInfo->printInfo();
+}

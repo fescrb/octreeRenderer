@@ -5,8 +5,10 @@
 class Device
 {
     public:
-        Device();
-        virtual ~Device();
+						 Device();
+        virtual 		~Device();
+
+        virtual void	 printInfo() = 0;
     protected:
     private:
 };
