@@ -1,0 +1,19 @@
+[Requirements]:
+
+At least one OpenCL sdk must be installed. 
+
+[Building]:
+
+Make a directory so as not to pollute the source tree:
+
+	mkdir bin; cd bin
+	
+Generate the makefiles using CMake:
+
+	cmake ..
+	
+Then invoke the makefile:
+
+	make
+	
+You will find the executable in src/octreeRenderer from the current directory.
