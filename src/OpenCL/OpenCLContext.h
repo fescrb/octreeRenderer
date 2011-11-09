@@ -13,6 +13,7 @@ class OpenCLContext :
 							 OpenCLContext();
 		virtual 			~OpenCLContext();
 
+		void				 printDeviceInfo();
 	private:
 		unsigned int		 m_numberOfPlatforms;
 		OpenCLPlatform		*m_aPlatforms;

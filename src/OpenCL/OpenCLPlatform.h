@@ -10,6 +10,14 @@ class OpenCLPlatform {
 	public:
 								 OpenCLPlatform(cl_platform_id platform_id);
 		virtual 				~OpenCLPlatform();
+
+		inline unsigned int		 getNumberOfDevices(){
+			return m_numberOfDevices;
+		}
+
+		OpenCLDevice*			 getDevice(const unsigned int dev){
+			return m_apDevices[dev];
+		}
 	private:
 		cl_platform_id 			 m_PlatformID;
 

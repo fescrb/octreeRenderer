@@ -1,6 +1,9 @@
 #include "OpenCLContext.h"
 #include "OpenCLUtils.h"
 
+// To print info, might need to be removed later.
+#include "OpenCLDevice.h"
+
 OpenCLContext::OpenCLContext() {
 	cl_uint num_of_platforms = 0;
 
@@ -32,4 +35,13 @@ OpenCLContext::OpenCLContext() {
 
 OpenCLContext::~OpenCLContext() {
 
+}
+
+void OpenCLContext::printDeviceInfo(){
+	for(int i = 0; i < m_numberOfPlatforms; i++) {
+		OpenCLPlatform platform = m_aPlatforms[i];
+		for(int j = 0; j < platform.getNumberOfDevices(); j++) {
+			platform.getDevice(j)->printInfo();
+		}
+	}
 }

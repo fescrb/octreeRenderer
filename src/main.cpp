@@ -5,4 +5,5 @@ using namespace std;
 int main()
 {
 	OpenCLContext *clContext = new OpenCLContext();
+	clContext->printDeviceInfo();
 }

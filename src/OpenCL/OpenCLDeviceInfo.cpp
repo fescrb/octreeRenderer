@@ -14,9 +14,38 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 		clPrintError(err); return;
 	}
 
+
 	// We now allocate memory for it and get it.
 	m_sDeviceName = (char*) malloc(stringSize+1);
 	err = clGetDeviceInfo(device, CL_DEVICE_NAME, stringSize, m_sDeviceName, NULL);
+
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+
+	// As with device name, we need to get size of both vendor string and version string.
+	err = clGetDeviceInfo(device, CL_DEVICE_VENDOR, 0, NULL, &stringSize);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+
+	m_sDeviceVendorString = (char*) malloc(stringSize+1);
+	err = clGetDeviceInfo(device, CL_DEVICE_VENDOR, stringSize, m_sDeviceVendorString, NULL);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+
+	// Now device version.
+	err = clGetDeviceInfo(device, CL_DEVICE_VERSION, 0, NULL, &stringSize);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+
+	m_sOpenCLVersionString = (char*) malloc(stringSize+1);
+	err = clGetDeviceInfo(device, CL_DEVICE_VERSION, stringSize, m_sOpenCLVersionString, NULL);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
 
 	// Find the number of compute units. We know the size of an integer, so we don't ask for it.
 	cl_uint maxComputeUnits;
@@ -35,6 +64,13 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
+
+	// We now query the device type. No need to check size.
+	err = clGetDeviceInfo(device, CL_DEVICE_TYPE, sizeof(cl_device_type), &m_deviceType, NULL);
+
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
 }
 
 OpenCLDeviceInfo::~OpenCLDeviceInfo(){
@@ -42,7 +78,10 @@ OpenCLDeviceInfo::~OpenCLDeviceInfo(){
 }
 
 void OpenCLDeviceInfo::printInfo(){
-	printf("\nDevice Name:                    %s\n", m_sDeviceName);
-	printf("\nMaximum Compute Units:          %d\n", m_maxComputeUnits);
-	printf("\nMaximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
+	printf("\n");
+	printf("Device Name:                    %s\n", m_sDeviceName);
+	printf("Vendor Name:                    %s\n", m_sDeviceVendorString);
+	printf("OpenCL Version:                 %s\n", m_sOpenCLVersionString);
+	printf("Maximum Compute Units:          %d\n", m_maxComputeUnits);
+	printf("Maximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
 }

@@ -13,6 +13,10 @@ class OpenCLDeviceInfo {
 	private:
 		char			*m_sDeviceName;
 
+		char			*m_sDeviceVendorString;
+		char			*m_sOpenCLVersionString;
+
+		cl_device_type	 m_deviceType;
 		unsigned int 	 m_maxComputeUnits;
 		unsigned int 	 m_maxComputeUnitFrequency;
 };
