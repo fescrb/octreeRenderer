@@ -3,6 +3,9 @@
 
 class Context {
 
+	public:
+		void				 printDeviceInfo();
+
 };
 
 #endif //_CONTEXT
