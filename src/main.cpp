@@ -1,9 +1,8 @@
-#include "OpenCLContext.h"
+#include "DeviceManager.h"
 
 using namespace std;
 
-int main()
-{
-	OpenCLContext *clContext = new OpenCLContext();
-	clContext->printDeviceInfo();
+int main() {
+	DeviceManager dev;
+	dev.printDeviceInfo();
 }

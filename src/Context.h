@@ -4,7 +4,7 @@
 class Context {
 
 	public:
-		void				 printDeviceInfo();
+		virtual void			 printDeviceInfo() = 0;
 
 };
 

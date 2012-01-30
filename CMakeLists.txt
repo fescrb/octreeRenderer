@@ -16,6 +16,8 @@ if(USE_OPENCL)
 	  
      if(OpenCL_FOUND)
 	  set(USE_OPENCL "Yes")
+
+	  add_definitions(-DUSE_OPENCL)
      else(OpenCL_FOUND)
 	  set(USE_OPENCL "No")
 	  message("ERROR: OpenCL not found")
