@@ -1,5 +1,9 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
+# This is added every time.
+include_directories(Octree)
+add_subdirectory(Octree)
+
 # Add OpenCL subdirectory only if we can.
 if(USE_OPENCL)
      include_directories(${OpenCL_INCLUDE_DIR})
