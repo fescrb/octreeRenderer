@@ -5,7 +5,7 @@
 class Device
 {
     public:
-						 Device();
+		explicit		 Device();
         virtual 		~Device();
 
         virtual void	 printInfo() = 0;
