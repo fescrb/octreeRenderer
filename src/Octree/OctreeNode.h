@@ -7,7 +7,7 @@ class OctreeNode {
 		explicit 				 OctreeNode();
 
 
-		//void					 addChild(OctreeNode* node, int pos);
+		void					 addChild(OctreeNode* node, unsigned int position_flag);
 
 
 	private:
