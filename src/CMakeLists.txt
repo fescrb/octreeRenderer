@@ -10,4 +10,4 @@ endif(USE_OPENCL)
 include(CMakeSources.cmake)
 
 add_executable(octreeRenderer ${sources})
-target_link_libraries(octreeRenderer ${OpenCL_LIBRARIES})
+target_link_libraries(octreeRenderer ${Device_LIBRARIES})
