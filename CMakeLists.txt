@@ -18,10 +18,15 @@ if(USE_OPENCL)
 	  set(USE_OPENCL "Yes")
 
 	  add_definitions(-DUSE_OPENCL)
+	  set(Device_LIBRARIES ${Device_LIBRARIES} ${OpenCL_LIBRARIES}) 
      else(OpenCL_FOUND)
 	  set(USE_OPENCL "No")
 	  message("ERROR: OpenCL not found")
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
+
+if(NOT USE_OPENCL)
+	set(USE_TEST_IMPLEMENTATION "Yes")
+endif(NOT USE_OPENCL)
 
 add_subdirectory(src)
