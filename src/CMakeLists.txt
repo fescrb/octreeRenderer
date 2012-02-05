@@ -11,6 +11,11 @@ if(USE_OPENCL)
      add_subdirectory(OpenCL)
 endif(USE_OPENCL)
 
+if(USE_TEST_IMPLEMENTATION)
+     include_directories(Test)
+     add_subdirectory(Test)
+endif(USE_TEST_IMPLEMENTATION)
+
 include(CMakeSources.cmake)
 
 add_executable(octreeRenderer ${sources})

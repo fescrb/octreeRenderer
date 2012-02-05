@@ -1,7 +1,9 @@
 #include "TestDevice.h"
 
+#include "TestDeviceInfo.h"
+
 TestDevice::TestDevice() {
-	
+	m_pDeviceInfo =new TestDeviceInfo();
 }
 
 TestDevice::~TestDevice() {
@@ -9,5 +11,5 @@ TestDevice::~TestDevice() {
 }
 
 void TestDevice::printInfo() {
-	m_info.printInfo();
+	m_pDeviceInfo->printInfo();
 }

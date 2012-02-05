@@ -27,6 +27,10 @@ endif(USE_OPENCL)
 
 if(NOT USE_OPENCL)
 	set(USE_TEST_IMPLEMENTATION "Yes")
+	
+	message("MESSAGE: Using Host as device")
+	
+	add_definitions(-DUSE_HOST_CPU)
 endif(NOT USE_OPENCL)
 
 add_subdirectory(src)

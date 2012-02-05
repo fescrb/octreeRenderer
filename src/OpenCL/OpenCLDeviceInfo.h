@@ -2,8 +2,10 @@
 #define _OPENCL_DEVICE_INFO_H
 
 #include <CL/cl.h>
+#include "DeviceInfo.h"
 
-class OpenCLDeviceInfo {
+class OpenCLDeviceInfo
+:	public DeviceInfo {
 	public:
 					 	 OpenCLDeviceInfo(cl_device_id device);
 		virtual 		~OpenCLDeviceInfo();

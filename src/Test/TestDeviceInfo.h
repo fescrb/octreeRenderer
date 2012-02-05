@@ -1,11 +1,15 @@
 #ifndef _TEST_DEVICE_INFO_H
 #define _TEST_DEVICE_INFO_H
 
-class TestDeviceInfo {
+#include "DeviceInfo.h"
+
+class TestDeviceInfo
+:	public DeviceInfo {
 	public:
 		explicit 			 TestDeviceInfo();
+							~TestDeviceInfo();
 		
 		void				 printInfo();
-}
+};
 
 #endif //_TEST_DEVICE_INFO_H

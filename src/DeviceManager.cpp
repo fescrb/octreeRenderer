@@ -1,12 +1,20 @@
 #include "DeviceManager.h"
 
 #ifdef USE_OPENCL
-	#include "OpenCL/OpenCLContext.h"
+	#include "OpenCLContext.h"
+#endif
+
+#ifdef USE_HOST_CPU
+	#include "TestContext.h"
 #endif
 
 DeviceManager::DeviceManager(){
 	#ifdef USE_OPENCL
 		m_vContext.push_back(new OpenCLContext());
+	#endif
+	
+	#ifdef USE_HOST_CPU
+		m_vContext.push_back(new TestContext());
 	#endif
 }
 
