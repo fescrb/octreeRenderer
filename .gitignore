@@ -6,3 +6,4 @@ octreeRenderer.layout
 .project
 *.*~
 /.pydevproject
+*.bmp
