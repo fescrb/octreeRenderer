@@ -7,12 +7,11 @@ use_ocl = " "
 build_type = ' -DCMAKE_BUILD_TYPE="Debug" ' 
 test = 0
 
-if sys.argv[1] == "clean" :
-    os.rmdir("obj")
-    exit(0)
-
 if len(sys.argv) > 1 :
     argc = 1
+    if sys.argv[argc] == "clean" :
+        os.system("rm -rf obj")
+        exit(0)
     while argc < len(sys.argv) :
         command = sys.argv[argc]
         if command == "extraflags":
@@ -30,9 +29,8 @@ if not os.path.exists('obj'):
     
 os.chdir('obj')
 
-cmake_command = 'cmake .. ' + use_simd + ' '
+cmake_command = 'cmake .. ' + use_ocl + ' '
 make_command = 'make ' + verbose
-test_command = 'src/Unit\\ Testing/Core/core_test'
 
 if not os.system(cmake_command):
     if not os.system(make_command):
