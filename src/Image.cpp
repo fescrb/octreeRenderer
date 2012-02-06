@@ -43,20 +43,20 @@ Image::Image(Image* image) {
 #pragma pack(push,1)
 typedef struct {
      char magicword[2];
-     long fileSize;
-     long padding;
-     long headerSize;
-     long infoSize;
-     long width;
-     long height;
+     int fileSize;
+     int padding;
+     int headerSize;
+     int infoSize;
+     int width;
+     int height;
      short planes;
      short bpp;
-     long compression;
-     long compressedSize;
-     long xPixelsPerMeter;
-     long yPixelsPerMeter;
-     long colourUsed;
-     long colourImportant;
+     int compression;
+     int compressedSize;
+     int xPixelsPerMeter;
+     int yPixelsPerMeter;
+     int colourUsed;
+     int colourImportant;
 } BMPHeader;
 #pragma pack(pop)
 		
@@ -67,7 +67,7 @@ void Image::toBMP(const char* filename) {
 	
 	head.magicword[0] = 'B';
 	head.magicword[1] = 'M';
-	head.headerSize = 54;
+	head.headerSize = 54L;
 	head.padding = 0;
 	head.fileSize = head.headerSize + ( ( 3 * m_width * m_height ) + ( linePadding * m_height ));
 	head.infoSize = 40;
