@@ -2,6 +2,9 @@
 
 #include "OctreeNode.h"
 
+#include <cstdlib>
+#include <cstdio>
+
 Octree::Octree() {
 
 }
@@ -41,4 +44,30 @@ Octree* Octree::getSimpleOctree() {
 	root->addChild(bottomright, OctreeNode::X | OctreeNode::Z);
 	
 	return octree;
+}
+
+unsigned int Octree::getDepth() {
+	return m_pRootNode->getDepth();
+}
+
+unsigned int Octree::getNumberOfNodes() {
+	return m_pRootNode->getNumberOfNodes();
+}
+
+char* Octree::flatten() {
+	unsigned int numOfNodes = getNumberOfNodes();
+
+	unsigned int memoryRequired = 0;
+
+	memoryRequired += numOfNodes * 4; // For children flags + attribute pointer.
+
+	memoryRequired += (numOfNodes - 1) * 4; // For children pointers, minus 1 as root node doesn't need one.
+
+	memoryRequired += numOfNodes * 4; // For the attributes.
+
+	printf("We need %d bytes of memory\n", memoryRequired);
+
+	char* buffer = (char*) malloc (memoryRequired);
+
+	return buffer;
 }

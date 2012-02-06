@@ -9,6 +9,11 @@ class Octree {
 		
 		static Octree 			*getSimpleOctree();
 
+		unsigned int			 getDepth();
+		unsigned int			 getNumberOfNodes();
+
+		char* 					 flatten();
+
 	private:
 		OctreeNode				*m_pRootNode;
 };

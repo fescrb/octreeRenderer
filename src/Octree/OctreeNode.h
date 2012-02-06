@@ -16,8 +16,12 @@ class OctreeNode {
 		};
 
 		void					 addChild(OctreeNode* node, unsigned int position_flag);
+		void					 cleanChildrenPointers();
 
 		void					 setAttributes(Attributes att);
+
+		unsigned int			 getDepth();
+		unsigned int			 getNumberOfNodes();
 
 	private:
 		OctreeNode				*m_vChildren[8];
