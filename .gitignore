@@ -1,6 +1,7 @@
 *.cbp
 build/*
 obj/*
+bin/*
 octreeRenderer.layout
 .cproject
 .project
