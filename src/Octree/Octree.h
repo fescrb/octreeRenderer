@@ -6,6 +6,8 @@ class OctreeNode;
 class Octree {
 	public:
 		explicit 				 Octree();
+		
+		static Octree 			*getSimpleOctree();
 
 	private:
 		OctreeNode				*m_pRootNode;

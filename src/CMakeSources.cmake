@@ -3,6 +3,7 @@ set(sources ${sources}
 			DeviceInfo.cpp
 			Device.cpp
 			DeviceManager.cpp
+			DataManager.cpp
 			main.cpp )
 
 set(headers ${headers}
@@ -11,4 +12,5 @@ set(headers ${headers}
 			Device.h 
 			Context.h
 			DeviceManager.h
+			DataManager.h
 			)

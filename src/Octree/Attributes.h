@@ -5,6 +5,11 @@ class Attributes {
 
 	public:
 		explicit 				 Attributes();
+		
+		void					 setAttributes(char red,
+											   char green,
+											   char blue,
+											   char alpha);
 
 		unsigned int			 getSize(); // Return size in chars
 
