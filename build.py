@@ -11,6 +11,7 @@ if len(sys.argv) > 1 :
     argc = 1
     if sys.argv[argc] == "clean" :
         os.system("rm -rf obj")
+        os.system("rm -rf bin")
         exit(0)
     while argc < len(sys.argv) :
         command = sys.argv[argc]
@@ -27,13 +28,18 @@ if len(sys.argv) > 1 :
 if not os.path.exists('obj'):
     os.mkdir('obj')
     
+if not os.path.exists('bin'):
+    os.mkdir('bin')
+    
 os.chdir('obj')
 
-cmake_command = 'cmake .. ' + use_ocl + ' '
+cmake_command = 'cmake .. ' + build_type + use_ocl + ' '
 make_command = 'make ' + verbose
+install_command = 'make install '
 
 if not os.system(cmake_command):
     if not os.system(make_command):
-       sys.exit(0)
+        if not os.system(install_command):
+            sys.exit(0)
 
 sys.exit(1)

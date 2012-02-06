@@ -83,7 +83,7 @@ void Image::toBMP(const char* filename) {
 	head.colourImportant = 0;
 	
 	// Print data to check.
-	printf("padding %d, header %d, sizeof %d, file %d\n", linePadding, head.headerSize, sizeof(head), head.fileSize);
+	//printf("padding %d, header %d, sizeof %d, file %d\n", linePadding, head.headerSize, sizeof(head), head.fileSize);
 	
 	FILE* bmpFile = fopen(filename, "wb");
 	fwrite(&head, sizeof(head), 1, bmpFile);

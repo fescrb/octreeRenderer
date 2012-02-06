@@ -20,3 +20,5 @@ include(CMakeSources.cmake)
 
 add_executable(octreeRenderer ${sources})
 target_link_libraries(octreeRenderer ${Device_LIBRARIES})
+
+install(TARGETS octreeRenderer RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION bin)

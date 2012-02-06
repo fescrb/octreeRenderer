@@ -33,4 +33,9 @@ if(NOT USE_OPENCL)
 	add_definitions(-DUSE_HOST_CPU)
 endif(NOT USE_OPENCL)
 
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+	message("Yep")
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
+endif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+
 add_subdirectory(src)
