@@ -13,6 +13,8 @@ class Attributes {
 
 		unsigned int			 getSize(); // Return size in chars
 
+		char*					 flatten(char* buffer);
+
 	private:
 		char					 m_red, m_green, m_blue, m_alpha;
 

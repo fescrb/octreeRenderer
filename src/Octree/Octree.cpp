@@ -69,5 +69,7 @@ char* Octree::flatten() {
 
 	char* buffer = (char*) malloc (memoryRequired);
 
+	m_pRootNode->flatten(buffer);
+
 	return buffer;
 }

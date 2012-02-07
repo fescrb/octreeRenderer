@@ -54,20 +54,38 @@ unsigned int OctreeNode::getNumberOfNodes() {
 	return numberOfNodes;
 }
 
+#include <cstdio>
+
 char* OctreeNode::flatten(char* buffer) {
 	int* buffer_int = (int*) buffer;
 	short* buffer_short = (short*) buffer;
 
+	// Create children flag. Then write it.
 	char flags = 0;
-
 	for(int i = 0; i < 8; i++) {
 		if(m_vChildren[i]){
 			flags |= (1 << i);
 		}
 	}
-
 	buffer[0] = flags;
+
+	// Write the number of children.
 	buffer_short[1] = numberOfChildren + 1;
 
-	return buffer;
+	// Find out where we will write the attributes. Then write
+	char* end = buffer + ((numberOfChildren + 1 ) *4);
+	end = m_attributes.flatten(end);
+
+	buffer_int++;
+
+	for(int i = 0; i < 8; i++) {
+		if(m_vChildren[i]){
+			buffer_int[0] = (int*)end - buffer_int;
+			//printf("diff %d\n", buffer_int[0]);
+			buffer_int++;
+			end = m_vChildren[i]->flatten(end);
+		}
+	}
+
+	return end;
 }
