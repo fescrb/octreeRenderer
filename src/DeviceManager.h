@@ -1,9 +1,10 @@
 #ifndef _DEVICE_MANAGER_H
 #define _DEVICE_MANAGER_H
 
-#include "Context.h"
-
 #include <vector>
+
+class Device;
+class Context;
 
 class DeviceManager {
 	public:
@@ -12,6 +13,8 @@ class DeviceManager {
 
 		void					 printDeviceInfo();
 
+		int						 getNumDevices();
+		Device					*getDevice(int index);
 	private:
 		std::vector<Context*>	 m_vContext;
 

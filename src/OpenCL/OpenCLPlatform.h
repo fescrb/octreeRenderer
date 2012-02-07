@@ -11,7 +11,7 @@ class OpenCLPlatform {
 								 OpenCLPlatform(cl_platform_id platform_id);
 		virtual 				~OpenCLPlatform();
 
-		inline unsigned int		 getNumberOfDevices(){
+		inline unsigned int		 getNumDevices(){
 			return m_numberOfDevices;
 		}
 

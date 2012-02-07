@@ -30,3 +30,24 @@ void DeviceManager::printDeviceInfo() {
 		m_vContext[i]->printDeviceInfo();
 	}
 }
+
+int	DeviceManager::getNumDevices(){
+	unsigned int count = 0;
+	for(int i = 0; i < m_vContext.size(); i++) {
+		count += m_vContext[i]->getNumDevices();
+	}
+	return count;
+}
+
+Device* DeviceManager::getDevice(int index) {
+	int start = -1;
+	for(int i = 0; i < m_vContext.size(); i++) {
+		int end = m_vContext[i]->getNumDevices() + start;
+		if(start < index && index <= end)
+			return m_vContext[i]->getDevice((index-1) - start);
+		start = end;
+	}
+
+	// Index out of range.
+	return 0;
+}
