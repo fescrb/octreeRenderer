@@ -12,6 +12,9 @@ class TestContext
 		explicit 		 TestContext();
 		void			 printDeviceInfo();	
 		
+		unsigned int	 getNumDevices();
+		Device			*getDevice(int index);
+
 	private:
 		TestDevice		*m_hostCPU;
 

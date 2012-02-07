@@ -12,11 +12,12 @@ TestDeviceInfo::TestDeviceInfo() {
 
 	cpuinfo.open("/proc/cpuinfo", ifstream::in);
 
-	while(!cpuinfo.eof()) {
+	//TODO
+	/*while(!cpuinfo.eof()) {
 		cpuinfo.getline(line,256);
 
 
-	}
+	}*/
 }
 
 TestDeviceInfo::~TestDeviceInfo() {

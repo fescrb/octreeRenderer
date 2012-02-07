@@ -45,3 +45,24 @@ void OpenCLContext::printDeviceInfo(){
 		}
 	}
 }
+
+unsigned int OpenCLContext::getNumDevices() {
+	unsigned int count = 0;
+	for(int i = 0; i < m_numberOfPlatforms; i++) {
+		count += m_aPlatforms[i].getNumberOfDevices();
+	}
+	return count;
+}
+
+Device* OpenCLContext::getDevice(int index) {
+	int start = -1;
+	for(int i = 0; i < m_numberOfPlatforms; i++) {
+		int end = m_aPlatforms[i].getNumberOfDevices() + start;
+		if(start < index && index <= end)
+			return m_aPlatforms[i].getDevice((index-1) - start);
+		start = end;
+	}
+
+	// Index out of range.
+	return 0;
+}

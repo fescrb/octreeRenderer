@@ -10,3 +10,10 @@ TestContext::TestContext()
 void TestContext::printDeviceInfo() {
 	m_hostCPU->printInfo();
 }
+
+unsigned int TestContext::getNumDevices() {
+	return 1;
+}
+Device* TestContext::getDevice(int index) {
+	return m_hostCPU;
+}
