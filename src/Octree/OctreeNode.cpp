@@ -11,12 +11,14 @@ OctreeNode::OctreeNode(Attributes att) {
 
 void OctreeNode::addChild(OctreeNode* node, unsigned int position_flag) {
 	m_vChildren[position_flag] = node;
+	numberOfChildren++;
 }
 
 void OctreeNode::cleanChildrenPointers() {
 	for(int i = 0; i < 8; i++) {
 		m_vChildren[i] = 0;
 	}
+	numberOfChildren = 0;
 }
 
 void OctreeNode::setAttributes(Attributes att) {
@@ -50,4 +52,22 @@ unsigned int OctreeNode::getNumberOfNodes() {
 	numberOfNodes++;
 
 	return numberOfNodes;
+}
+
+char* OctreeNode::flatten(char* buffer) {
+	int* buffer_int = (int*) buffer;
+	short* buffer_short = (short*) buffer;
+
+	char flags = 0;
+
+	for(int i = 0; i < 8; i++) {
+		if(m_vChildren[i]){
+			flags |= (1 << i);
+		}
+	}
+
+	buffer[0] = flags;
+	buffer_short[1] = numberOfChildren + 1;
+
+	return buffer;
 }

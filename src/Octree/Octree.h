@@ -12,7 +12,7 @@ class Octree {
 		unsigned int			 getDepth();
 		unsigned int			 getNumberOfNodes();
 
-		char* 					 flatten();
+		char 					*flatten();
 
 	private:
 		OctreeNode				*m_pRootNode;

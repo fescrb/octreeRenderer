@@ -20,11 +20,14 @@ class OctreeNode {
 
 		void					 setAttributes(Attributes att);
 
+		char 					*flatten(char* buffer);
+
 		unsigned int			 getDepth();
 		unsigned int			 getNumberOfNodes();
 
 	private:
 		OctreeNode				*m_vChildren[8];
+		unsigned int			 numberOfChildren;
 
 		Attributes 				 m_attributes;
 };
