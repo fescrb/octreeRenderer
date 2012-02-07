@@ -3,6 +3,7 @@
 #include "TestDeviceInfo.h"
 
 #include <cstdlib>
+#include <cmath>
 
 TestDevice::TestDevice()
 :	m_pOctreeData(0),
@@ -37,9 +38,18 @@ void TestDevice::render(RenderInfo &info) {
 		}
 	}
 
+	//TODO (BIG) do in vector math
+	float plane_step = (tan(info.fov)*info.eyePlaneDist) / (float) info.resolution[0];
+	float plane_start[2] = { info.eyePos[0] - (plane_step * ((float)info.resolution[0]/2.0f)),
+							 info.eyePos[1] - (plane_step * ((float)info.resolution[1]/2.0f))};
+
 	for(int y = 0; y < info.resolution[1]; y++) {
 		for(int x = 0; x < info.resolution[0]; x++) {
 			// Ray setup.
+			float v[3] = { plane_start[0] + (plane_step*x),
+						   plane_start[1] + (plane_step * y),
+						   info.eyePos[2] + info.eyePlaneDist};
+			float t = 0;
 
 			// Traversal.
 		}

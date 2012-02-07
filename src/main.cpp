@@ -21,7 +21,7 @@ int main() {
 	renderInfo.eyePos[1] = 0; //y
 	renderInfo.eyePos[2] = -256.0f; //z
 
-	renderInfo.eyePos[0] = 0; //x
+	renderInfo.viewDir[0] = 0; //x
 	renderInfo.viewDir[1] = 0; //y
 	renderInfo.viewDir[2] = 1.0f; //z
 
