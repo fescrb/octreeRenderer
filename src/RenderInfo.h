@@ -2,9 +2,9 @@
 #define _RENDER_INFO_H
 
 struct RenderInfo {
-	// Scene info. Makes no difference on rendering, will probably be hard-coded.
-	float leftCorner[3];
-	float size;
+	// Scene info. Hard coded. Scene boundaries go from -256 to 256.
+	//float leftCorner[3];
+	//float size;
 
 	// Projection Info.
 	int	  resolution[2];

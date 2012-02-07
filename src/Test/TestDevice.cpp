@@ -39,7 +39,9 @@ void TestDevice::render(RenderInfo &info) {
 
 	for(int y = 0; y < info.resolution[1]; y++) {
 		for(int x = 0; x < info.resolution[0]; x++) {
+			// Ray setup.
 
+			// Traversal.
 		}
 	}
 }
