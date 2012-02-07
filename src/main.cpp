@@ -12,7 +12,6 @@ int main() {
 	dev.printDeviceInfo();
 	
 	DataManager manager;
-	char* buffer = manager.getOctree()->flatten();
 
 	RenderInfo renderInfo;
 	renderInfo.resolution[0] = 32;

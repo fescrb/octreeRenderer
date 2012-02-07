@@ -26,7 +26,7 @@ void TestDevice::sendData(char* data) {
 void TestDevice::render(RenderInfo &info) {
 	if(!m_pFrame) {
 		int buffSize = 3*info.resolution[0]*info.resolution[1];
-		char* m_pFrame = (char*) malloc(buffSize);
+		m_pFrame = (char*) malloc(buffSize);
 
 		char* tmpPtr = m_pFrame;
 
@@ -34,6 +34,12 @@ void TestDevice::render(RenderInfo &info) {
 		while(tmpPtr != m_pFrame+buffSize) {
 			tmpPtr[0] = 0;
 			tmpPtr++;
+		}
+	}
+
+	for(int y = 0; y < info.resolution[1]; y++) {
+		for(int x = 0; x < info.resolution[0]; x++) {
+
 		}
 	}
 }
