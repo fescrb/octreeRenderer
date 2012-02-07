@@ -4,9 +4,9 @@
 
 #include <cstdio>
 
-Image::Image(unsigned int width, unsigned int length)
+Image::Image(unsigned int width, unsigned int height)
 :	m_width(width),
-	m_height(length) {
+	m_height(height) {
 	m_pData = (char*) malloc (3 * m_width * m_height);
 	
 	for(int i = 0; i < 3 * m_height * m_width; i++) {
@@ -15,16 +15,17 @@ Image::Image(unsigned int width, unsigned int length)
 }
 
 Image::Image(unsigned int width, 
-			 unsigned int length, 
+			 unsigned int height,
 			 ImageFormat buffer_format,  
 			 const char* buffer) 
 :	m_width(width),
-	m_height(length) {
-	m_pData = (char*) malloc (3 * m_width * m_height);
+	m_height(height) {
+	int size = 3 * m_width * m_height;
+	m_pData = (char*) malloc (size);
 	
 	char* data = m_pData;
 	
-	while(data != (m_pData + ( 3 * m_width * m_height ))) {
+	while(data != m_pData + size) {
 		data[0] = buffer[0];
 		data++; buffer++;
 		data[0] = buffer[0];

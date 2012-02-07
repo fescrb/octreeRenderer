@@ -15,3 +15,15 @@ OpenCLDevice::~OpenCLDevice(){
 void OpenCLDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
+
+void OpenCLDevice::sendData(char* data) {
+
+}
+
+void OpenCLDevice::render(RenderInfo &info) {
+
+}
+
+char* OpenCLDevice::getFrame() {
+
+}

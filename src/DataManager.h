@@ -2,6 +2,9 @@
 #define _DATA_MANAGER_H
 
 class Octree;
+class DeviceManager;
+
+#include "RenderInfo.h"
 
 class DataManager {
 	public:
@@ -10,6 +13,8 @@ class DataManager {
 
 		Octree 				 	*getOctree();
 		
+		char					*renderFrame(DeviceManager* deviceManager, RenderInfo &info);
+
 	private:
 	
 		Octree					*m_pOctree;

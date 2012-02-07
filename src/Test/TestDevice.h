@@ -9,7 +9,14 @@ class TestDevice
 		explicit		 TestDevice();
         virtual 		~TestDevice();
 
-        virtual void	 printInfo();
+        void			 printInfo();
+        void 			 sendData(char* data);
+        void			 render(RenderInfo &info);
+        char    		*getFrame();
+
+    private:
+        char			*m_pOctreeData;
+        char			*m_pFrame;
 };
 
 #endif // _TEST_DEVICE_H

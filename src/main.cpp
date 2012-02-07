@@ -1,5 +1,6 @@
 #include "DeviceManager.h"
 #include "DataManager.h"
+#include "RenderInfo.h"
 
 #include "Octree.h"
 #include "Image.h"
@@ -11,9 +12,13 @@ int main() {
 	dev.printDeviceInfo();
 	
 	DataManager manager;
-
 	char* buffer = manager.getOctree()->flatten();
 
-	Image image(32,32);
+	RenderInfo renderInfo;
+	renderInfo.resolution[0] = 32;
+	renderInfo.resolution[1] = 32;
+	char* frame = manager.renderFrame(&dev, renderInfo);
+
+	Image image(renderInfo.resolution[0], renderInfo.resolution[1], Image::RGB, frame);
 	image.toBMP("test.bmp");
 }

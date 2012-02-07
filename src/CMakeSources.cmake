@@ -8,6 +8,7 @@ set(sources ${sources}
 
 set(headers ${headers}
 			Image.h
+			RenderInfo.h
 			DeviceInfo.h
 			Device.h 
 			Context.h

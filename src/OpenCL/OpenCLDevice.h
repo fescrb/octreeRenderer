@@ -12,6 +12,9 @@ class OpenCLDevice:
 		virtual 			~OpenCLDevice();
 
 		void	 			 printInfo();
+		void 			 	 sendData(char* data);
+		void				 render(RenderInfo &info);
+		char    			*getFrame();
 	private:
 
 		cl_device_id 		 m_DeviceID;
