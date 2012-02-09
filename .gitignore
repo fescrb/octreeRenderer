@@ -5,7 +5,9 @@ bin/*
 octreeRenderer.layout
 .cproject
 .project
+.kdev4/*
 *.*~
 /.pydevproject
 *.bmp
 *.geany
+*.kdev4
