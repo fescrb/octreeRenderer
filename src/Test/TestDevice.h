@@ -17,6 +17,10 @@ class TestDevice
     private:
         char			*m_pOctreeData;
         char			*m_pFrame;
+        int				 m_frameBufferResolution[2];
+        
+        void			 setFramePixel(int x, int y,
+									   char red, char green, char blue);
 };
 
 #endif // _TEST_DEVICE_H

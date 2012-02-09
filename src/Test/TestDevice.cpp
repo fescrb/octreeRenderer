@@ -18,6 +18,16 @@ float max(float3 vector) {
 	return maximum > vector[2] ? maximum : vector[2];
 }
 
+char* getAttributes(char* node) {
+	short* addr_short = (short*)node;
+	
+	return node + (addr_short[1] * 4);
+}
+
+bool noChildren(char* node) {
+	return !node[0];
+}
+
 TestDevice::TestDevice()
 :	m_pOctreeData(0),
  	m_pFrame(0) {
@@ -40,6 +50,8 @@ void TestDevice::sendData(char* data) {
 void TestDevice::render(RenderInfo &info) {
 	if(!m_pFrame) {
 		int buffSize = 3*info.resolution[0]*info.resolution[1];
+		m_frameBufferResolution[0] = info.resolution[0];
+		m_frameBufferResolution[1] = info.resolution[1];
 		m_pFrame = (char*) malloc(buffSize);
 
 		char* tmpPtr = m_pFrame;
@@ -55,13 +67,6 @@ void TestDevice::render(RenderInfo &info) {
 	float plane_step = (tan(info.fov)*info.eyePlaneDist) / (float) info.resolution[0];
 	float plane_start[2] = { info.eyePos[0] - (plane_step * ((float)info.resolution[0]/2.0f)),
 							 info.eyePos[1] - (plane_step * ((float)info.resolution[1]/2.0f))};
-
-	float tx0 = -256.0f;
-	float ty0 = -256.0f;
-	float tz0 = -256.0f;
-	float tx1 =  256.0f;
-	float ty1 =  256.0f;
-	float tz1 =  256.0f;
 	
 	float half_size = 256.0f;
 
@@ -95,12 +100,21 @@ void TestDevice::render(RenderInfo &info) {
 			
 			// We are out of the volume and we will never get to it.
 			if(t > t_max)
-				printf("Out of the volume!\n");
 				collission = true;
 
-			// Traversal.;
+			char* curr_address = m_pOctreeData;
+			int curr_index = 0;
+
+			// Traversal.
 			while(!collission) {
 				collission = true;
+				
+				if(noChildren(curr_address)){
+					collission = true;
+					
+				} else {
+					
+				}
 			}
 		}
 	}
@@ -108,4 +122,12 @@ void TestDevice::render(RenderInfo &info) {
 
 char* TestDevice::getFrame() {
 	return m_pFrame;
+}
+
+void TestDevice::setFramePixel(int x, int y, char red, char green, char blue) {
+	char* pixelPtr = &m_pFrame[(y*m_frameBufferResolution[0]*3)+(x*3)];
+	
+	pixelPtr[0] = red;
+	pixelPtr[1] = green;
+	pixelPtr[2] = blue;
 }
