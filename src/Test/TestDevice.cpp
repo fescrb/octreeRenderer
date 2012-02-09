@@ -5,6 +5,19 @@
 #include <cstdlib>
 #include <cmath>
 
+// Remove later
+#include <cstdio>
+
+float min(float3 vector) {
+	float minimum = vector[0] < vector[1] ? vector[0] : vector[1];
+	return minimum < vector[2] ? minimum : vector[2];
+}
+
+float max(float3 vector) {
+	float maximum = vector[0] > vector[1] ? vector[0] : vector[1];
+	return maximum > vector[2] ? maximum : vector[2];
+}
+
 TestDevice::TestDevice()
 :	m_pOctreeData(0),
  	m_pFrame(0) {
@@ -67,15 +80,27 @@ void TestDevice::render(RenderInfo &info) {
 							  d[2] >= 0 ? half_size : -half_size);
 							  
 			float3 corner_close(corner_far.neg());
+
+			float3 vt0 = (corner_close - o) / d;
+			float3 vt1 = (corner_far - o) / d;
+
+			float t_min = max(vt0);
+			float t_max = min(vt1);
 			
-			float t_min;
-			float t_max;
+			// If we are out 
+			if(t < t_min)
+				t = t_min;
+			
+			bool collission = false;	
+			
+			// We are out of the volume and we will never get to it.
+			if(t > t_max)
+				printf("Out of the volume!\n");
+				collission = true;
 
-			// Traversal.
-			// TODO make false
-			bool collission = true;
+			// Traversal.;
 			while(!collission) {
-
+				collission = true;
 			}
 		}
 	}
