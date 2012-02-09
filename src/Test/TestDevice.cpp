@@ -96,14 +96,16 @@ void TestDevice::render(RenderInfo &info) {
 			if(t < t_min)
 				t = t_min;
 			
+			char* curr_address = m_pOctreeData;
 			bool collission = false;	
+			int curr_index = 0;
 			
 			// We are out of the volume and we will never get to it.
-			if(t > t_max)
+			
+			if(t > t_max) {
 				collission = true;
-
-			char* curr_address = m_pOctreeData;
-			int curr_index = 0;
+				curr_address = 0; // Set to null.
+			}
 
 			// Traversal.
 			while(!collission) {
@@ -111,10 +113,15 @@ void TestDevice::render(RenderInfo &info) {
 				
 				if(noChildren(curr_address)){
 					collission = true;
-					
 				} else {
 					
 				}
+			}
+			
+			// If there was a collission.
+			if(curr_address) {
+				char* attributes = getAttributes(curr_address);
+				setFramePixel(x, y, attributes[0], attributes[1], attributes[2]);
 			}
 		}
 	}
