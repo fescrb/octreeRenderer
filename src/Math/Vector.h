@@ -3,6 +3,6 @@
 
 #include "Vector3.h"
 
-typedef vector3<float> float3;
+typedef vector3<F32> float3;
 
 #endif //_VECTOR_H

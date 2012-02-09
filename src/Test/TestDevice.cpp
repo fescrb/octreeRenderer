@@ -43,6 +43,13 @@ void TestDevice::render(RenderInfo &info) {
 	float plane_start[2] = { info.eyePos[0] - (plane_step * ((float)info.resolution[0]/2.0f)),
 							 info.eyePos[1] - (plane_step * ((float)info.resolution[1]/2.0f))};
 
+	float tx0 = -256.0f;
+	float ty0 = -256.0f;
+	float tz0 = -256.0f;
+	float tx1 =  256.0f;
+	float ty1 =  256.0f;
+	float tz1 =  256.0f;
+
 	for(int y = 0; y < info.resolution[1]; y++) {
 		for(int x = 0; x < info.resolution[0]; x++) {
 			// Ray setup.
@@ -52,6 +59,11 @@ void TestDevice::render(RenderInfo &info) {
 			float t = 0;
 
 			// Traversal.
+			// TODO make false
+			bool collission = true;
+			while(!collission) {
+
+			}
 		}
 	}
 }

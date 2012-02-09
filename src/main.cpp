@@ -17,13 +17,13 @@ int main() {
 	renderInfo.resolution[0] = 32;
 	renderInfo.resolution[1] = 32;
 
-	renderInfo.eyePos[0] = 0; //x
-	renderInfo.eyePos[1] = 0; //y
-	renderInfo.eyePos[2] = -256.0f; //z
+	renderInfo.eyePos.setX(0); //x
+	renderInfo.eyePos.setY(0); //y
+	renderInfo.eyePos.setZ(-256.0f); //z
 
-	renderInfo.viewDir[0] = 0; //x
-	renderInfo.viewDir[1] = 0; //y
-	renderInfo.viewDir[2] = 1.0f; //z
+	renderInfo.viewDir.setX(0); //x
+	renderInfo.viewDir.setY(0); //y
+	renderInfo.viewDir.setZ(1.0f); //z
 
 	renderInfo.eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
 	renderInfo.fov = 1.0f;
