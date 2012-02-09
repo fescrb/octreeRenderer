@@ -100,6 +100,10 @@ struct vector3{
 			array[1] = m_z;
 			array[2] = m_y;
 		}
+		
+		inline vector3<t> neg() {
+			return vector3<t>(-m_x, -m_y, -m_z);
+		}
 
 		template<class t2>
 		friend t2          sum(const vector3<t2> &vector);

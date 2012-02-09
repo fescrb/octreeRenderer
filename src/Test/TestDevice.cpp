@@ -49,14 +49,27 @@ void TestDevice::render(RenderInfo &info) {
 	float tx1 =  256.0f;
 	float ty1 =  256.0f;
 	float tz1 =  256.0f;
+	
+	float half_size = 256.0f;
 
 	for(int y = 0; y < info.resolution[1]; y++) {
 		for(int x = 0; x < info.resolution[0]; x++) {
 			// Ray setup.
-			float v[3] = { plane_start[0] + (plane_step*x),
-						   plane_start[1] + (plane_step * y),
-						   info.eyePos[2] + info.eyePlaneDist};
+			float3 o(plane_start[0] + (plane_step*x),
+					 plane_start[1] + (plane_step * y),
+					 info.eyePos[2] + info.eyePlaneDist);
+					 
+			float3 d(info.viewDir); // As this is a parallel projection.
 			float t = 0;
+			
+			float3 corner_far(d[0] >= 0 ? half_size : -half_size,
+							  d[1] >= 0 ? half_size : -half_size,
+							  d[2] >= 0 ? half_size : -half_size);
+							  
+			float3 corner_close(corner_far.neg());
+			
+			float t_min;
+			float t_max;
 
 			// Traversal.
 			// TODO make false
