@@ -11,11 +11,13 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+class OpenCLContext;
+
 class OpenCLDevice:
 	public Device{
 
 	public:
-							 OpenCLDevice(cl_device_id device_id);
+							 OpenCLDevice(cl_device_id device_id, OpenCLContext *context);
 		virtual 			~OpenCLDevice();
 
 		void	 			 printInfo();
@@ -25,6 +27,8 @@ class OpenCLDevice:
 	private:
 
 		cl_device_id 		 m_DeviceID;
+        cl_command_queue     m_commandQueue;
+        OpenCLContext       *m_pOpenCLContext;
 };
 
 #endif //_OPENCL_DEVICE_H

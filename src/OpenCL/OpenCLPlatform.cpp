@@ -3,7 +3,7 @@
 
 #include "OpenCLUtils.h"
 
-OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
+OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context)
 :	m_PlatformID(platform_id){
 	cl_uint device_num;
 
@@ -28,7 +28,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 	}
 
 	for(int i = 0; i < m_numberOfDevices; i++) {
-		m_apDevices[i] = new OpenCLDevice(aDevice_ids[i]);
+		m_apDevices[i] = new OpenCLDevice(aDevice_ids[i], context);
 	}
 }
 

@@ -29,7 +29,7 @@ OpenCLContext::OpenCLContext() {
 
 	// We initialize the platforms.
 	for(int i = 0; i < m_numberOfPlatforms; i++) {
-		m_aPlatforms[i] = OpenCLPlatform(platform_ids[i]);
+		m_aPlatforms[i] = OpenCLPlatform(platform_ids[i], this);
 	}
 }
 

@@ -9,12 +9,13 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+class OpenCLContext;
 class OpenCLDevice;
 
 class OpenCLPlatform {
 
 	public:
-								 OpenCLPlatform(cl_platform_id platform_id);
+								 OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context);
 		virtual 				~OpenCLPlatform();
 
 		inline unsigned int		 getNumDevices(){
