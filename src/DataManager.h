@@ -13,6 +13,8 @@ class DataManager {
 
 		Octree 				 	*getOctree();
 		
+		int 					 getMaxOctreeDepth();
+		
 		char					*renderFrame(DeviceManager* deviceManager, RenderInfo &info);
 
 	private:

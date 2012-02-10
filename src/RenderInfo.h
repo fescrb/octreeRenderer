@@ -7,6 +7,7 @@ struct RenderInfo {
 	// Scene info. Hard coded. Scene boundaries go from -256 to 256.
 	//float leftCorner[3];
 	//float size;
+	int   maxOctreeDepth;
 
 	// Projection Info.
 	int	  resolution[2];

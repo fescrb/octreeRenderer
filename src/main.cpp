@@ -27,6 +27,8 @@ int main() {
 
 	renderInfo.eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
 	renderInfo.fov = 1.0f;
+	
+	renderInfo.maxOctreeDepth = manager.getMaxOctreeDepth();
 	char* frame = manager.renderFrame(&dev, renderInfo);
 
 	Image image(renderInfo.resolution[0], renderInfo.resolution[1], Image::RGB, frame);

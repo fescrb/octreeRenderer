@@ -18,6 +18,10 @@ Octree* DataManager::getOctree() {
 	return m_pOctree;
 }
 
+int DataManager::getMaxOctreeDepth() {
+	return getOctree()->getDepth();
+}
+
 char* DataManager::renderFrame(DeviceManager* deviceManager, RenderInfo &info) {
 	Device* dev = deviceManager->getDevice(0);
 

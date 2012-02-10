@@ -28,6 +28,16 @@ bool noChildren(char* node) {
 	return !node[0];
 }
 
+bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
+	float3 flagVector = rayPos - nodeCentre;
+	int flag = 0;
+	for(int i = 0; i < 3; i++)
+		if(flagVector[3] >= 0)
+			flag | (1 << i);
+	
+	return node[0] & (1 << flag);  
+}
+
 TestDevice::TestDevice()
 :	m_pOctreeData(0),
  	m_pFrame(0) {
@@ -46,6 +56,11 @@ void TestDevice::printInfo() {
 void TestDevice::sendData(char* data) {
 	m_pOctreeData = data;
 }
+
+struct Stack {
+	float3 far_corner, node_centre;
+	float t_min, t_max;
+};
 
 void TestDevice::render(RenderInfo &info) {
 	if(!m_pFrame) {
@@ -97,6 +112,7 @@ void TestDevice::render(RenderInfo &info) {
 				t = t_min;
 			
 			char* curr_address = m_pOctreeData;
+			float3 voxelCentre(0.0f, 0.0f, 0.0f);
 			bool collission = false;	
 			int curr_index = 0;
 			
@@ -114,7 +130,13 @@ void TestDevice::render(RenderInfo &info) {
 				if(noChildren(curr_address)){
 					collission = true;
 				} else {
+					//bool node_has
 					
+					vt0 = (corner_close - o) / d;
+					vt1 = (corner_far - o) / d;
+					
+					float t_min = max(vt0);
+					float t_max = min(vt1);
 				}
 			}
 			
