@@ -32,17 +32,19 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	float3 flagVector = rayPos - nodeCentre;
 	char flag = 0;
 	for(int i = 0; i < 3; i++)
-		if(flagVector[3] >= 0)
+		if(flagVector[i] >= 0.0f)
 			flag | (1 << i);
 		
 	return flag;
 }
 
 char makeChildFlag(float3 rayPos, float3 nodeCentre) {
+	printf("x %f y %f z %f flag %d\n", rayPos[0], rayPos[1], rayPos[2], makeXYZFlag(rayPos, nodeCentre));
 	return 0  | (1 << makeXYZFlag(rayPos, nodeCentre));
 }
 
 bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
+	printf("node %d flag %d\n", node[0], makeChildFlag(rayPos,nodeCentre));
 	return node[0] & makeChildFlag(rayPos,nodeCentre);  
 }
 
@@ -152,7 +154,6 @@ void TestDevice::render(RenderInfo &info) {
 
 			// Traversal.
 			while(!collission) {
-				collission = true;
 				
 				if(noChildren(curr_address)){
 					collission = true;
@@ -172,7 +173,7 @@ void TestDevice::render(RenderInfo &info) {
 											  d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
 											  d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
 						
-						float tmp_max = min((corner_far - rayPos) / d);
+						float tmp_max = min((tmp_corner_far - rayPos) / d);
 						
 						if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
 							// If the voxel we are at is not empty, go down.
@@ -186,6 +187,8 @@ void TestDevice::render(RenderInfo &info) {
 												   d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
 							t_max = tmp_max;
 							t_min = max((corner_close - rayPos) / d);
+							
+							curr_address = getChild(rayPos,voxelCentre,curr_address);
 							
 						} else {
 							// If the child is empty, we step the ray.
