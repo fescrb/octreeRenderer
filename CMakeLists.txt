@@ -25,6 +25,14 @@ if(USE_OPENCL)
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+    add_definitions(-D_LINUX)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    add_definitions(-D_OSX)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 if(NOT USE_OPENCL)
 	set(USE_TEST_IMPLEMENTATION "Yes")
 	

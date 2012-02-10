@@ -1,8 +1,15 @@
 #ifndef _OPENCL_DEVICE_INFO_H
 #define _OPENCL_DEVICE_INFO_H
 
-#include <CL/cl.h>
 #include "DeviceInfo.h"
+
+#ifdef _LINUX
+    #include <CL/cl.h>
+#endif //_LINUX
+
+#ifdef _OSX
+    #include <OpenCL/cl.h>
+#endif //_OSX
 
 class OpenCLDeviceInfo
 :	public DeviceInfo {

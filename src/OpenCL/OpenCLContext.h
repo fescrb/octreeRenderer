@@ -4,8 +4,6 @@
 #include "Context.h"
 #include "OpenCLPlatform.h"
 
-#include <CL/cl.h>
-
 class OpenCLContext :
 	public Context {
 

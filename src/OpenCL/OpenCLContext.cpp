@@ -40,7 +40,7 @@ OpenCLContext::~OpenCLContext() {
 void OpenCLContext::printDeviceInfo(){
 	for(int i = 0; i < m_numberOfPlatforms; i++) {
 		OpenCLPlatform platform = m_aPlatforms[i];
-		for(int j = 0; j < platform.getNumberOfDevices(); j++) {
+		for(int j = 0; j < platform.getNumDevices(); j++) {
 			platform.getDevice(j)->printInfo();
 		}
 	}

@@ -1,7 +1,13 @@
 #ifndef _OPENCL_PLATFORM_H
 #define _OPENCL_PLATFORM_H
 
-#include <CL/cl.h>
+#ifdef _LINUX
+    #include <CL/cl.h>
+#endif //_LINUX
+
+#ifdef _OSX
+    #include <OpenCL/cl.h>
+#endif //_OSX
 
 class OpenCLDevice;
 

@@ -1,8 +1,15 @@
 #ifndef _OPENCL_UTILS_H
 #define _OPENCL_UTILS_H
 
-#include <CL/cl.h>
 #include <stdio.h>
+
+#ifdef _LINUX
+    #include <CL/cl.h>
+#endif //_LINUX
+
+#ifdef _OSX
+    #include <OpenCL/cl.h>
+#endif //_OSX
 
 const char* clErrorToCString(cl_int error_code);
 
