@@ -32,19 +32,19 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	float3 flagVector = rayPos - nodeCentre;
 	char flag = 0;
 	for(int i = 0; i < 3; i++)
-		if(flagVector[i] >= 0.0f)
-			flag | (1 << i);
+			flag |= (1 << i);
 		
+	//printf("makeXYZFlag x %f y %f z %f flag %d\n", flagVector[0], flagVector[1], flagVector[2], flag);
 	return flag;
 }
 
 char makeChildFlag(float3 rayPos, float3 nodeCentre) {
-	printf("x %f y %f z %f flag %d\n", rayPos[0], rayPos[1], rayPos[2], makeXYZFlag(rayPos, nodeCentre));
-	return 0  | (1 << makeXYZFlag(rayPos, nodeCentre));
+	//printf("makeChildFlag x %f y %f z %f flag %d\n", rayPos[0], rayPos[1], rayPos[2], makeXYZFlag(rayPos, nodeCentre));
+	return 0 | (1 << makeXYZFlag(rayPos, nodeCentre));
 }
 
 bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
-	printf("node %d flag %d\n", node[0], makeChildFlag(rayPos,nodeCentre));
+	//printf("nodeHasChildAt node %d flag %d\n", node[0], makeChildFlag(rayPos,nodeCentre));
 	return node[0] & makeChildFlag(rayPos,nodeCentre);  
 }
 
