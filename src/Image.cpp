@@ -64,7 +64,7 @@ typedef struct {
 void Image::toBMP(const char* filename) {
 	BMPHeader head;
 	
-	int linePadding = (3 * m_width) % 4;
+	int linePadding = 4 - ((3 * m_width) % 4);
 	
 	head.magicword[0] = 'B';
 	head.magicword[1] = 'M';
@@ -84,13 +84,17 @@ void Image::toBMP(const char* filename) {
 	head.colourImportant = 0;
 	
 	// Print data to check.
-	//printf("padding %d, header %d, sizeof %d, file %d\n", linePadding, head.headerSize, sizeof(head), head.fileSize);
+	printf("padding %d, header %d, sizeof %d, file %d\n", linePadding, head.headerSize, sizeof(head), head.fileSize);
 	
 	FILE* bmpFile = fopen(filename, "wb");
 	fwrite(&head, sizeof(head), 1, bmpFile);
 	
-	//Remember, this won work unless width % 4 = 0
-	fwrite(m_pData, 1,( 3 * m_width * m_height ), bmpFile );
+	char* data = m_pData;
+	for(int i = 0; i < m_height; i++){
+		fwrite(data, 1,( 3 * m_width ), bmpFile );
+		fwrite(data, 1,linePadding, bmpFile );
+		data+=( 3 * m_width );
+	}
 	
 	fclose(bmpFile);
 }

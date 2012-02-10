@@ -34,7 +34,7 @@ Octree* Octree::getSimpleOctree() {
 	
 	// Create bottomright node + atts
 	Attributes bottomrightAtts;
-	bottomrightAtts.setAttributes(0, 0, 0, 255);
+	bottomrightAtts.setAttributes(0, 0, 255, 255);
 	OctreeNode *bottomright = new OctreeNode(bottomrightAtts);
 	
 	octree->m_pRootNode = root;

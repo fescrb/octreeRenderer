@@ -5,17 +5,28 @@
 #include "Octree.h"
 #include "Image.h"
 
+#include <cstring>
+
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
 	DeviceManager dev;
-	dev.printDeviceInfo();
-	
 	DataManager manager;
-
 	RenderInfo renderInfo;
+	
 	renderInfo.resolution[0] = 32;
 	renderInfo.resolution[1] = 32;
+	
+	for(int i = 1; i < argc; i++) {
+		if(!strcmp(argv[i],"resolution")){
+			i++;
+			renderInfo.resolution[0] = atoi(argv[i]);
+			i++;
+			renderInfo.resolution[1] = atoi(argv[i]);
+		}
+	}
+	
+	dev.printDeviceInfo();
 
 	renderInfo.eyePos.setX(0); //x
 	renderInfo.eyePos.setY(0); //y
