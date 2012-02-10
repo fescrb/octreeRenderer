@@ -11,3 +11,4 @@ octreeRenderer.layout
 *.bmp
 *.geany
 *.kdev4
+*xcodeproj*
