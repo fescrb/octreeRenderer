@@ -32,6 +32,7 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	float3 flagVector = rayPos - nodeCentre;
 	char flag = 0;
 	for(int i = 0; i < 3; i++)
+		if(flagVector[i] >= 0.0f)
 			flag |= (1 << i);
 		
 	//printf("makeXYZFlag x %f y %f z %f flag %d\n", flagVector[0], flagVector[1], flagVector[2], flag);
@@ -51,11 +52,15 @@ bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
 char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
 	int counter = 0;
 	bool found = false;
-	char flag = makeChildFlag(rayPos, nodeCentre);
-	for(int i = 0; i <= flag; i++) 
+	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
+	char flag = 0 | (1 << xyz_flag);
+	for(int i = 0; i <= xyz_flag; i++) 
 		if(node[0] & (1 << i))
 			counter++;
-	return node + (counter*4);
+	//printf("getChild node %d flag %d counter %d\n", node[0], flag, counter);
+	node+=(counter*4);
+	int* add_int = (int*)node;
+	return node + (add_int[0]*4);
 }
 
 TestDevice::TestDevice()
@@ -180,6 +185,8 @@ void TestDevice::render(RenderInfo &info) {
 							
 							curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 							
+							curr_address = getChild(rayPos,voxelCentre,curr_address);
+							
 							corner_far = tmp_corner_far;
 							voxelCentre = tmpNodeCentre;
 							corner_close =  float3(d[0] >= 0 ? voxelCentre[0] - nodeHalfSize : voxelCentre[0] + nodeHalfSize,
@@ -187,8 +194,6 @@ void TestDevice::render(RenderInfo &info) {
 												   d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
 							t_max = tmp_max;
 							t_min = max((corner_close - rayPos) / d);
-							
-							curr_address = getChild(rayPos,voxelCentre,curr_address);
 							
 						} else {
 							// If the child is empty, we step the ray.
