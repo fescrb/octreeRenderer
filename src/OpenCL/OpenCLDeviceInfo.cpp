@@ -2,7 +2,7 @@
 
 #include "OpenCLUtils.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 	// To get the device name, first we get the length.

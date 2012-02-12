@@ -11,6 +11,7 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+class OpenCLPlatformInfo;
 class OpenCLDevice;
 
 class OpenCLPlatform {
@@ -22,17 +23,17 @@ class OpenCLPlatform {
 		inline unsigned int          getNumDevices(){
 			return m_vpDevices.size();
 		}
-
-		OpenCLDevice*                getDevice(const unsigned int dev){
-			return m_vpDevices[dev];
-		}
     
         std::vector<OpenCLDevice*>   getDeviceList();
+    
+        void                         printInfo();
 	private:
 		cl_platform_id               m_PlatformID;
         cl_context                   m_context;
 
         std::vector<OpenCLDevice*> 	 m_vpDevices;
+    
+        OpenCLPlatformInfo          *m_pPlatformInfo;
 };
 
 #endif //_OPENCL_PLATFORM_H

@@ -1,10 +1,12 @@
 #include "OpenCLPlatform.h"
+#include "OpenCLPlatformInfo.h"
 #include "OpenCLDevice.h"
 
 #include "OpenCLUtils.h"
 
 OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
-:	m_PlatformID(platform_id){
+:	m_PlatformID(platform_id),
+    m_pPlatformInfo(new OpenCLPlatformInfo(platform_id)){
 	cl_uint device_num;
 
 	// Get the number of devices for this platform.
@@ -26,7 +28,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 	}
     
     // Create the context.
-    // TODO
+    // TODO: fix properties
     //cl_context_properties properties[3] = {CL_CONTEXT_PLATFORM, platform_id, 0};
 
     // Perhaps should have callback specified?
@@ -47,4 +49,11 @@ OpenCLPlatform::~OpenCLPlatform(){
 
 std::vector<OpenCLDevice*> OpenCLPlatform::getDeviceList() {
     return m_vpDevices;
+}
+
+void OpenCLPlatform::printInfo() {
+    m_pPlatformInfo->printInfo();
+    for(int i = 0; i < getNumDevices(); i++) {
+        m_vpDevices[i]->printInfo();
+    }
 }
