@@ -37,7 +37,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 	}
     
 	for(int i = 0; i < device_num; i++) {
-		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i]));
+		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], m_context));
 	}
 }
 
