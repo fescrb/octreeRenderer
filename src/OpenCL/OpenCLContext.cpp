@@ -2,6 +2,7 @@
 #include "OpenCLUtils.h"
 
 // To print info, might need to be removed later.
+#include "OpenCLPlatform.h"
 #include "OpenCLDevice.h"
 
 OpenCLContext::OpenCLContext() {
@@ -15,11 +16,9 @@ OpenCLContext::OpenCLContext() {
 		clPrintError(err); return;
 	}
 
-	m_numberOfPlatforms = num_of_platforms;
-
 	// We allocate memory for the list of platforms and retrieve it.
-	m_aPlatforms = (OpenCLPlatform*) malloc(sizeof(OpenCLPlatform)*m_numberOfPlatforms + 1);
-	cl_platform_id *platform_ids = (cl_platform_id*) malloc(sizeof(cl_platform_id)*m_numberOfPlatforms + 1);
+	m_vpPlatforms.resize(num_of_platforms);
+	cl_platform_id *platform_ids = (cl_platform_id*) malloc(sizeof(cl_platform_id)*num_of_platforms + 1);
 
 	err = clGetPlatformIDs(num_of_platforms, platform_ids, NULL);
 
@@ -28,8 +27,8 @@ OpenCLContext::OpenCLContext() {
 	}
 
 	// We initialize the platforms.
-	for(int i = 0; i < m_numberOfPlatforms; i++) {
-		m_aPlatforms[i] = OpenCLPlatform(platform_ids[i], this);
+	for(int i = 0; i < getNumPlatforms(); i++) {
+		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i], this));
 	}
 }
 
@@ -38,31 +37,35 @@ OpenCLContext::~OpenCLContext() {
 }
 
 void OpenCLContext::printDeviceInfo(){
-	for(int i = 0; i < m_numberOfPlatforms; i++) {
-		OpenCLPlatform platform = m_aPlatforms[i];
-		for(int j = 0; j < platform.getNumDevices(); j++) {
-			platform.getDevice(j)->printInfo();
+	for(int i = 0; i < getNumPlatforms(); i++) {
+		OpenCLPlatform* platform = m_vpPlatforms[i];
+		for(int j = 0; j < platform->getNumDevices(); j++) {
+			platform->getDevice(j)->printInfo();
 		}
 	}
 }
 
 unsigned int OpenCLContext::getNumDevices() {
 	unsigned int count = 0;
-	for(int i = 0; i < m_numberOfPlatforms; i++) {
-		count += m_aPlatforms[i].getNumDevices();
+	for(int i = 0; i < getNumPlatforms(); i++) {
+		count += m_vpPlatforms[i]->getNumDevices();
 	}
 	return count;
 }
 
 Device* OpenCLContext::getDevice(int index) {
-	int start = -1;
-	for(int i = 0; i < m_numberOfPlatforms; i++) {
-		int end = m_aPlatforms[i].getNumDevices() + start;
-		if(start < index && index <= end)
-			return m_aPlatforms[i].getDevice((index-1) - start);
-		start = end;
-	}
+    return getDeviceList()[index];
+}
 
-	// Index out of range.
-	return 0;
+unsigned int OpenCLContext::getNumPlatforms() {
+    return m_vpPlatforms.size();
+}
+
+std::vector<OpenCLDevice*> OpenCLContext::getDeviceList() {
+    std::vector<OpenCLDevice*> ret;
+    for (int i = 0; i < m_vpPlatforms.size(); i++) {
+        std::vector<OpenCLDevice*> dev = m_vpPlatforms[i]->getDeviceList();
+        ret.insert(ret.end(), dev.begin(), dev.end());
+    }
+    return ret;
 }

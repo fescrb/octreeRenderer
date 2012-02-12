@@ -40,3 +40,7 @@ void OpenCLPlatform::initializeCommandQueues() {
 		m_vpDevices[i]->initializeCommandQueue();
 	}
 }
+
+std::vector<OpenCLDevice*> OpenCLPlatform::getDeviceList() {
+    return m_vpDevices;
+}

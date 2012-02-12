@@ -29,6 +29,7 @@ class OpenCLPlatform {
 		}
     
         void                         initializeCommandQueues();
+        std::vector<OpenCLDevice*>   getDeviceList();
 	private:
 		cl_platform_id               m_PlatformID;
 
