@@ -45,12 +45,6 @@ OpenCLPlatform::~OpenCLPlatform(){
 
 }
 
-void OpenCLPlatform::initializeCommandQueues() {
-    for(int i = 0; i < m_vpDevices.size(); i++) {
-		m_vpDevices[i]->initializeCommandQueue();
-	}
-}
-
 std::vector<OpenCLDevice*> OpenCLPlatform::getDeviceList() {
     return m_vpDevices;
 }
