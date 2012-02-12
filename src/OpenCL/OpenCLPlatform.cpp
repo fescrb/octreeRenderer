@@ -16,7 +16,6 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* contex
 	}
 
 	// We allocate the space for the devices.
-	m_vpDevices.resize(device_num);
 	cl_device_id *aDevice_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * device_num + 1);
 
 	// Now we get the list of devices.

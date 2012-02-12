@@ -17,7 +17,6 @@ OpenCLContext::OpenCLContext() {
 	}
 
 	// We allocate memory for the list of platforms and retrieve it.
-	m_vpPlatforms.resize(num_of_platforms);
 	cl_platform_id *platform_ids = (cl_platform_id*) malloc(sizeof(cl_platform_id)*num_of_platforms + 1);
 
 	err = clGetPlatformIDs(num_of_platforms, platform_ids, NULL);
@@ -27,7 +26,7 @@ OpenCLContext::OpenCLContext() {
 	}
 
 	// We initialize the platforms.
-	for(int i = 0; i < getNumPlatforms(); i++) {
+	for(int i = 0; i < num_of_platforms; i++) {
 		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i], this));
 	}
 }
