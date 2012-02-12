@@ -29,7 +29,6 @@ class OpenCLPlatform {
         void                         printInfo();
 	private:
 		cl_platform_id               m_PlatformID;
-        cl_context                   m_context;
 
         std::vector<OpenCLDevice*> 	 m_vpDevices;
     

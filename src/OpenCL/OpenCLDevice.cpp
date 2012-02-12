@@ -4,7 +4,8 @@
 #include "OpenCLUtils.h"
 
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
-:	m_DeviceID(device_id){
+:	m_DeviceID(device_id),
+    m_context(context){
 	m_pDeviceInfo = new OpenCLDeviceInfo(device_id);
     
     cl_int err = 0;

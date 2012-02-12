@@ -25,6 +25,7 @@ class OpenCLDevice:
 	private:
 
 		cl_device_id 		 m_DeviceID;
+        cl_context           m_context;
         cl_command_queue     m_commandQueue;
 };
 

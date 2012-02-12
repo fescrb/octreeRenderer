@@ -27,19 +27,19 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 		clPrintError(err); return;
 	}
     
-    // Create the context.
-    // TODO: fix properties
-    //cl_context_properties properties[3] = {CL_CONTEXT_PLATFORM, platform_id, 0};
-
-    // Perhaps should have callback specified?
-    m_context = clCreateContext(0, device_num, aDevice_ids, NULL, NULL, &err);
-    
-    if(clIsError(err)){
-		clPrintError(err); return;
-	}
-    
 	for(int i = 0; i < device_num; i++) {
-		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], m_context));
+		// Create the context.
+        // TODO: fix properties
+        //cl_context_properties properties[3] = {CL_CONTEXT_PLATFORM, platform_id, 0};
+        
+        // Perhaps should have callback specified?
+        cl_context context = clCreateContext(0, 1, &aDevice_ids[i], NULL, NULL, &err);
+        
+        if(clIsError(err)){
+            clPrintError(err); return;
+        }
+        
+        m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
 	}
 }
 
