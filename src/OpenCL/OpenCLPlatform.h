@@ -11,13 +11,12 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
-class OpenCLContext;
 class OpenCLDevice;
 
 class OpenCLPlatform {
 
 	public:
-                                     OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context);
+                                     OpenCLPlatform(cl_platform_id platform_id);
 		virtual                     ~OpenCLPlatform();
 
 		inline unsigned int          getNumDevices(){
@@ -32,6 +31,7 @@ class OpenCLPlatform {
         std::vector<OpenCLDevice*>   getDeviceList();
 	private:
 		cl_platform_id               m_PlatformID;
+        cl_context                   m_context;
 
         std::vector<OpenCLDevice*> 	 m_vpDevices;
 };

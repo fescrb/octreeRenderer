@@ -27,7 +27,7 @@ OpenCLContext::OpenCLContext() {
 
 	// We initialize the platforms.
 	for(int i = 0; i < num_of_platforms; i++) {
-		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i], this));
+		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i]));
 	}
 }
 

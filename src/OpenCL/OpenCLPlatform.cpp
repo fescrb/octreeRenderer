@@ -3,7 +3,7 @@
 
 #include "OpenCLUtils.h"
 
-OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context)
+OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 :	m_PlatformID(platform_id){
 	cl_uint device_num;
 
@@ -24,9 +24,20 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* contex
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
+    
+    // Create the context.
+    // TODO
+    //cl_context_properties properties[3] = {CL_CONTEXT_PLATFORM, platform_id, 0};
 
+    // Perhaps should have callback specified?
+    m_context = clCreateContext(0, device_num, aDevice_ids, NULL, NULL, &err);
+    
+    if(clIsError(err)){
+		clPrintError(err); return;
+	}
+    
 	for(int i = 0; i < device_num; i++) {
-		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
+		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i]));
 	}
 }
 
