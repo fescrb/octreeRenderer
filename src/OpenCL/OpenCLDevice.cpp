@@ -15,6 +15,10 @@ OpenCLDevice::~OpenCLDevice(){
 
 }
 
+void OpenCLDevice::initializeCommandQueue() {
+    
+}
+
 void OpenCLDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }

@@ -1,6 +1,8 @@
 #ifndef _OPENCL_PLATFORM_H
 #define _OPENCL_PLATFORM_H
 
+#include <vector>
+
 #ifdef _LINUX
     #include <CL/cl.h>
 #endif //_LINUX
@@ -15,21 +17,22 @@ class OpenCLDevice;
 class OpenCLPlatform {
 
 	public:
-								 OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context);
-		virtual 				~OpenCLPlatform();
+                                     OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* context);
+		virtual                     ~OpenCLPlatform();
 
-		inline unsigned int		 getNumDevices(){
-			return m_numberOfDevices;
+		inline unsigned int          getNumDevices(){
+			return m_vpDevices.size();
 		}
 
-		OpenCLDevice*			 getDevice(const unsigned int dev){
-			return m_apDevices[dev];
+		OpenCLDevice*                getDevice(const unsigned int dev){
+			return m_vpDevices[dev];
 		}
+    
+        void                         initializeCommandQueues();
 	private:
-		cl_platform_id 			 m_PlatformID;
+		cl_platform_id               m_PlatformID;
 
-		unsigned int	 		 m_numberOfDevices;
-		OpenCLDevice 		   **m_apDevices;
+        std::vector<OpenCLDevice*> 	 m_vpDevices;
 };
 
 #endif //_OPENCL_PLATFORM_H

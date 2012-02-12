@@ -16,9 +16,8 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* contex
 	}
 
 	// We allocate the space for the devices.
-	m_numberOfDevices = device_num;
-	m_apDevices = (OpenCLDevice**) malloc(sizeof(OpenCLDevice*) * m_numberOfDevices + 1);
-	cl_device_id *aDevice_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * m_numberOfDevices + 1);
+	m_vpDevices.resize(device_num);
+	cl_device_id *aDevice_ids = (cl_device_id*) malloc(sizeof(cl_device_id) * device_num + 1);
 
 	// Now we get the list of devices.
 	err = clGetDeviceIDs(m_PlatformID, CL_DEVICE_TYPE_ALL, device_num, aDevice_ids, NULL);
@@ -27,11 +26,17 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id, OpenCLContext* contex
 		clPrintError(err); return;
 	}
 
-	for(int i = 0; i < m_numberOfDevices; i++) {
-		m_apDevices[i] = new OpenCLDevice(aDevice_ids[i], context);
+	for(int i = 0; i < device_num; i++) {
+		m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
 	}
 }
 
 OpenCLPlatform::~OpenCLPlatform(){
 
+}
+
+void OpenCLPlatform::initializeCommandQueues() {
+    for(int i = 0; i < m_vpDevices.size(); i++) {
+		m_vpDevices[i]->initializeCommandQueue();
+	}
 }
