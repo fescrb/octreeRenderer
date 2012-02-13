@@ -74,7 +74,7 @@ void TestDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
-void TestDevice::sendData(char* data) {
+void TestDevice::sendData(char* data, size_t) {
 	m_pOctreeData = data;
 }
 

@@ -16,6 +16,14 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     if(clIsError(err)){
 		clPrintError(err); return;
 	}
+    
+    // Create octree memory in the object, the host will only write, not read. And the device will only read.
+    // We make it 512 bytes only for now.
+    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 512, NULL, &err);
+    
+    if(clIsError(err)){
+        clPrintError(err); return;
+    }
 }
 
 
@@ -27,8 +35,8 @@ void OpenCLDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
-void OpenCLDevice::sendData(char* data) {
-
+void OpenCLDevice::sendData(char* data, size_t size) {
+    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, size, (void*)data, NULL, 0, NULL);
 }
 
 void OpenCLDevice::render(RenderInfo &info) {

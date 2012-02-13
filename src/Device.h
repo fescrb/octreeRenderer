@@ -12,7 +12,7 @@ class Device {
 
         virtual void	 printInfo() = 0;
 
-        virtual void 	 sendData(char* data) = 0;
+        virtual void 	 sendData(char* data, size_t size) = 0;
         virtual void	 render(RenderInfo &info) = 0;
         virtual char    *getFrame() = 0;
     protected:

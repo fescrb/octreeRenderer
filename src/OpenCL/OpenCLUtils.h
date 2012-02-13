@@ -11,6 +11,12 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+// This macro is only available in OCL 1.2,
+// we must define it to avoid compiler errors
+#ifndef CL_MEM_COPY_HOST_WRITE_ONLY
+    #define CL_MEM_COPY_HOST_WRITE_ONLY 0
+#endif
+
 const char* clErrorToCString(cl_int error_code);
 
 inline bool clIsError(cl_int error_code) {

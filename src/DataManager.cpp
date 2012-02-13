@@ -26,7 +26,7 @@ char* DataManager::renderFrame(DeviceManager* deviceManager, RenderInfo &info) {
 	Device* dev = deviceManager->getDevice(0);
 
 	char* buffer = getOctree()->flatten();
-	dev->sendData(buffer);
+	dev->sendData(buffer, 56);
 
 	dev->render(info);
 
