@@ -10,7 +10,7 @@ class TestDevice
         virtual 		~TestDevice();
 
         void			 printInfo();
-        void 			 sendData(char* data, size_t size);
+        void 			 sendData(OctreeSegment* segment);
         void			 render(RenderInfo &info);
         char    		*getFrame();
 

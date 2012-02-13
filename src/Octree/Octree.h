@@ -2,6 +2,7 @@
 #define _OCTREE_H
 
 class OctreeNode;
+class OctreeSegment;
 
 class Octree {
 	public:
@@ -12,7 +13,7 @@ class Octree {
 		unsigned int			 getDepth();
 		unsigned int			 getNumberOfNodes();
 
-		char 					*flatten();
+		OctreeSegment			*flatten();
 
 	private:
 		OctreeNode				*m_pRootNode;

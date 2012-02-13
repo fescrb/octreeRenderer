@@ -1,6 +1,7 @@
 #include "TestDevice.h"
 
 #include "TestDeviceInfo.h"
+#include "OctreeSegment.h"
 
 #include <cstdlib>
 #include <cmath>
@@ -74,8 +75,8 @@ void TestDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
-void TestDevice::sendData(char* data, size_t) {
-	m_pOctreeData = data;
+void TestDevice::sendData(OctreeSegment* segment) {
+	m_pOctreeData = segment->getData();
 }
 
 struct Stack {

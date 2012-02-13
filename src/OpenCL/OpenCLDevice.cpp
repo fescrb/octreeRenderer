@@ -3,6 +3,8 @@
 #include "OpenCLDeviceInfo.h"
 #include "OpenCLUtils.h"
 
+#include "OctreeSegment.h"
+
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 :	m_DeviceID(device_id),
     m_context(context){
@@ -35,8 +37,8 @@ void OpenCLDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
-void OpenCLDevice::sendData(char* data, size_t size) {
-    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, size, (void*)data, NULL, 0, NULL);
+void OpenCLDevice::sendData(OctreeSegment* segment) {
+    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, segment->getSize(), (void*)segment->getData(), NULL, 0, NULL);
 }
 
 void OpenCLDevice::render(RenderInfo &info) {

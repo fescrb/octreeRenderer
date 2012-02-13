@@ -25,8 +25,8 @@ int DataManager::getMaxOctreeDepth() {
 char* DataManager::renderFrame(DeviceManager* deviceManager, RenderInfo &info) {
 	Device* dev = deviceManager->getDevice(0);
 
-	char* buffer = getOctree()->flatten();
-	dev->sendData(buffer, 56);
+	OctreeSegment* segment = getOctree()->flatten();
+	dev->sendData(segment);
 
 	dev->render(info);
 

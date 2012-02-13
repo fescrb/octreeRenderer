@@ -1,6 +1,7 @@
 #include "Octree.h"
 
 #include "OctreeNode.h"
+#include "OctreeSegment.h"
 
 #include <cstdlib>
 #include <cstdio>
@@ -54,7 +55,7 @@ unsigned int Octree::getNumberOfNodes() {
 	return m_pRootNode->getNumberOfNodes();
 }
 
-char* Octree::flatten() {
+OctreeSegment* Octree::flatten() {
 	unsigned int numOfNodes = getNumberOfNodes();
 
 	unsigned int memoryRequired = 0;
@@ -65,11 +66,12 @@ char* Octree::flatten() {
 
 	memoryRequired += numOfNodes * 4; // For the attributes.
 
-	printf("We need %d bytes of memory\n", memoryRequired);
+	// Debug cout
+	//printf("We need %d bytes of memory\n", memoryRequired);
 
 	char* buffer = (char*) malloc (memoryRequired);
 
 	m_pRootNode->flatten(buffer);
 
-	return buffer;
+	return new OctreeSegment(buffer, memoryRequired);
 }

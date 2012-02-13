@@ -4,6 +4,7 @@
 #include "RenderInfo.h"
 
 class DeviceInfo;
+class OctreeSegment;
 
 class Device {
     public:
@@ -12,7 +13,7 @@ class Device {
 
         virtual void	 printInfo() = 0;
 
-        virtual void 	 sendData(char* data, size_t size) = 0;
+        virtual void 	 sendData(OctreeSegment* segment) = 0;
         virtual void	 render(RenderInfo &info) = 0;
         virtual char    *getFrame() = 0;
     protected:
