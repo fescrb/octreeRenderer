@@ -2,9 +2,17 @@
 
 At least one OpenCL sdk must be installed. 
 
+A python script is provided to ease CMake argument selection.
+
 [Building]:
 
-Make a directory so as not to pollute the source tree:
+Using the python script:
+
+	python build.py
+
+The executable will be located in bin/octreeRenderer.
+
+Alternatively, we can build without using Python: Make a directory so as not to pollute the source tree:
 
 	mkdir bin; cd bin
 	
