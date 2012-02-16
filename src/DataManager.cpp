@@ -28,7 +28,7 @@ char* DataManager::renderFrame(DeviceManager* deviceManager, RenderInfo &info) {
 	OctreeSegment* segment = getOctree()->flatten();
 	dev->sendData(segment);
 
-	dev->render(info);
+	dev->render(float2(0,0), float2(32,32), info);
 
 	return dev->getFrame();
 }

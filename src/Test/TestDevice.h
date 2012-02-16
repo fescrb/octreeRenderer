@@ -11,7 +11,7 @@ class TestDevice
 
         void			 printInfo();
         void 			 sendData(OctreeSegment* segment);
-        void			 render(RenderInfo &info);
+        void			 render(float2 start, float2 size, RenderInfo &info);
         char    		*getFrame();
 
     private:

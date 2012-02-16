@@ -95,7 +95,7 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
-void TestDevice::render(RenderInfo &info) {
+void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 	if(!m_pFrame) {
 		int buffSize = 3*info.resolution[0]*info.resolution[1];
 		m_frameBufferResolution[0] = info.resolution[0];
