@@ -4,6 +4,8 @@ set(sources ${sources}
 			Device.cpp
 			DeviceManager.cpp
 			DataManager.cpp
+            SourceFile.cpp
+            SourceFileManager.cpp
 			main.cpp )
 
 set(headers ${headers}
@@ -14,4 +16,6 @@ set(headers ${headers}
 			Context.h
 			DeviceManager.h
 			DataManager.h
+            SourceFile.h
+            SourceFileManager.h
 			)
