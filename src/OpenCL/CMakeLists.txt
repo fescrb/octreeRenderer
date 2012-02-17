@@ -6,4 +6,4 @@ endforeach(source)
 
 set(sources ${sources} PARENT_SCOPE)
 
-install(FILES ${shaders} RUNTIME DESTINATION bin/shaders LIBRARY DESTINATION bin/shaders ARCHIVE DESTINATION bin/shaders)
+install(FILES ${shaders} DESTINATION bin/shaders)

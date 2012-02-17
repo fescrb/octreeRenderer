@@ -80,7 +80,6 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 __kernel void render(__global char* root,
 					 RenderInfo info,
 					 float2 start,
-					 float2 size,
 					 image2d_t framebuffer) {
 
 	//TODO (BIG) do in vector math
