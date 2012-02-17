@@ -25,6 +25,10 @@ if(USE_OPENCL)
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
 
+find_package(GLUT REQUIRED)
+set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES}) 
+include_directories(${GLUT_INCLUDE_DIR})
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions(-D_LINUX)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")

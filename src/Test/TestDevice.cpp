@@ -118,10 +118,12 @@ void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 	
 	float half_size = 256.0f;
 
-	for(int y = 0; y < info.resolution[1]; y++) {
-		for(int x = 0; x < info.resolution[0]; x++) {
+	float2 end = start+size;
+
+	for(int y = start[1]; y < end[1]; y++) {
+		for(int x = start[0]; x < end[0]; x++) {
 			// Ray setup.
-			float3 o(plane_start[0] + (plane_step*x),
+			float3 o(plane_start[0] + (plane_step * x),
 					 plane_start[1] + (plane_step * y),
 					 info.eyePos[2] + info.eyePlaneDist);
 					 
