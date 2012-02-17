@@ -5,6 +5,9 @@
 
 #include "OctreeSegment.h"
 
+#include "SourceFile.h"
+#include "SourceFileManager.h"
+
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 :	m_DeviceID(device_id),
     m_context(context){
