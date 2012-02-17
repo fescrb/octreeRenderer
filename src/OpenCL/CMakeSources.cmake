@@ -14,3 +14,5 @@ set(this_headers 	${this_headers}
 					OpenCLDeviceInfo.h
 					OpenCLUtils.h
 					OpenCLExtra.h )
+
+set(shaders		RayTracing.cl)
