@@ -6,6 +6,7 @@ verbose = ""
 use_ocl = " "
 build_type = ' -DCMAKE_BUILD_TYPE="Debug" ' 
 test = 0
+extra_defs = ''
 
 if len(sys.argv) > 1 :
     argc = 1
@@ -23,6 +24,8 @@ if len(sys.argv) > 1 :
             verbose = " VERBOSE=1 "
         if command == "noocl":
             use_ocl = ' -DDONT_USE_OPENCL="Yes" '
+        if command == "debugfindocl":
+            extra_defs = extra_defs + ' -DDEBUG_FINDOPENCL="Yes" '
 
 
 if not os.path.exists('obj'):
@@ -33,7 +36,7 @@ if not os.path.exists('bin'):
     
 os.chdir('obj')
 
-cmake_command = 'cmake .. ' + build_type + use_ocl + ' '
+cmake_command = 'cmake .. ' + build_type + use_ocl + extra_defs + ' '
 make_command = 'make ' + verbose
 install_command = 'make install '
 
