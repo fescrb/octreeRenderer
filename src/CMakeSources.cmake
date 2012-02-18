@@ -6,6 +6,7 @@ set(sources ${sources}
 			DataManager.cpp
             SourceFile.cpp
             SourceFileManager.cpp
+            Window.cpp
 			main.cpp )
 
 set(headers ${headers}
@@ -18,4 +19,5 @@ set(headers ${headers}
 			DataManager.h
             SourceFile.h
             SourceFileManager.h
+            Window.h
 			)

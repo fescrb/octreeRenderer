@@ -3,14 +3,20 @@
 
 #include "Vector.h"
 
-#include <glut.h>
+#include <OpenGL/gl.h>
 
 class Window {
 	public:
 		explicit				 Window(int argc, char** argv, float2 dimensions);
 
 		void					 render();
-		void					 resize(GLInt width, GLInt height);
+    
+		void					 resize(GLint width, GLint height);
+        int2                     getSize();
+    
+    private:
+    
+        int2                     m_size;
 };
 
 #endif //_WINDOW_H
