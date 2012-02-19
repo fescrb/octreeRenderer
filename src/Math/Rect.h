@@ -1,14 +1,23 @@
-//
-//  Rect.h
-//  octreeRenderer
-//
-//  Created by Nataliya Dubrovska on 19/02/2012.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//
+#ifndef _RECT_H
+#define _RECT_H
 
-#ifndef octreeRenderer_Rect_h
-#define octreeRenderer_Rect_h
+#include "Vector.h"
 
+struct rect {
+    public:
+                         rect(){};
+        explicit         rect(int2 origin, int2 size): m_origin(origin), m_size(size){};
+        explicit         rect(int x, int y, int width, int height):m_origin(x,y), m_size(width,height){};
+    
+        int2&            origin(){
+            return m_origin;
+        }
+    
+        int2&            size(){
+            return m_size;
+        }
+    private:
+        int2             m_origin, m_size;
+};
 
-
-#endif
+#endif //_RECT_H

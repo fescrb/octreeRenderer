@@ -3,9 +3,11 @@
 
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Vector4.h"
 
 typedef vector2<F32> float2;
 typedef vector3<F32> float3;
+typedef vector4<F32> float4;
 
 typedef vector2<I32> int2;
 
