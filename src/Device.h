@@ -1,7 +1,6 @@
 #ifndef _DEVICE_H
 #define _DEVICE_H
 
-#include "RenderInfo.h"
 #include "Vector.h"
 
 
@@ -15,6 +14,7 @@
 
 class DeviceInfo;
 class OctreeSegment;
+class RenderInfo;
 
 class Device {
     public:
@@ -29,7 +29,7 @@ class Device {
          */
         virtual void     makeFrameBuffer(int2 size) = 0;
         virtual void 	 sendData(OctreeSegment* segment) = 0;
-        virtual void	 render(float2 start, float2 size, RenderInfo &info) = 0;
+        virtual void	 render(int2 start, int2 size, RenderInfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.

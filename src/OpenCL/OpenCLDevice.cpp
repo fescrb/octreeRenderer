@@ -44,7 +44,7 @@ void OpenCLDevice::sendData(OctreeSegment* segment) {
     clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, segment->getSize(), (void*)segment->getData(), NULL, 0, NULL);
 }
 
-void OpenCLDevice::render(float2 start, float2 size, RenderInfo &info) {
+void OpenCLDevice::render(int2 start, int2 size, RenderInfo *info) {
 
 }
 

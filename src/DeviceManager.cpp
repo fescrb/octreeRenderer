@@ -1,5 +1,10 @@
 #include "DeviceManager.h"
 
+#include "DataManager.h"
+#include "RenderInfo.h"
+
+#include "Device.h"
+
 #ifdef USE_OPENCL
 	#include "OpenCLContext.h"
 #endif
@@ -8,7 +13,8 @@
 	#include "TestContext.h"
 #endif
 
-DeviceManager::DeviceManager(){
+DeviceManager::DeviceManager(DataManager *dataManager)
+:	m_pDataManager(dataManager){
 	#ifdef USE_OPENCL
 		m_vContext.push_back(new OpenCLContext());
 	#endif
@@ -50,4 +56,23 @@ Device* DeviceManager::getDevice(int index) {
 
 	// Index out of range.
 	return 0;
+}
+
+std::vector<GLuint>	DeviceManager::renderFrame(RenderInfo *info, int2 resolution) {
+	int devices = getNumDevices();
+	
+	std::vector<GLuint> textures;
+	
+	OctreeSegment* fullOctree = m_pDataManager->getFullOctree();
+	
+	for(int i = 0; i < devices; i++) {
+		Device *thisDevice = getDevice(i);
+		
+		thisDevice->makeFrameBuffer(resolution);
+		thisDevice->sendData(fullOctree);
+		thisDevice->render(int2(),resolution,info);
+		textures.push_back(thisDevice->getFrameBuffer());
+	}
+	
+	return textures;
 }

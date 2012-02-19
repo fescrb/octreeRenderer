@@ -7,7 +7,9 @@
 ProgramState::ProgramState(int argc, char** argv) {
     m_pDataManager = new DataManager;
     
-    m_pDeviceManager = new DeviceManager;
+    m_pDeviceManager = new DeviceManager(m_pDataManager);
+	
+	m_pDeviceManager->printDeviceInfo();
     
     // Setup the render info.
     m_pRenderInfo = new RenderInfo;

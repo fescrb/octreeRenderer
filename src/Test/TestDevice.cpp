@@ -2,6 +2,7 @@
 
 #include "TestDeviceInfo.h"
 #include "OctreeSegment.h"
+#include "RenderInfo.h"
 
 #include <cstdlib>
 #include <cmath>
@@ -113,16 +114,16 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
-void TestDevice::render(float2 start, float2 size, RenderInfo &info) {	
+void TestDevice::render(int2 start, int2 size, RenderInfo *info) {	
 	float half_size = 256.0f;
 
-	float2 end = start+size;
+	int2 end = start+size;
 
 	for(int y = start[1]; y < end[1]; y++) {
 		for(int x = start[0]; x < end[0]; x++) {
 			// Ray setup.
-            float3 o(info.viewPortStart + (info.viewStep * (start[0]+x)) + (info.up * (start[1]+y)));
-            float3 d(o-info.eyePos); //Perspective projection now.
+            float3 o(info->viewPortStart + (info->viewStep * (start[0]+x)) + (info->up * (start[1]+y)));
+            float3 d(o-info->eyePos); //Perspective projection now.
             //normalize(d);
 			float t = 1.0f;
 			
@@ -143,7 +144,7 @@ void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 			float3 voxelCentre(0.0f, 0.0f, 0.0f);
 			bool collission = false;	
 			int curr_index = 0;
-			Stack stack[info.maxOctreeDepth - 1];
+			Stack stack[info->maxOctreeDepth - 1];
 			
 			// We are out of the volume and we will never get to it.
 			

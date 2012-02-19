@@ -2,9 +2,7 @@
 #define _DATA_MANAGER_H
 
 class Octree;
-class DeviceManager;
-
-#include "RenderInfo.h"
+class OctreeSegment;
 
 class DataManager {
 	public:
@@ -15,7 +13,7 @@ class DataManager {
 		
 		int 					 getMaxOctreeDepth();
 		
-		char					*renderFrame(DeviceManager* deviceManager, RenderInfo &info);
+		OctreeSegment			*getFullOctree();
 
 	private:
 	
