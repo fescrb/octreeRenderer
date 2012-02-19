@@ -5,6 +5,8 @@ class SourceFile {
 	public:
 		explicit 			 SourceFile(const char* path);
 							~SourceFile();
+							
+		char 				*getSource();
 
 	private:
 		char*				 m_sSource;

@@ -29,3 +29,7 @@ SourceFile::~SourceFile() {
 	if(m_sSource)
 		free(m_sSource);
 }
+
+char* SourceFile::getSource() {
+	return m_sSource;
+}
