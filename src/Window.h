@@ -5,18 +5,24 @@
 
 #include <OpenGL/gl.h>
 
+class ProgramState;
+
 class Window {
 	public:
-		explicit				 Window(int argc, char** argv, float2 dimensions);
+		explicit				 Window(int argc, char** argv, int2 dimensions, ProgramState* state);
 
 		void					 render();
     
 		void					 resize(GLint width, GLint height);
         int2                     getSize();
     
+        void                     run();
+    
     private:
     
         int2                     m_size;
+    
+    ProgramState            *m_pProgramState;
 };
 
 #endif //_WINDOW_H

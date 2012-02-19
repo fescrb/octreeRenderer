@@ -9,9 +9,6 @@ struct RenderInfo {
 	//float size;
 	int   maxOctreeDepth;
 
-	// Projection Info.
-	int	  resolution[2];
-
 	// Camera info.
 	float3 eyePos;
 	float3 viewDir;

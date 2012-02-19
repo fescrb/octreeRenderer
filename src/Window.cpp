@@ -2,16 +2,22 @@
 
 #include <glut.h>
 
-Window::Window(int argc, char** argv, float2 dimensions) {
+Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state) {
 	glutInit(&argc, argv);
 	glutInitWindowSize(dimensions[0], dimensions[1]);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
 
 	glutCreateWindow("Octree Renderer");
+    
+    //glutDisplayFunc(&this->render);
+    
+    //glutReshapeFunc(&this->resize);
 }
 
 void Window::render() {
-
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    glutSwapBuffers();
 }
 
 void Window::resize(GLint width, GLint height) {
@@ -26,4 +32,8 @@ void Window::resize(GLint width, GLint height) {
 
 int2 Window::getSize() {
     return m_size;
+}
+
+void Window::run() {
+    glutMainLoop();
 }
