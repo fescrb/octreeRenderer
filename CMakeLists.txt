@@ -27,9 +27,6 @@ endif(USE_OPENCL)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
-
-message("libs " ${OpenGL_LIBRARIES})
-
 set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES}) 
 include_directories(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
 
