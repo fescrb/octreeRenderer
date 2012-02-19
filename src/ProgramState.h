@@ -1,14 +1,31 @@
-//
-//  ProgramState.h
-//  octreeRenderer
-//
-//  Created by Nataliya Dubrovska on 18/02/2012.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//
+/**
+ * @file ProgramState.h
+ * @brief Contains all global variables, and initializes them.
+ */
 
-#ifndef octreeRenderer_ProgramState_h
-#define octreeRenderer_ProgramState_h
+#ifndef _PROGRAM_STATE_H
+#define _PROGRAM_STATE_H
 
+class DataManager;
+class DeviceManager;
+class RenderInfo;
 
+class ProgramState {
+    public:
+        explicit                 ProgramState(int argc, char** argv);
+                                ~ProgramState();
+        
+        RenderInfo              *getRenderInfo();
+    
+        DataManager             *getDataManager();
+    
+        DeviceManager           *getDeviceManager();
+    
+    private:
+        RenderInfo              *m_pRenderInfo;
+    
+        DataManager             *m_pDataManager;
+        DeviceManager           *m_pDeviceManager;
+};
 
-#endif
+#endif //_PROGRAM_STATE_H
