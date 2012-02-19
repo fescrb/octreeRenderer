@@ -20,6 +20,10 @@ ProgramState::ProgramState(int argc, char** argv) {
 	m_pRenderInfo->viewDir.setY(0); //y
 	m_pRenderInfo->viewDir.setZ(1.0f); //z
     
+    m_pRenderInfo->up.setX(0); //x
+	m_pRenderInfo->up.setY(1.0f); //y
+	m_pRenderInfo->up.setZ(0); //z
+    
 	m_pRenderInfo->eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
 	m_pRenderInfo->fov = 1.0f;
 }

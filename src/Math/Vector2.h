@@ -99,8 +99,6 @@ struct vector2{
 
 		template<class t2>
 		friend t2          sum(const vector2<t2> &vector);
-		template<class t2>
-		friend vector2<t2> cross(const vector2<t2> &lhs, const vector2<t2> &rhs);
 
 	private:
 		t m_x, m_y;
@@ -137,8 +135,13 @@ inline t sum(const vector2<t> &vector){
 }
 
 template <class t>
+inline F32 dot(const vector2<t> &lhs, const vector2<t> &rhs){
+	return sum(mul(lhs,rhs));
+}
+
+template <class t>
 inline t mag(const vector2<t> &vector){
-	return sqrt(fabs(sum(mul(vector,vector))));
+	return sqrt(fabs(cross(vector,vector)));
 }
 
 #endif //_VECTOR_2_H

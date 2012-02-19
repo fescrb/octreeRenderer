@@ -121,7 +121,7 @@ void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 	for(int y = start[1]; y < end[1]; y++) {
 		for(int x = start[0]; x < end[0]; x++) {
 			// Ray setup.
-            float3 o(info.viewPortStart + (info.viewStepHor * (start[0]+x)) + (info.viewStepVer * (start[1]+y)));
+            float3 o(info.viewPortStart + (info.viewStep * (start[0]+x)) + (info.up * (start[1]+y)));
             float3 d(o-info.eyePos); //Perspective projection now.
             //normalize(d);
 			float t = 1.0f;

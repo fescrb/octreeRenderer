@@ -1,10 +1,7 @@
 #ifndef _VECTOR_4_H 
 #define _VECTOR_4_H
 
-
-#include "BasicTypes.h"
-#include <cmath>
-#include <cstdlib>
+#include "Vector3.h"
 
 template <class t>
 struct vector4{
@@ -166,7 +163,7 @@ inline t sum(const vector4<t> &vector){
 }
 
 template <class t>
-inline t dot(const vector4<t> &lhs, const vector4<t> &rhs){
+inline F32 dot(const vector4<t> &lhs, const vector4<t> &rhs){
 	return sum(mul(lhs,rhs));
 }
 
@@ -180,6 +177,16 @@ vector4<t> cross(const vector4<t> &lhs, const vector4<t> &rhs) {
     return vector4<t>((lhs.getY()*rhs.getZ()) - (lhs.getZ()*rhs.getY()),
                       -((lhs.getX()*rhs.getZ()) - (lhs.getZ()*rhs.getX())),
                       (lhs.getX()*rhs.getY()) - (lhs.getY()*rhs.getX()));
+}
+
+template <class t>
+inline vector4<t> direction(const vector3<t> &vector){
+	return vector4<t>(vector[0],vector[1],vector[2],0.0f);
+}
+
+template <class t>
+inline vector4<t> position(const vector3<t> &vector){
+	return vector4<t>(vector[0],vector[1],vector[2],1.0f);
 }
 
 

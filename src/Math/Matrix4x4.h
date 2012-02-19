@@ -1,13 +1,15 @@
 #ifndef _MATRIX_4_4_H
 #define _MATRIX_4_4_H
 
-#include "Vector4.h"
+#include "Vector.h"
+
+#include <cstdio>
 
 template <class t>
 struct matrix4x4 {
     public:
         matrix4x4(){}
-        explicit 			 matrix4x4(const matrix4x4& other)
+                             matrix4x4(const matrix4x4<t>& other)
         :	m_column1(other.m_column1),
         m_column2(other.m_column2),
         m_column3(other.m_column3),
@@ -45,7 +47,7 @@ struct matrix4x4 {
                             operator*(rightHandSide.m_column4) );
         }
         
-        inline matrix4x4 	 operator*(const vector4<t>& rightHandSide) {
+        inline vector4<t> 	 operator*(const vector4<t>& rightHandSide) {
             vector4<t> x = rightHandSide.replicateX();
             vector4<t> y = rightHandSide.replicateY();
             vector4<t> z = rightHandSide.replicateZ();
@@ -112,6 +114,31 @@ struct matrix4x4 {
                             vector4<t>(-sin(radians), cos(radians), 0, 0),
                             vector4<t>(            0,            0, 1, 0),
                             vector4<t>(            0,            0, 0, 1) );
+        }
+    
+        static inline matrix4x4		 
+        rotationAroundVector(vector4<t> vector, F32 radians) {
+            vector2<t> twoComponenVector(vector[0], vector[1]);
+            vector2<t> twoComponenYAxis(0.0f, 1.0f);
+            
+            float alpha = acos(dot(twoComponenVector, twoComponenYAxis));
+            
+            printf("alpha %f\n", alpha);
+            
+            matrix4x4<t> rotateAroundZ = rotationAroundZ(alpha);
+            matrix4x4<t> rotateAroundZneg = rotationAroundZ(-alpha); 
+            
+            // We now rotate up to be equal to k.
+            vector = rotateAroundZ*vector;
+            
+            float beta = acos(dot(vector, vector4<t>(0.0f,0.0f,1.0f,0.0f)));
+            
+            printf("beta %f\n", beta);
+            
+            matrix4x4<t> rotateAroundY = rotationAroundZ(beta);
+            matrix4x4<t> rotateAroundYneg = rotationAroundZ(-beta); 
+            
+            return rotateAroundZneg * ( rotateAroundYneg * ( matrix4x4<t>::rotationAroundZ(radians) * ( rotateAroundY * rotateAroundZ ) ) );
         }
         
         static inline matrix4x4		 

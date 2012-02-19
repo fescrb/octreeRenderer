@@ -11,6 +11,8 @@
 
 #include <cstddef>
 
+#define _PI 3.14159265f
+
 /** @typedef I64 
  * 
  * 8 byte signed integer.
