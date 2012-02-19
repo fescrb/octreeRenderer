@@ -22,6 +22,8 @@ class Window {
     
         void                     setRenderWindow(Window *window);
     
+        void                     recalculateViewportVectors();
+    
     private:
     
         int2                     m_size;

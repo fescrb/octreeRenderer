@@ -2,7 +2,13 @@
 
 #include <glut.h>
 
+#include "Vector.h"
 #include "Matrix.h"
+
+#include "ProgramState.h"
+#include "RenderInfo.h"
+
+#include <cstdio>
 
 /**
  * Statically define methods.
@@ -37,6 +43,10 @@ Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state) {
     
     glutIdleFunc(staticRender);
     
+    float4 res = float4x4::rotationAroundVector(float4(0.0f,1.0f,0.0f,0.0f), _PI/2.0f) * float4(0.0f,0.0f,1.0f,0.0f);
+    
+    printf("x %f y %f z %f w %f \n", res[0], res[1], res[2], res[3]);
+    
     if(!renderWindow)
         setRenderWindow(this);
 }
@@ -69,4 +79,8 @@ int2 Window::getSize() {
 
 void Window::run() {
     glutMainLoop();
+}
+
+void Window::recalculateViewportVectors() {
+    float4 viewDir = float4x4::rotationAroundVector( direction(m_pProgramState->getRenderInfo()->up), _PI/2.0f) * direction(m_pProgramState->getRenderInfo()->viewDir);
 }
