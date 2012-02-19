@@ -12,7 +12,7 @@ struct RenderInfo {
     int2  viewportSize;
 
 	// Camera info.
-	float3 eyePos, viewDir, viewPortStart, viewStepHor, viewStepVer;
+	float3 eyePos, viewDir, up, viewPortStart, viewStepHor, viewStepVer;
 	float eyePlaneDist, fov; // Distance from near plane + field of view angle.
 };
 
