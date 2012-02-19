@@ -3,8 +3,6 @@
 
 #include "Vector.h"
 
-#include <cstdio>
-
 template <class t>
 struct matrix4x4 {
     public:
@@ -123,8 +121,6 @@ struct matrix4x4 {
             
             float alpha = acos(dot(twoComponenVector, twoComponenYAxis));
             
-            printf("alpha %f\n", alpha);
-            
             matrix4x4<t> rotateAroundZ = rotationAroundZ(alpha);
             matrix4x4<t> rotateAroundZneg = rotationAroundZ(-alpha); 
             
@@ -132,8 +128,6 @@ struct matrix4x4 {
             vector = rotateAroundZ*vector;
             
             float beta = acos(dot(vector, vector4<t>(0.0f,0.0f,1.0f,0.0f)));
-            
-            printf("beta %f\n", beta);
             
             matrix4x4<t> rotateAroundX = rotationAroundX(beta);
             matrix4x4<t> rotateAroundXneg = rotationAroundX(-beta); 
