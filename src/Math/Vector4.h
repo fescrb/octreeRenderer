@@ -123,6 +123,13 @@ public:
         return vector4<t>(-m_x, -m_y, -m_z, -m_w);
     }
     
+    inline operator vector3<t>(){
+		vector3<t> ret(m_x, m_y, m_z);
+		if(m_w!=0.0f)
+			ret = ret/m_w;
+		return ret;
+	}
+    
     template<class t2>
     friend t2          sum(const vector4<t2> &vector);
     template<class t2>
@@ -170,6 +177,12 @@ inline F32 dot(const vector4<t> &lhs, const vector4<t> &rhs){
 template <class t>
 inline t mag(const vector4<t> &vector){
 	return sqrt(fabs(dot(vector,vector)));
+}
+
+
+template <class t>
+inline vector4<t> normalize(const vector4<t> &vector){
+	return vector/mag(vector);
 }
 
 template <class t>

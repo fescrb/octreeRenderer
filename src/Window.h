@@ -3,7 +3,13 @@
 
 #include "Vector.h"
 
-#include <OpenGL/gl.h>
+#ifdef _LINUX
+	#include <GL/gl.h>
+#endif //_LINUX
+
+#ifdef _OSX
+	#include <OpenGL/gl.h>
+#endif //_OSX
 
 class ProgramState;
 

@@ -135,10 +135,10 @@ struct matrix4x4 {
             
             printf("beta %f\n", beta);
             
-            matrix4x4<t> rotateAroundY = rotationAroundZ(beta);
-            matrix4x4<t> rotateAroundYneg = rotationAroundZ(-beta); 
+            matrix4x4<t> rotateAroundX = rotationAroundX(beta);
+            matrix4x4<t> rotateAroundXneg = rotationAroundX(-beta); 
             
-            return rotateAroundZneg * ( rotateAroundYneg * ( matrix4x4<t>::rotationAroundZ(radians) * ( rotateAroundY * rotateAroundZ ) ) );
+            return rotateAroundZneg * ( rotateAroundXneg * ( matrix4x4<t>::rotationAroundZ(radians) * ( rotateAroundX * rotateAroundZ ) ) );
         }
         
         static inline matrix4x4		 

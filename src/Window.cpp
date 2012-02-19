@@ -1,6 +1,12 @@
 #include "Window.h"
 
-#include <glut.h>
+#ifdef _LINUX
+	#include <GL/glut.h>
+#endif //_LINUX
+
+#ifdef _OSX
+	#include <glut.h>
+#endif //_OSX
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -43,10 +49,6 @@ Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state) {
     
     glutIdleFunc(staticRender);
     
-    float4 res = float4x4::rotationAroundVector(float4(0.0f,1.0f,0.0f,0.0f), _PI/2.0f) * float4(0.0f,0.0f,1.0f,0.0f);
-    
-    printf("x %f y %f z %f w %f \n", res[0], res[1], res[2], res[3]);
-    
     if(!renderWindow)
         setRenderWindow(this);
 }
@@ -71,6 +73,8 @@ void Window::resize(GLint width, GLint height) {
     glMatrixMode(GL_PROJECTION);
     glOrtho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
+	
+	recalculateViewportVectors();
 }
 
 int2 Window::getSize() {
@@ -82,5 +86,21 @@ void Window::run() {
 }
 
 void Window::recalculateViewportVectors() {
-    float4 viewDir = float4x4::rotationAroundVector( direction(m_pProgramState->getRenderInfo()->up), _PI/2.0f) * direction(m_pProgramState->getRenderInfo()->viewDir);
+	RenderInfo *info = m_pProgramState->getRenderInfo(); 
+	
+	float4 eyepos = position(info->eyePos);
+	float4 up = direction(info->up);
+	float4 viewDir = direction(info->viewDir);
+	
+    float4 viewportStep = float4x4::rotationAroundVector( up, _PI/2.0f) * viewDir;
+	
+	float stepMagnitude = ((info->eyePlaneDist * tan(info->fov/2.0f))*2.0f)/(float)m_size[0];
+	viewportStep = viewportStep * stepMagnitude;
+	
+	up = normalize(up) * stepMagnitude;
+	float4 viewportStart(( (viewDir*info->eyePlaneDist) - (viewportStep*((float)m_size[0]/2.0f)) ) - (up*((float)m_size[1]/2.0f)) );
+	
+	info->up = up;
+	info->viewPortStart = viewportStart;
+	info->viewStep = viewportStep;
 }
