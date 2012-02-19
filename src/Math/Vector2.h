@@ -48,6 +48,10 @@ struct vector2{
 		inline bool      operator==(const vector2 &rhs)const{
 			return m_x==rhs.m_x && m_y==rhs.m_y;
 		}
+    
+        inline bool      operator!=(const vector2 &rhs)const{
+            return m_x!=rhs.m_x || m_y!=rhs.m_y;
+        }
 
 		inline t	     operator[](const I32 &index)const{
 			switch(index){
