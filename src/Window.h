@@ -13,16 +13,20 @@ class Window {
 
 		void					 render();
     
+        void                     initGL();
+    
 		void					 resize(GLint width, GLint height);
         int2                     getSize();
     
         void                     run();
     
+        void                     setRenderWindow(Window *window);
+    
     private:
     
         int2                     m_size;
     
-    ProgramState            *m_pProgramState;
+        ProgramState            *m_pProgramState;
 };
 
 #endif //_WINDOW_H

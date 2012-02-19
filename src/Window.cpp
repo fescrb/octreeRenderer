@@ -2,6 +2,28 @@
 
 #include <glut.h>
 
+#include "Matrix.h"
+
+/**
+ * Statically define methods.
+ *
+ * Perhaps later we can do away with GLUT and use GLX, Cocoa, etc.
+ */
+
+Window *renderWindow = 0;
+
+void Window::setRenderWindow(Window *window) {
+    renderWindow = window;
+}
+
+void staticRender() {
+    renderWindow->render();
+}
+
+void staticResize(GLint width, GLint height) {
+    renderWindow->resize(width, height);
+}
+
 Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state) {
 	glutInit(&argc, argv);
 	glutInitWindowSize(dimensions[0], dimensions[1]);
@@ -9,13 +31,24 @@ Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state) {
 
 	glutCreateWindow("Octree Renderer");
     
-    //glutDisplayFunc(&this->render);
+    glutDisplayFunc(staticRender);
     
-    //glutReshapeFunc(&this->resize);
+    glutReshapeFunc(staticResize);
+    
+    glutIdleFunc(staticRender);
+    
+    if(!renderWindow)
+        setRenderWindow(this);
+}
+
+void Window::initGL() {
+    glEnable(GL_TEXTURE_2D);
 }
 
 void Window::render() {
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    
     
     glutSwapBuffers();
 }
