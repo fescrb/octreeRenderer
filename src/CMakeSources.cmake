@@ -23,3 +23,8 @@ set(headers ${headers}
             ProgramState.h
             Window.h
 			)
+
+set(shaders ${shaders}
+			NoTransform.vert
+			Coalesce.frag
+			)

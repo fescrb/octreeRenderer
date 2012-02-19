@@ -29,6 +29,8 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES}) 
 include_directories(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
+# To allow usage of glext extensions
+add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     add_definitions(-D_LINUX)
