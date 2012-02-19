@@ -10,14 +10,17 @@ class TestDevice
         virtual 		~TestDevice();
 
         void			 printInfo();
+        void             makeFrameBuffer(int2 size);
         void 			 sendData(OctreeSegment* segment);
         void			 render(float2 start, float2 size, RenderInfo &info);
+        GLuint           getFrameBuffer();
         char    		*getFrame();
 
     private:
         char			*m_pOctreeData;
         char			*m_pFrame;
-        int				 m_frameBufferResolution[2];
+        int2             m_frameBufferResolution;
+        GLuint           m_texture;
         
         void			 setFramePixel(int x, int y,
 									   char red, char green, char blue);

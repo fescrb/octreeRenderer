@@ -62,7 +62,8 @@ char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
 
 TestDevice::TestDevice()
 :	m_pOctreeData(0),
- 	m_pFrame(0) {
+ 	m_pFrame(0),
+    m_texture(0){
 	m_pDeviceInfo = new TestDeviceInfo();
 }
 
@@ -73,6 +74,23 @@ TestDevice::~TestDevice() {
 
 void TestDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
+}
+
+void TestDevice::makeFrameBuffer(int2 size) {
+    // Generate frame buffer if non-existant or not the same size;
+    if (size != m_frameBufferResolution) {
+        if(m_pFrame)
+            free(m_pFrame);
+        m_pFrame = (char*)malloc(3*size[0]*size[1]);
+        m_frameBufferResolution = size;
+    }
+    
+    // Clear.
+    int i = 0;
+    int bufferSize = 3*m_frameBufferResolution[0]*m_frameBufferResolution[1];
+    while ( i < bufferSize) {
+        m_pFrame[i]=0;
+    }
 }
 
 void TestDevice::sendData(OctreeSegment* segment) {
@@ -95,27 +113,7 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
-void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
-	if(!m_pFrame) {
-		int buffSize = 3*info.resolution[0]*info.resolution[1];
-		m_frameBufferResolution[0] = info.resolution[0];
-		m_frameBufferResolution[1] = info.resolution[1];
-		m_pFrame = (char*) malloc(buffSize);
-
-		char* tmpPtr = m_pFrame;
-
-		// Set all to 0.
-		while(tmpPtr != m_pFrame+buffSize) {
-			tmpPtr[0] = 0;
-			tmpPtr++;
-		}
-	}
-
-	//TODO (BIG) do in vector math
-	float plane_step = (tan(info.fov)*info.eyePlaneDist) / (float) info.resolution[0];
-	float plane_start[2] = { info.eyePos[0] - (plane_step * ((float)info.resolution[0]/2.0f)),
-							 info.eyePos[1] - (plane_step * ((float)info.resolution[1]/2.0f))};
-	
+void TestDevice::render(float2 start, float2 size, RenderInfo &info) {	
 	float half_size = 256.0f;
 
 	float2 end = start+size;
@@ -123,12 +121,10 @@ void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 	for(int y = start[1]; y < end[1]; y++) {
 		for(int x = start[0]; x < end[0]; x++) {
 			// Ray setup.
-			float3 o(plane_start[0] + (plane_step * x),
-					 plane_start[1] + (plane_step * y),
-					 info.eyePos[2] + info.eyePlaneDist);
-					 
-			float3 d(info.viewDir); // As this is a parallel projection.
-			float t = 0;
+            float3 o(info.viewPortStart + (info.viewStepHor * (start[0]+x)) + (info.viewStepVer * (start[1]+y)));
+            float3 d(o-info.eyePos); //Perspective projection now.
+            //normalize(d);
+			float t = 1.0f;
 			
 			float3 corner_far(d[0] >= 0 ? half_size : -half_size,
 							  d[1] >= 0 ? half_size : -half_size,
@@ -220,6 +216,24 @@ void TestDevice::render(float2 start, float2 size, RenderInfo &info) {
 			}
 		}
 	}
+}
+
+GLuint TestDevice::getFrameBuffer() {
+    if (!m_texture) {
+        glGenTextures(1, &m_texture);
+    }
+    
+    glBindTexture(GL_TEXTURE_2D, m_texture);
+    
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGB,
+                 m_frameBufferResolution[0],
+                 m_frameBufferResolution[1],
+                 0,
+                 GL_RGB,
+                 GL_BYTE,
+                 m_pFrame);
 }
 
 char* TestDevice::getFrame() {
