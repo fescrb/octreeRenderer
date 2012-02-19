@@ -8,10 +8,11 @@ struct RenderInfo {
 	//float leftCorner[3];
 	//float size;
 	int   maxOctreeDepth;
+    
+    int2  viewportSize;
 
 	// Camera info.
-	float3 eyePos;
-	float3 viewDir;
+	float3 eyePos, viewDir, viewPortStart, viewStepHor, viewStepVer;
 	float eyePlaneDist, fov; // Distance from near plane + field of view angle.
 };
 
