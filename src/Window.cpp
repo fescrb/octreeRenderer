@@ -109,6 +109,8 @@ GLuint Window::compileShader(GLenum type, const char* fileName) {
 		
 		printf("Error compiling shader from file %s:\n%s", fileName, log);
 	}
+	
+	return shaderID;
 }
 
 GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
@@ -158,6 +160,8 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 	}
 	
 	printf("ul %d \n", m_textUniform);
+    
+    return programID;
 }
 
 void Window::render() {
@@ -167,13 +171,16 @@ void Window::render() {
 	
 	glEnableVertexAttribArray(m_vertAttr);
 	
-	//std::vector<GLuint> textures = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getRenderInfo(), m_size);
+	std::vector<GLuint> textures = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getRenderInfo(), m_size);
 	
-	//glUniform1i(m_textUniform, textures[0]);
+	glUniform1i(m_textUniform, textures[0]);
 	
-	glColor3f(1.0f,1.0f,0.0f);
+    glActiveTexture(GL_TEXTURE0 + textures[0]);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+    
+	//glColor3f(1.0f,1.0f,0.0f);
 	
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     
     glutSwapBuffers();
 }

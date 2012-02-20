@@ -91,6 +91,7 @@ void TestDevice::makeFrameBuffer(int2 size) {
     int bufferSize = 3*m_frameBufferResolution[0]*m_frameBufferResolution[1];
     while ( i < bufferSize) {
         m_pFrame[i]=0;
+        i++;
     }
 }
 
@@ -124,8 +125,8 @@ void TestDevice::render(int2 start, int2 size, RenderInfo *info) {
 			// Ray setup.
             float3 o(info->viewPortStart + (info->viewStep * (start[0]+x)) + (info->up * (start[1]+y)));
             float3 d(o-info->eyePos); //Perspective projection now.
-            //normalize(d);
-			float t = 1.0f;
+            normalize(d);
+			float t = 0.0f;
 			
 			float3 corner_far(d[0] >= 0 ? half_size : -half_size,
 							  d[1] >= 0 ? half_size : -half_size,
@@ -235,6 +236,8 @@ GLuint TestDevice::getFrameBuffer() {
                  GL_RGB,
                  GL_BYTE,
                  m_pFrame);
+    
+    return m_texture;
 }
 
 char* TestDevice::getFrame() {

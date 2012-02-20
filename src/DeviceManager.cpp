@@ -69,6 +69,8 @@ std::vector<GLuint>	DeviceManager::renderFrame(RenderInfo *info, int2 resolution
 	std::vector<GLuint> textures;
 	
 	OctreeSegment* fullOctree = m_pDataManager->getFullOctree();
+    
+    info->maxOctreeDepth = m_pDataManager->getMaxOctreeDepth();
 	
 	for(int i = 0; i < devices; i++) {
 		Device *thisDevice = getDevice(i);
