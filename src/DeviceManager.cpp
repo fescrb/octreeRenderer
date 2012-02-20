@@ -15,6 +15,9 @@
 
 DeviceManager::DeviceManager(DataManager *dataManager)
 :	m_pDataManager(dataManager){
+}
+
+void DeviceManager::detectDevices() {
 	#ifdef USE_OPENCL
 		m_vContext.push_back(new OpenCLContext());
 	#endif
@@ -22,6 +25,8 @@ DeviceManager::DeviceManager(DataManager *dataManager)
 	#ifdef USE_HOST_CPU
 		m_vContext.push_back(new TestContext());
 	#endif
+	
+	printDeviceInfo();
 }
 
 DeviceManager::~DeviceManager(){

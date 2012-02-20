@@ -24,6 +24,8 @@ class DeviceManager {
 		virtual					~DeviceManager();
 
 		void					 printDeviceInfo();
+		
+		void 					 detectDevices();
 
 		int						 getNumDevices();
 		Device					*getDevice(int index);
