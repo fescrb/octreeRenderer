@@ -4,5 +4,5 @@ varying vec2 textureCoord;
 
 void main() {
 	gl_Position = vertex;
-	textureCoord = vertex;
+	textureCoord = vertex.xy;
 }
