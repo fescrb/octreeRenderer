@@ -159,6 +159,11 @@ inline t mag(const vector3<t> &vector){
 }
 
 template <class t>
+inline vector3<t> normalize(const vector3<t> &vector){
+    return vector/mag(vector);
+}
+
+template <class t>
 vector3<t> cross(const vector3<t> &lhs, const vector3<t> &rhs) {
 return vector3<t>((lhs.getY()*rhs.getZ()) - (lhs.getZ()*rhs.getY()),
 				-((lhs.getX()*rhs.getZ()) - (lhs.getZ()*rhs.getX())),
