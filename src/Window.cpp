@@ -34,13 +34,11 @@
 
 Window *renderWindow = 0;
 
-GLfloat square[] = {0.0f, 0.0f, 0.0f,
-					1.0f, 0.0f, 0.0f,
-					1.0f, 1.0f, 0.0f,
-					0.0f, 1.0f, 0.0f
+GLfloat square[] = {0.0f, 0.0f,
+					1.0f, 0.0f,
+					1.0f, 1.0f,
+					0.0f, 1.0f
 };
-
-GLuint	indices[] = { 1, 2, 3, 4 };
 
 void Window::setRenderWindow(Window *window) {
     renderWindow = window;
@@ -84,10 +82,6 @@ void Window::initGL() {
 	m_programObject = linkProgram(m_vertexShader, m_fragmentShader);
 	
 	resize(m_size[0],m_size[1]);
-	
-	//glGenBuffers(1, &m_vertexAndTextureBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_vertexAndTextureBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat)*3*4, square, GL_STATIC_DRAW);
 }
 
 GLuint Window::compileShader(GLenum type, const char* fileName) {
@@ -136,15 +130,10 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 	glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTES, &numAtts);
 	glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &numUni);
 	
-	printf("atts %d uni %d\n",numAtts, numUni);
-	
 	m_vertAttr = glGetAttribLocation(programID, "vertex");
 	
-	//glBindAttribLocation(programID, 1, "vertex");
-	glVertexAttribPointer(m_vertAttr, 3, GL_FLOAT, GL_FALSE, 0, square);
+	glVertexAttribPointer(m_vertAttr, 2, GL_FLOAT, GL_FALSE, 0, square);
 	glEnableVertexAttribArray(m_vertAttr);
-	
-	printf("vert %d \n", m_vertAttr);
 	
 	m_textUniform = glGetUniformLocation(programID, "texture");
 	
@@ -158,8 +147,6 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 			printf("unkown error");
 		}
 	}
-	
-	printf("ul %d \n", m_textUniform);
     
     return programID;
 }
@@ -173,14 +160,14 @@ void Window::render() {
 	
 	std::vector<GLuint> textures = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getRenderInfo(), m_size);
 	
-	glUniform1i(m_textUniform, textures[0]);
-	
-    glActiveTexture(GL_TEXTURE0 + textures[0]);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
+	glUniform1i(m_textUniform, 0);
     
-	//glColor3f(1.0f,1.0f,0.0f);
+    glActiveTexture(GL_TEXTURE0 + 0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
 	
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glUseProgram(m_programObject);
+    
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     
     glutSwapBuffers();
 }
@@ -191,8 +178,10 @@ void Window::resize(GLint width, GLint height) {
     // Set up viewport and parallel projection.
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
-    glOrtho(0.0f, 1.0f, 0.0f, 1.0f, -1.0f, 1.0f);
+    glLoadIdentity();
+    gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 	
 	recalculateViewportVectors();
 }
