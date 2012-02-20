@@ -234,7 +234,7 @@ GLuint TestDevice::getFrameBuffer() {
                  m_frameBufferResolution[1],
                  0,
                  GL_RGB,
-                 GL_BYTE,
+                 GL_UNSIGNED_BYTE,
                  m_pFrame);
     
     return m_texture;
