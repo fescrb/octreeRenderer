@@ -43,6 +43,11 @@ class Window {
 		GLuint					 m_fragmentShader;
 		
 		GLuint					 m_programObject;
+		
+		GLint 					 m_vertAttr;
+		GLint					 m_textAttr;
+		
+		GLint					 m_textUniform;
 };
 
 #endif //_WINDOW_H

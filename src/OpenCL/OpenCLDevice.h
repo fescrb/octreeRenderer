@@ -19,8 +19,10 @@ class OpenCLDevice:
 		virtual 			~OpenCLDevice();
 
 		void	 			 printInfo();
+		void    			 makeFrameBuffer(int2 size);
 		void 			 	 sendData(OctreeSegment* segment);
 		void				 render(int2 start, int2 size, RenderInfo *info);
+		GLuint   			 getFrameBuffer();
 		char    			*getFrame();
         
 	private:

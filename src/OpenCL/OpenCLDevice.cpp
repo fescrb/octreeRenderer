@@ -40,12 +40,20 @@ void OpenCLDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
+void OpenCLDevice::makeFrameBuffer(int2 size) {
+	
+}
+
 void OpenCLDevice::sendData(OctreeSegment* segment) {
     clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, segment->getSize(), (void*)segment->getData(), NULL, 0, NULL);
 }
 
 void OpenCLDevice::render(int2 start, int2 size, RenderInfo *info) {
 
+}
+
+GLuint OpenCLDevice::getFrameBuffer() {
+	
 }
 
 char* OpenCLDevice::getFrame() {
