@@ -67,6 +67,7 @@ SourceFile* SourceFileManager::openSource(const char* name) {
 	if(!m_map.count(name)) {
 		char path[256];
 		sprintf(path,"%s%s", m_sShaderLocation, name);
+        //printf("res %s\n", path);
 		m_map[name] = new SourceFile(path);
 	}
 	return m_map[name];
