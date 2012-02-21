@@ -90,12 +90,14 @@ GLuint Window::compileShader(GLenum type, const char* fileName) {
 	glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
 	
 	if(!status) {
-		char log[512];
-		
-		glGetShaderInfoLog(shaderID, 512, NULL, log);
-		
-		printf("Error compiling shader from file %s:\n%s", fileName, log);
+		printf("Error compiling shader from file %s.\n", fileName);
 	}
+	
+	char log[512];
+        
+    glGetShaderInfoLog(shaderID, 512, NULL, log);
+    
+     printf("Shader compile log:\n%s\n", log);
 	
 	return shaderID;
 }
@@ -110,14 +112,17 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 	
 	GLint status;
 	glGetProgramiv(programID, GL_LINK_STATUS, &status);
-	
-	if(!status) {
-		char log[512];
-		
-		glGetProgramInfoLog(programID, 512, NULL, log);
-		
-		printf("Error linking shader:\n%s", log);
-	}
+    
+    if(!status) {
+        
+        printf("Error linking shader.\n");
+    }
+    
+    char log[512];
+
+    glGetProgramInfoLog(programID, 512, NULL, log);
+        
+    printf("Program link log:\n%s\n", log);
 	
 	GLint numAtts, numUni;
 	glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTES, &numAtts);
