@@ -27,3 +27,7 @@ TestDeviceInfo::~TestDeviceInfo() {
 void TestDeviceInfo::printInfo() {
 
 }
+
+char* TestDeviceInfo::getName() {
+    return NULL;
+}

@@ -7,6 +7,8 @@ class DeviceInfo {
 		virtual 			~DeviceInfo();
 
 		virtual void		 printInfo() = 0;
+        
+        virtual char        *getName() = 0;
 };
 
 #endif //_DEVICE_INFO_H

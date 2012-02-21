@@ -18,6 +18,8 @@ class OpenCLDeviceInfo
 		virtual 		~OpenCLDeviceInfo();
 
 		void	 	 	 printInfo();
+        
+        char            *getName();
 
 	private:
 		char			*m_sDeviceName;

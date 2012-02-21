@@ -95,3 +95,7 @@ void OpenCLDeviceInfo::printInfo(){
 	printf("Maximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
 	printf("Global Memory Size:             %lu bytes\n", m_globalMemorySize);
 }
+
+char* OpenCLDeviceInfo::getName() {
+    return m_sDeviceName;
+}

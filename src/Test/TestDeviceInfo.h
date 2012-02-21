@@ -10,6 +10,8 @@ class TestDeviceInfo
 							~TestDeviceInfo();
 		
 		void				 printInfo();
+        
+        char                *getName();
 };
 
 #endif //_TEST_DEVICE_INFO_H
