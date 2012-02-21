@@ -27,4 +27,5 @@ set(headers ${headers}
 set(shaders ${shaders}
 			NoTransform.vert
 			Coalesce.frag
+            RenderInfo.h
 			)
