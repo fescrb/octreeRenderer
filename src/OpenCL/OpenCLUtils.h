@@ -23,6 +23,10 @@ inline bool clIsError(cl_int error_code) {
 	return error_code != CL_SUCCESS;
 }
 
+inline bool clIsBuildError(cl_int error_code) {
+    return error_code == CL_BUILD_PROGRAM_FAILURE;
+}
+
 inline void clPrintError(cl_int error_code) {
 	printf("Error: %s.\n", clErrorToCString(error_code));
 }

@@ -8,21 +8,21 @@
 
 class DataManager;
 class DeviceManager;
-class RenderInfo;
+class renderinfo;
 
 class ProgramState {
     public:
         explicit                 ProgramState(int argc, char** argv);
                                 ~ProgramState();
         
-        RenderInfo              *getRenderInfo();
+        renderinfo              *getrenderinfo();
     
         DataManager             *getDataManager();
     
         DeviceManager           *getDeviceManager();
     
     private:
-        RenderInfo              *m_pRenderInfo;
+        renderinfo              *m_prenderinfo;
     
         DataManager             *m_pDataManager;
         DeviceManager           *m_pDeviceManager;

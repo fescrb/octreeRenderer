@@ -115,7 +115,7 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
-void TestDevice::render(int2 start, int2 size, RenderInfo *info) {	
+void TestDevice::render(int2 start, int2 size, renderinfo *info) {	
 	float half_size = 256.0f;
 
 	int2 end = start+size;

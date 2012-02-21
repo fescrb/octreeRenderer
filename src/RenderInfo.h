@@ -1,9 +1,11 @@
 #ifndef _RENDER_INFO_H
 #define _RENDER_INFO_H
 
+#ifndef _OCL
 #include "Vector.h"
+#endif //_OCL
 
-struct RenderInfo {
+struct renderinfo {
 	// Scene info. Hard coded. Scene boundaries go from -256 to 256.
 	//float leftCorner[3];
 	//float size;

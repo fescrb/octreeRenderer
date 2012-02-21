@@ -12,7 +12,7 @@ class TestDevice
         void			 printInfo();
         void             makeFrameBuffer(int2 size);
         void 			 sendData(OctreeSegment* segment);
-        void			 render(int2 start, int2 size, RenderInfo *info);
+        void			 render(int2 start, int2 size, renderinfo *info);
         GLuint           getFrameBuffer();
         char    		*getFrame();
 

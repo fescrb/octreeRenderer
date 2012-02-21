@@ -16,7 +16,7 @@
 class Device;
 class Context;
 class DataManager;
-class RenderInfo;
+class renderinfo;
 
 class DeviceManager {
 	public:
@@ -30,7 +30,7 @@ class DeviceManager {
 		int						 getNumDevices();
 		Device					*getDevice(int index);
 		
-		std::vector<GLuint>		 renderFrame(RenderInfo *info, int2 resolution);
+		std::vector<GLuint>		 renderFrame(renderinfo *info, int2 resolution);
 		
 	private:
 		std::vector<Context*>	 m_vContext;

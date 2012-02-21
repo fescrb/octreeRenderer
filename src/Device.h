@@ -14,7 +14,7 @@
 
 class DeviceInfo;
 class OctreeSegment;
-class RenderInfo;
+class renderinfo;
 
 class Device {
     public:
@@ -29,7 +29,7 @@ class Device {
          */
         virtual void     makeFrameBuffer(int2 size) = 0;
         virtual void 	 sendData(OctreeSegment* segment) = 0;
-        virtual void	 render(int2 start, int2 size, RenderInfo *info) = 0;
+        virtual void	 render(int2 start, int2 size, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.

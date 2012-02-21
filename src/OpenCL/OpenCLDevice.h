@@ -21,7 +21,7 @@ class OpenCLDevice:
 		void	 			 printInfo();
 		void    			 makeFrameBuffer(int2 size);
 		void 			 	 sendData(OctreeSegment* segment);
-		void				 render(int2 start, int2 size, RenderInfo *info);
+		void				 render(int2 start, int2 size, renderinfo *info);
 		GLuint   			 getFrameBuffer();
 		char    			*getFrame();
         
@@ -31,6 +31,14 @@ class OpenCLDevice:
         cl_context           m_context;
         cl_command_queue     m_commandQueue;
         cl_mem               m_memory;
+        
+        cl_program           m_rayTracingProgram;
+        cl_kernel            m_rayTraceKernel;
+        
+        GLuint               m_texture;
+        
+        cl_mem               m_frameBuff;
+        int2                 m_frameBufferResolution;
 };
 
 #endif //_OPENCL_DEVICE_H

@@ -1,17 +1,5 @@
 #include "Window.h"
 
-#ifdef _LINUX
-	#include <GL/glut.h>
-	#include <GL/gl.h>
-	#include <GL/glext.h>
-#endif //_LINUX
-
-#ifdef _OSX
-	#include <glut.h>
-	#include <OpenGL/gl.h>
-	#include <OpenGL/glext.h>
-#endif //_OSX
-
 #include "Vector.h"
 #include "Matrix.h"
 
@@ -74,6 +62,11 @@ Window::Window(int argc, char** argv, int2 dimensions, ProgramState* state)
 }
 
 void Window::initGL() {
+    /*GLenum err = glewInit();
+    if (GLEW_OK != err || !(GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GLEW_ARB_vertex_program && GLEW_ARB_shader_objects)){
+        printf("Error: %s\n", glewGetErrorString(err));
+    }*/
+    
     glEnable(GL_TEXTURE_2D);
 	
 	m_vertexShader = compileShader(GL_VERTEX_SHADER, "NoTransform.vert");
@@ -135,10 +128,10 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 	glVertexAttribPointer(m_vertAttr, 2, GL_FLOAT, GL_FALSE, 0, square);
 	glEnableVertexAttribArray(m_vertAttr);
 	
-	m_textUniform = glGetUniformLocation(programID, "texture");
-	
-	if(m_textUniform < 0 ) {
-		GLenum error = glGetError();
+	m_textUniform = glGetUniformLocation(programID, "myTexture");
+    GLenum error = glGetError();
+    
+	if(m_textUniform < 0 || error != GL_NO_ERROR) {
 		if(error == GL_INVALID_VALUE) {
 			printf("invalid value\n");
 		} else if (error == GL_INVALID_OPERATION) {
@@ -147,24 +140,36 @@ GLuint Window::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
 			printf("unkown error");
 		}
 	}
+	
+    glValidateProgram(programID);
+    glGetProgramiv(programID, GL_VALIDATE_STATUS, &status);
+    
+    if(!status) {
+        printf("Error Invalid Program\n");
+    }
     
     return programID;
 }
 
 void Window::render() {
     glClear(GL_COLOR_BUFFER_BIT);
+	
+	std::vector<GLuint> textures = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getrenderinfo(), m_size);
     
-	glUseProgram(m_programObject);
-	
-	glEnableVertexAttribArray(m_vertAttr);
-	
-	std::vector<GLuint> textures = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getRenderInfo(), m_size);
-	
-	glUniform1i(m_textUniform, 0);
+    glUseProgram(m_programObject);
     
-    glActiveTexture(GL_TEXTURE0 + 0);
+    glEnableVertexAttribArray(m_vertAttr);
+    
+    glActiveTexture(GL_TEXTURE1);
+    
+    glUniform1i(m_textUniform, 1);
+    GLint val;
+    glGetUniformiv(m_programObject, m_textUniform, &val);
+    //printf("Value is %d\n", val);
+    
+	
     glBindTexture(GL_TEXTURE_2D, textures[0]);
-	
+    
     glUseProgram(m_programObject);
     
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -195,7 +200,7 @@ void Window::run() {
 }
 
 void Window::recalculateViewportVectors() {
-	RenderInfo *info = m_pProgramState->getRenderInfo(); 
+	renderinfo *info = m_pProgramState->getrenderinfo(); 
 	
 	float4 eyepos = position(info->eyePos);
 	float4 up = direction(info->up);

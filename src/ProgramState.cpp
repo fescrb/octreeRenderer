@@ -10,32 +10,32 @@ ProgramState::ProgramState(int argc, char** argv) {
     m_pDeviceManager = new DeviceManager(m_pDataManager);
     
     // Setup the render info.
-    m_pRenderInfo = new RenderInfo;
+    m_prenderinfo = new renderinfo;
     
-    m_pRenderInfo->eyePos.setX(0); //x
-	m_pRenderInfo->eyePos.setY(0); //y
-	m_pRenderInfo->eyePos.setZ(-256.0f); //z
+    m_prenderinfo->eyePos.setX(0); //x
+	m_prenderinfo->eyePos.setY(0); //y
+	m_prenderinfo->eyePos.setZ(-256.0f); //z
     
-	m_pRenderInfo->viewDir.setX(0); //x
-	m_pRenderInfo->viewDir.setY(0); //y
-	m_pRenderInfo->viewDir.setZ(1.0f); //z
+	m_prenderinfo->viewDir.setX(0); //x
+	m_prenderinfo->viewDir.setY(0); //y
+	m_prenderinfo->viewDir.setZ(1.0f); //z
     
-    m_pRenderInfo->up.setX(0); //x
-	m_pRenderInfo->up.setY(1.0f); //y
-	m_pRenderInfo->up.setZ(0); //z
+    m_prenderinfo->up.setX(0); //x
+	m_prenderinfo->up.setY(1.0f); //y
+	m_prenderinfo->up.setZ(0); //z
     
-	m_pRenderInfo->eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
-	m_pRenderInfo->fov = 1.0f;
+	m_prenderinfo->eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
+	m_prenderinfo->fov = 1.0f;
 }
 
 ProgramState::~ProgramState() {
-    delete m_pRenderInfo;
+    delete m_prenderinfo;
 	delete m_pDataManager;
 	delete m_pDeviceManager;
 }
 
-RenderInfo* ProgramState::getRenderInfo() {
-    return m_pRenderInfo;
+renderinfo* ProgramState::getrenderinfo() {
+    return m_prenderinfo;
 }
 
 DataManager* ProgramState::getDataManager() {

@@ -4,11 +4,17 @@
 #include "Vector.h"
 
 #ifdef _LINUX
-	#include <GL/gl.h>
+    //#include <GL/glew.h>
+    #include <GL/glut.h>
+    #include <GL/gl.h>
+    #include <GL/glext.h>
 #endif //_LINUX
 
 #ifdef _OSX
-	#include <OpenGL/gl.h>
+    #include <OpenGL/glew.h>
+    #include <glut.h>
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glext.h>
 #endif //_OSX
 
 class ProgramState;
@@ -17,7 +23,8 @@ class Window {
 	public:
 		explicit				 Window(int argc, char** argv, int2 dimensions, ProgramState* state);
 
-		void					 render();
+		void				
+		render();
     
         void                     initGL();
 		
