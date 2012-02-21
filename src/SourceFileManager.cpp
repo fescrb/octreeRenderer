@@ -7,31 +7,46 @@
 #include <cstdio>
 #include <unistd.h>
 
+#ifdef _OSX
+#include <mach-o/dyld.h>
+#endif //_OSX
+
 using namespace std;
 
 SourceFileManager *SourceFileManager::m_pDefaultInstance = 0;
 
 SourceFileManager::SourceFileManager() {
+
+#ifdef _LINUX
 	// We get the pid.
 	pid_t pid;
 	pid = getpid();
 
 	// We use it to find the symlink location.
-	char symlink[128];
-	sprintf(symlink,"/proc/%d/exe", pid);
+	char path[512];
+	sprintf(path,"/proc/%d/exe", pid);
 
-	int sizeOfBuffer = 256;
-	m_sShaderLocation = (char*) malloc (sizeOfBuffer);
-	int size = readlink(symlink, m_sShaderLocation, sizeOfBuffer);
-
-	while(m_sShaderLocation[size] != '/')
+	int size = readlink(path, path, 512);
+#endif //_LINUX
+#ifdef _OSX
+    char* path = (char*) malloc(512);;
+    uint32_t size = 512;
+    
+    _NSGetExecutablePath(path,&size);
+#endif _OSX
+    
+    size--;
+    while(path[size] != '/')
 		size--;
-
-	strcpy(&m_sShaderLocation[size], "/shaders/");
+    
+    strcpy(path+size, "/shaders/");
 	size += strlen("/shaders/");
-
-	// m_sShaderLocation is not null terminated, we make it so.
-	m_sShaderLocation[size] = 0;
+    
+	// path is not null terminated, we make it so.
+	path[size] = 0;
+    
+    m_sShaderLocation = (char*) malloc(size);
+    strcpy(m_sShaderLocation,path);
 }
 
 SourceFileManager::SourceFileManager(char* shaderLocation)
