@@ -16,9 +16,12 @@ class SourceFileManager {
 									~SourceFileManager();
 
 		SourceFile					*openSource(const char* name);
+        
+        char                        *getShaderLocation();
 
 		static SourceFile			*getSource(const char* name);
 		static void					 setDefaultInstance(SourceFileManager *defaultInstance);
+        static SourceFileManager    *getDefaultInstance();
 
 	private:
 		static SourceFileManager  	*m_pDefaultInstance;

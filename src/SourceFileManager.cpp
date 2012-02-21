@@ -33,7 +33,7 @@ SourceFileManager::SourceFileManager() {
     uint32_t size = 512;
     
     _NSGetExecutablePath(path,&size);
-#endif _OSX
+#endif //_OSX
     
     size--;
     while(path[size] != '/')
@@ -79,6 +79,16 @@ SourceFile* SourceFileManager::getSource(const char* name) {
 	return m_pDefaultInstance->openSource(name);
 }
 
+char* SourceFileManager::getShaderLocation() {
+    return m_sShaderLocation;
+}
+
 void SourceFileManager::setDefaultInstance(SourceFileManager *defaultInstance) {
 	m_pDefaultInstance = defaultInstance;
+}
+
+SourceFileManager* SourceFileManager::getDefaultInstance() {
+    if(!m_pDefaultInstance)
+        m_pDefaultInstance = new SourceFileManager();
+    return m_pDefaultInstance;
 }
