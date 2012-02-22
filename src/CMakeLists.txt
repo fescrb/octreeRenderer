@@ -1,6 +1,8 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # This is added every time.
+include_directories(Common)
+add_subdirectory(Common)
 include_directories(Math)
 add_subdirectory(Math)
 include_directories(Octree)
