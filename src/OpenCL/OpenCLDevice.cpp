@@ -44,7 +44,7 @@ void OpenCLDevice::printInfo() {
 
 void OpenCLDevice::makeFrameBuffer(int2 size) {
     cl_int error;
-    if(size != m_frameBufferResolution && !m_frameBufferResolution[0]) {
+    if(size != m_frameBufferResolution && m_frameBufferResolution[0]) {
         error = clReleaseMemObject(m_frameBuff);
         if(clIsError(error)){
             clPrintError(error);
