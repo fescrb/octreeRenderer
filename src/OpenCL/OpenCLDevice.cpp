@@ -3,10 +3,10 @@
 #include "OpenCLDeviceInfo.h"
 #include "OpenCLProgram.h"
 #include "OpenCLUtils.h"
+#include "OpenCLRenderInfo.h"
 
 #include "OctreeSegment.h"
 
-#include "RenderInfo.h"
 #include "SourceFile.h"
 #include "SourceFileManager.h"
 
@@ -72,7 +72,9 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(renderinfo), info);
+    
+    cl_renderinfo cl_info= convert(*info);
+    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_renderinfo), &cl_info);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
