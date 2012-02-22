@@ -49,18 +49,25 @@ void OpenCLDevice::printInfo() {
 }
 
 void OpenCLDevice::makeFrameBuffer(int2 size) {
-    cl_int error;
-    if(size != m_frameBufferResolution && m_frameBufferResolution[0]) {
-        error = clReleaseMemObject(m_frameBuff);
-        if(clIsError(error)){
-            clPrintError(error);
-        }
+    if(size != m_frameBufferResolution) {
+		cl_int error;
+		if(m_frameBufferResolution[0]) {
+			error = clReleaseMemObject(m_frameBuff);
+			if(clIsError(error)){
+				clPrintError(error);
+			}
+		}
+		m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
+		
+		if(clIsError(error)){
+			clPrintError(error);
+		}
+		m_frameBufferResolution = size;
+		error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
+		if(clIsError(error)){
+			clPrintError(error); exit(1);
+		}
     }
-	m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
-    if(clIsError(error)){
-        clPrintError(error);
-    }
-    m_frameBufferResolution = size;
 }
 
 void OpenCLDevice::sendData(OctreeSegment* segment) {
@@ -80,10 +87,6 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
     }
     int frameBufferWidth = m_frameBufferResolution[0];
 	error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_int), &frameBufferWidth);
- 	if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-    error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
