@@ -125,3 +125,18 @@ const char* clDeviceTypeToCString(cl_device_type device_type){
 			return "Device type invalid or unknown";
 	}
 }
+
+const char* clProgramBuildStatusToCString(cl_build_status build_status) {
+	switch(build_status){
+		case CL_BUILD_NONE:
+			return "CL_BUILD_NONE";
+		case CL_BUILD_ERROR:
+			return "CL_BUILD_ERROR";
+		case CL_BUILD_SUCCESS:
+			return "CL_BUILD_SUCCESS";
+		case CL_BUILD_IN_PROGRESS:
+			return "CL_BUILD_IN_PROGRESS";
+		default:
+			return "Build status invalid or unknown";
+	}
+}

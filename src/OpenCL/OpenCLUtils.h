@@ -33,4 +33,6 @@ inline void clPrintError(cl_int error_code) {
 
 const char* clDeviceTypeToCString(cl_device_type device_type);
 
+const char* clProgramBuildStatusToCString(cl_build_status build_status);
+
 #endif //_OPENCL_UTILS_H

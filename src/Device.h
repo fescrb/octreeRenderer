@@ -20,6 +20,8 @@ class Device {
     public:
 		explicit		 Device();
         virtual 		~Device();
+		
+		virtual char	*getName();
 
         virtual void	 printInfo() = 0;
 

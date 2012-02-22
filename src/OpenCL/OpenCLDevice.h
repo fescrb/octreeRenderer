@@ -24,6 +24,9 @@ class OpenCLDevice:
 		void				 render(int2 start, int2 size, renderinfo *info);
 		GLuint   			 getFrameBuffer();
 		char    			*getFrame();
+		
+		cl_context			 getOpenCLContext();
+		cl_device_id		 getOpenCLDeviceID();
         
 	private:
 

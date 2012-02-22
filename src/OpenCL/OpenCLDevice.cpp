@@ -11,7 +11,7 @@
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 :	m_DeviceID(device_id),
     m_context(context),
-    m_frameBufferResolution(0),
+    m_frameBufferResolution(int2(0)),
     m_texture(0) {
 	m_pDeviceInfo = new OpenCLDeviceInfo(device_id);
     
@@ -29,38 +29,6 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 512, NULL, &err);
     
     if(clIsError(err)){
-        clPrintError(err); return;
-    }
-    
-    const char* source = SourceFileManager::getSource("RayTracing.cl")->getSource();
-    
-    m_rayTracingProgram = clCreateProgramWithSource( context, 1, &source, NULL, &err);
-  
-    if(clIsError(err)){
-        clPrintError(err); return;
-    }
-    
-    char *options = (char*) malloc (512);
-    
-    sprintf(options, " -D _OCL -I %s ", SourceFileManager::getDefaultInstance()->getShaderLocation());
-    
-    err = clBuildProgram( m_rayTracingProgram, 1, &device_id, options, NULL, NULL);
-    
-    if(clIsError(err) && !clIsBuildError(err)){
-        clPrintError(err); return;
-    }
-    
-    char log[1024];
-    cl_build_status build_status;
-    err = clGetProgramBuildInfo( m_rayTracingProgram, device_id, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
-    
-    
-    err = clGetProgramBuildInfo( m_rayTracingProgram, device_id, CL_PROGRAM_BUILD_LOG, 1024, log, NULL);
-    printf("Device %s Build Log:\n%s\n", m_pDeviceInfo->getName(), log);
-    
-    m_rayTraceKernel = clCreateKernel( m_rayTracingProgram, "ray_trace", &err);
-    
-    if(clIsError(err)) {
         clPrintError(err); return;
     }
 }
@@ -133,4 +101,13 @@ GLuint OpenCLDevice::getFrameBuffer() {
 
 char* OpenCLDevice::getFrame() {
 
+}
+
+cl_context OpenCLDevice::getOpenCLContext() {
+	return m_context;
+}
+
+
+cl_device_id OpenCLDevice::getOpenCLDeviceID() {
+	return m_DeviceID;
 }
