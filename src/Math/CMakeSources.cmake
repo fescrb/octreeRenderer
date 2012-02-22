@@ -9,3 +9,5 @@ set(this_headers 	${this_headers}
                     Rect.h
 					Matrix4x4.h
 					Matrix.h )
+					
+set(this_shaders 	RenderInfo.h )

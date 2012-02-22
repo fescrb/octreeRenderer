@@ -7,6 +7,8 @@ include_directories(Math)
 add_subdirectory(Math)
 include_directories(Octree)
 add_subdirectory(Octree)
+include_directories(Base)
+add_subdirectory(Base)
 
 # Add OpenCL subdirectory only if we can.
 if(USE_OPENCL)

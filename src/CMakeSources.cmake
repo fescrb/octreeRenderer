@@ -1,6 +1,4 @@
 set(sources ${sources}
-			DeviceInfo.cpp
-			Device.cpp
 			DeviceManager.cpp
 			DataManager.cpp
             ProgramState.cpp
@@ -8,10 +6,6 @@ set(sources ${sources}
 			main.cpp )
 
 set(headers ${headers}
-			RenderInfo.h
-			DeviceInfo.h
-			Device.h 
-			Context.h
 			DeviceManager.h
 			DataManager.h
             ProgramState.h
@@ -21,5 +15,4 @@ set(headers ${headers}
 set(shaders ${shaders}
 			NoTransform.vert
 			Coalesce.frag
-            RenderInfo.h
 			)
