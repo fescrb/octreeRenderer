@@ -1,10 +1,12 @@
 #include "OpenCLDevice.h"
 
 #include "OpenCLDeviceInfo.h"
+#include "OpenCLProgram.h"
 #include "OpenCLUtils.h"
 
 #include "OctreeSegment.h"
 
+#include "RenderInfo.h"
 #include "SourceFile.h"
 #include "SourceFileManager.h"
 
@@ -31,6 +33,10 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     if(clIsError(err)){
         clPrintError(err); return;
     }
+    
+    m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
+	
+	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
 }
 
 
@@ -62,13 +68,47 @@ void OpenCLDevice::sendData(OctreeSegment* segment) {
 }
 
 void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
-
+	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(renderinfo), info);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    int frameBufferWidth = m_frameBufferResolution[0];
+	error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_int), &frameBufferWidth);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    size_t offset[2] = {start[0], start[1]};
+    size_t dimensions[2] = {size[0], size[1]};
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, NULL);
+	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
 }
 
 GLuint OpenCLDevice::getFrameBuffer() {
 	if (!m_texture) {
         glGenTextures(1, &m_texture);
-    }
+    
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		
+		glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+		
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	} else 
+		 glBindTexture(GL_TEXTURE_2D, m_texture);
     
     int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
     char* frameBuffer = (char*) malloc(size);

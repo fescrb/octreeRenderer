@@ -34,7 +34,14 @@ OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
     err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
     
     err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_LOG, 1024, log, NULL);
-    printf("Device %s Build:\nStatus: %s\nLog:\n%s\n", clProgramBuildStatusToCString(build_status),device->getName(), log);
+    printf("Device %s Build:\nStatus: %s\nLog:\n%s\n", device->getName(), clProgramBuildStatusToCString(build_status), log);
+	
+	/* Not available in ocl 1.1...
+	 * err = clGetProgramInfo(	m_program, CL_PROGRAM_NUM_KERNELS, 1, &m_numKernels, NULL);
+
+	if(!m_numKernels) {
+		printf("Error! Program %s has no kernels.\n", sourceFilename);
+	}*/
 }
 
 cl_kernel OpenCLProgram::getOpenCLKernel(const char* kernel_name) {

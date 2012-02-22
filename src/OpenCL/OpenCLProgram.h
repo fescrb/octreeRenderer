@@ -20,6 +20,9 @@ class OpenCLProgram {
 	private:
 		cl_program               m_program;
 		
+		size_t 					 m_numKernels;
+		char 				   **m_asKernelNames;
+		
 		OpenCLDevice			*m_pDevice;
 };
 
