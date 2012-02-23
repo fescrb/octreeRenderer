@@ -12,6 +12,26 @@
 #include "RenderInfo.h"
 
 struct cl_renderinfo {
+					 cl_renderinfo(){}
+	explicit 		 cl_renderinfo(cl_int maxDept, 
+								   cl_int2 viewport,
+								   cl_float3 eye,
+								   cl_float3 dir,
+								   cl_float3 upV,
+								   cl_float3 viewportS,
+								   cl_float3 viewS,
+								   cl_float eyePlaneD,
+								   cl_float fovR )
+	: 	maxOctreeDepth(maxDept), 
+		viewportSize(viewport), 
+		eyePos(eye), 
+		viewDir(dir), 
+		up(upV), 
+		viewPortStart(viewportS), 
+		viewStep(viewS), 
+		eyePlaneDist(eyePlaneD), 
+		fov(fovR){}
+	
 	cl_int   maxOctreeDepth;
     
     cl_int2  viewportSize;
