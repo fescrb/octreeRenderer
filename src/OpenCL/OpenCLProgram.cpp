@@ -8,10 +8,11 @@
 
 OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
 :	m_pDevice(device) {
-	const char* source = SourceFileManager::getSource(sourceFilename)->getSource();
+	SourceFile *sourceFile = SourceFileManager::getSource(sourceFilename);
+	const char** source = sourceFile->getSource();
     
 	int err;
-    m_program = clCreateProgramWithSource(device->getOpenCLContext(), 1, &source, NULL, &err);
+    m_program = clCreateProgramWithSource(device->getOpenCLContext(), sourceFile->getNumLines(), source, NULL, &err);
 	
 	if(clIsError(err)){
         clPrintError(err); return;
@@ -29,11 +30,13 @@ OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
         clPrintError(err); return;
     }
     
-    char log[1024];
     cl_build_status build_status;
     err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
     
-    err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_LOG, 1024, log, NULL);
+	size_t size;
+	err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &size);
+	char *log = (char*) malloc (size+1);
+    err = clGetProgramBuildInfo( m_program, device_id, CL_PROGRAM_BUILD_LOG, size, log, NULL);
     printf("Device %s Build:\nStatus: %s\nLog:\n%s\n", device->getName(), clProgramBuildStatusToCString(build_status), log);
 	
 	/* Not available in ocl 1.1...

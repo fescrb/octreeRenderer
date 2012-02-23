@@ -5,31 +5,33 @@
 #include <cstdlib>
 #include <cstring>
 
-SourceFile::SourceFile(const char* path):
-	m_sSource(0) {
+SourceFile::SourceFile(const char* path) {
 	std::ifstream in;
 	in.open(path);
-
-	std::string all_text;
 
 	while(!in.eof()) {
 		char line[1024];
 
 		in.getline(line, 1024);
-
-		all_text.append(line);
+		
+		char *sLine = (char*) malloc(strlen(line)+1);
+		strcpy(sLine, line);
+		
+		m_vsSourceLines.push_back(sLine);
 	}
-
-	m_sSource = (char*) malloc(all_text.length()+1);
-
-	strcpy(m_sSource, all_text.data());
 }
 
 SourceFile::~SourceFile() {
-	if(m_sSource)
-		free(m_sSource);
+	unsigned int num = getNumLines();
+	for(int i = 0; i<num; i++)
+		free (m_vsSourceLines[i]);
+	m_vsSourceLines.clear();
 }
 
-char* SourceFile::getSource() {
-	return m_sSource;
+const char** SourceFile::getSource() {
+	return (const char**)&m_vsSourceLines[0];
+}
+
+unsigned int SourceFile::getNumLines() {
+	return m_vsSourceLines.size();
 }

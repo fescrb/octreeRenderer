@@ -79,10 +79,10 @@ void Window::initGL() {
 
 GLuint Window::compileShader(GLenum type, const char* fileName) {
 	GLuint shaderID = glCreateShader(type);
+	SourceFile *sourceFile = SourceFileManager::getSource(fileName);
+	const GLchar** source = sourceFile->getSource();
 	
-	const GLchar* source = SourceFileManager::getSource(fileName)->getSource();
-	
-	glShaderSource(shaderID, 1, &source, NULL);
+	glShaderSource(shaderID, sourceFile->getNumLines(), source, NULL);
 	
 	glCompileShader(shaderID);
 	
