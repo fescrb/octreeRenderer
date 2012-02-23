@@ -4,6 +4,8 @@ set(this_sources 	${this_sources}
                     OpenCLPlatformInfo.cpp
 					OpenCLDevice.cpp
 					OpenCLDeviceInfo.cpp
+					OpenCLProgram.cpp
+					OpenCLRenderInfo.cpp
 					OpenCLUtils.cpp )
 
 set(this_headers 	${this_headers}
@@ -12,7 +14,9 @@ set(this_headers 	${this_headers}
                     OpenCLPlatformInfo.h
 					OpenCLDevice.h
 					OpenCLDeviceInfo.h
+					OpenCLProgram.h
 					OpenCLUtils.h
+					OpenCLRenderInfo.h
 					OpenCLExtra.h )
 
 set(shaders		RayTracing.cl)

@@ -1,7 +1,9 @@
 #include "OpenCLDevice.h"
 
 #include "OpenCLDeviceInfo.h"
+#include "OpenCLProgram.h"
 #include "OpenCLUtils.h"
+#include "OpenCLRenderInfo.h"
 
 #include "OctreeSegment.h"
 
@@ -11,7 +13,7 @@
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 :	m_DeviceID(device_id),
     m_context(context),
-    m_frameBufferResolution(0),
+    m_frameBufferResolution(int2(0)),
     m_texture(0) {
 	m_pDeviceInfo = new OpenCLDeviceInfo(device_id);
     
@@ -32,37 +34,9 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
         clPrintError(err); return;
     }
     
-    const char* source = SourceFileManager::getSource("RayTracing.cl")->getSource();
-    
-    m_rayTracingProgram = clCreateProgramWithSource( context, 1, &source, NULL, &err);
-  
-    if(clIsError(err)){
-        clPrintError(err); return;
-    }
-    
-    char *options = (char*) malloc (512);
-    
-    sprintf(options, " -D _OCL -I %s ", SourceFileManager::getDefaultInstance()->getShaderLocation());
-    
-    err = clBuildProgram( m_rayTracingProgram, 1, &device_id, options, NULL, NULL);
-    
-    if(clIsError(err) && !clIsBuildError(err)){
-        clPrintError(err); return;
-    }
-    
-    char log[1024];
-    cl_build_status build_status;
-    err = clGetProgramBuildInfo( m_rayTracingProgram, device_id, CL_PROGRAM_BUILD_STATUS, sizeof(cl_build_status), &build_status, NULL);
-    
-    
-    err = clGetProgramBuildInfo( m_rayTracingProgram, device_id, CL_PROGRAM_BUILD_LOG, 1024, log, NULL);
-    printf("Device %s Build Log:\n%s\n", m_pDeviceInfo->getName(), log);
-    
-    m_rayTraceKernel = clCreateKernel( m_rayTracingProgram, "ray_trace", &err);
-    
-    if(clIsError(err)) {
-        clPrintError(err); return;
-    }
+    m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
+	
+	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
 }
 
 
@@ -75,18 +49,25 @@ void OpenCLDevice::printInfo() {
 }
 
 void OpenCLDevice::makeFrameBuffer(int2 size) {
-    cl_int error;
-    if(size != m_frameBufferResolution && !m_frameBufferResolution[0]) {
-        error = clReleaseMemObject(m_frameBuff);
-        if(clIsError(error)){
-            clPrintError(error);
-        }
+    if(size != m_frameBufferResolution) {
+		cl_int error;
+		if(m_frameBufferResolution[0]) {
+			error = clReleaseMemObject(m_frameBuff);
+			if(clIsError(error)){
+				clPrintError(error);
+			}
+		}
+		m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
+		
+		if(clIsError(error)){
+			clPrintError(error);
+		}
+		m_frameBufferResolution = size;
+		error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
+		if(clIsError(error)){
+			clPrintError(error); exit(1);
+		}
     }
-	m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
-    if(clIsError(error)){
-        clPrintError(error);
-    }
-    m_frameBufferResolution = size;
 }
 
 void OpenCLDevice::sendData(OctreeSegment* segment) {
@@ -94,13 +75,45 @@ void OpenCLDevice::sendData(OctreeSegment* segment) {
 }
 
 void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
-
+	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    cl_renderinfo cl_info= convert(*info);
+    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_renderinfo), &cl_info);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    int frameBufferWidth = m_frameBufferResolution[0];
+	error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_int), &frameBufferWidth);
+ 	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    size_t offset[2] = {start[0], start[1]};
+    size_t dimensions[2] = {size[0], size[1]};
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, NULL);
+	if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
 }
 
 GLuint OpenCLDevice::getFrameBuffer() {
 	if (!m_texture) {
         glGenTextures(1, &m_texture);
-    }
+    
+		glBindTexture(GL_TEXTURE_2D, m_texture);
+		
+		glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+		
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+	} else 
+		 glBindTexture(GL_TEXTURE_2D, m_texture);
     
     int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
     char* frameBuffer = (char*) malloc(size);
@@ -133,4 +146,13 @@ GLuint OpenCLDevice::getFrameBuffer() {
 
 char* OpenCLDevice::getFrame() {
 
+}
+
+cl_context OpenCLDevice::getOpenCLContext() {
+	return m_context;
+}
+
+
+cl_device_id OpenCLDevice::getOpenCLDeviceID() {
+	return m_DeviceID;
 }

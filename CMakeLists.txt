@@ -27,9 +27,8 @@ endif(USE_OPENCL)
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
-find_package(GLEW REQUIRED)
-set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES} ${GLEW_LIBRARIES}) 
-include_directories(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR} ${GLEW_INCLUDE_DIR})
+set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES}) 
+include_directories(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
 # To allow usage of glext extensions
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 

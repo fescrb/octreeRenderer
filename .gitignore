@@ -12,3 +12,4 @@ octreeRenderer.layout
 *.geany
 *.kdev4
 *xcodeproj*
+*.trace

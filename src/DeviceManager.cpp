@@ -72,7 +72,7 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
     
     info->maxOctreeDepth = m_pDataManager->getMaxOctreeDepth();
 	
-	for(int i = 0; i < devices; i++) {
+	for(int i = 0; i < 1; i++) {
 		Device *thisDevice = getDevice(i);
 		
 		thisDevice->makeFrameBuffer(resolution);

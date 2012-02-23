@@ -12,7 +12,7 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	
-    int2 resolution(32,32);
+    int2 resolution(800,400);
 	
 	for(int i = 1; i < argc; i++) {
 		if(!strcmp(argv[i],"resolution")){

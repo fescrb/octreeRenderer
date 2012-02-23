@@ -79,10 +79,10 @@ void Window::initGL() {
 
 GLuint Window::compileShader(GLenum type, const char* fileName) {
 	GLuint shaderID = glCreateShader(type);
+	SourceFile *sourceFile = SourceFileManager::getSource(fileName);
+	const GLchar** source = sourceFile->getSource();
 	
-	const GLchar* source = SourceFileManager::getSource(fileName)->getSource();
-	
-	glShaderSource(shaderID, 1, &source, NULL);
+	glShaderSource(shaderID, sourceFile->getNumLines(), source, NULL);
 	
 	glCompileShader(shaderID);
 	
@@ -165,17 +165,13 @@ void Window::render() {
     
     glEnableVertexAttribArray(m_vertAttr);
     
-    glActiveTexture(GL_TEXTURE1);
-    
-    glUniform1i(m_textUniform, 1);
-    GLint val;
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(m_textUniform, 0);
+    glBindTexture(GL_TEXTURE_2D, textures[0]);
+	
+	GLint val;
     glGetUniformiv(m_programObject, m_textUniform, &val);
     //printf("Value is %d\n", val);
-    
-	
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    
-    glUseProgram(m_programObject);
     
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     

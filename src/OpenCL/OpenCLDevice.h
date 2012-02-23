@@ -11,6 +11,8 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+class OpenCLProgram;
+
 class OpenCLDevice:
 	public Device{
 
@@ -24,6 +26,9 @@ class OpenCLDevice:
 		void				 render(int2 start, int2 size, renderinfo *info);
 		GLuint   			 getFrameBuffer();
 		char    			*getFrame();
+		
+		cl_context			 getOpenCLContext();
+		cl_device_id		 getOpenCLDeviceID();
         
 	private:
 
@@ -31,8 +36,8 @@ class OpenCLDevice:
         cl_context           m_context;
         cl_command_queue     m_commandQueue;
         cl_mem               m_memory;
-        
-        cl_program           m_rayTracingProgram;
+		
+		OpenCLProgram 		*m_pProgram;
         cl_kernel            m_rayTraceKernel;
         
         GLuint               m_texture;

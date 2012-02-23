@@ -11,6 +11,8 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+#include "DebugUtils.h"
+
 // This macro is only available in OCL 1.2,
 // we must define it to avoid compiler errors
 #ifndef CL_MEM_COPY_HOST_WRITE_ONLY
@@ -29,8 +31,12 @@ inline bool clIsBuildError(cl_int error_code) {
 
 inline void clPrintError(cl_int error_code) {
 	printf("Error: %s.\n", clErrorToCString(error_code));
+	printf("In :");
+	printStackTrace(4,1);
 }
 
 const char* clDeviceTypeToCString(cl_device_type device_type);
+
+const char* clProgramBuildStatusToCString(cl_build_status build_status);
 
 #endif //_OPENCL_UTILS_H
