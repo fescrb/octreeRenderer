@@ -23,7 +23,11 @@ float max_component(float3 vector) {
 	return maximum > vector.z ? maximum : vector.z;
 }
 
-char* find_collission(__global char* octree, float3 origin, float3 direction, float t) {
+bool no_children(__global char* address) {
+    return !address[0];
+}
+
+__global char* find_collission(__global char* octree, float3 origin, float3 direction, float t) {
 
 	float half_size = 256.0f;
 
@@ -37,23 +41,77 @@ char* find_collission(__global char* octree, float3 origin, float3 direction, fl
 	float t_max = min_component((corner_far - origin) / direction);
 	float t_out = t_max;
 			
-	// If we are out 
+	/* If we are out */
 	if(t < t_min)
 		t = t_min;
 			
-	char* curr_address = octree;
+	__global char* curr_address = octree;
 	float3 voxelCentre = (float3)(0.0f);
 	bool collission = false;	
 	int curr_index = 0;
 	struct stack short_stack[5];
 			
-	// We are out of the volume and we will never get to it.
+	/* We are out of the volume and we will never get to it. */
 	if(t > t_max) {
 		collission = true;
-		curr_address = 0; // Set to null.
+		curr_address = 0; 
 	}
 
 	while(!collission) {
+        collission = true;
+
+        if(no_children(curr_address)) {
+            collission = true;
+        } else {
+            /*If we are inside the node*/
+            if(t_min <= t && t < t_max) {
+                float3 rayPos = origin + (direction * t);
+                
+                char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
+                float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
+                
+                float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
+                                      xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
+                                      xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
+                
+                float3 tmp_corner_far(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
+                                      d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
+                                      d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
+                
+                float tmp_max = min((tmp_corner_far - rayPos) / d);
+                
+                if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
+                    /* If the voxel we are at is not empty, go down. */
+                    
+                    curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
+                    
+                    curr_address = getChild(rayPos,voxelCentre,curr_address);
+                    
+                    corner_far = tmp_corner_far;
+                    voxelCentre = tmpNodeCentre;
+                    corner_close =  float3(d[0] >= 0 ? voxelCentre[0] - nodeHalfSize : voxelCentre[0] + nodeHalfSize,
+                                            d[1] >= 0 ? voxelCentre[1] - nodeHalfSize : voxelCentre[1] + nodeHalfSize,
+                                            d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
+                    t_max = tmp_max;
+                    t_min = max((corner_close - rayPos) / d);
+                    
+                } else {
+                    /* If the child is empty, we step the ray. */
+                    t = tmp_max;
+                }
+            } else {
+                /* We are outside the node. Pop the stack */
+                curr_index--;
+                if(curr_index>=0) {
+                    /* Pop that stack! */
+                    corner_far = stack[curr_index].far_corner;
+                } else {
+                    /* We are outside the volume. */
+                    curr_address = 0;
+                    collission = true;
+                }
+            }
+        }
 	}
 
 	return curr_address;
