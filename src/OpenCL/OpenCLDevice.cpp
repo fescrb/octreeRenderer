@@ -114,20 +114,7 @@ GLuint OpenCLDevice::getFrameBuffer() {
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	} else 
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
-    
-    int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
-    char* frameBuffer = (char*) malloc(size);
-    
-    cl_int error;
-    error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 0, NULL, NULL);
-    if(clIsError(error)){
-        clPrintError(error);
-    }
-    
-    error = clFinish(m_commandQueue);
-    if(clIsError(error)){
-        clPrintError(error);
-    }
+    char* frameBuffer = getFrame();
     
     glBindTexture(GL_TEXTURE_2D, m_texture);
     
@@ -145,7 +132,16 @@ GLuint OpenCLDevice::getFrameBuffer() {
 }
 
 char* OpenCLDevice::getFrame() {
-
+	int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
+	char* frameBuffer = (char*) malloc(size);
+    
+    cl_int error;
+    error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error);
+    }
+    error = clFinish(m_commandQueue);
+    return frameBuffer;
 }
 
 cl_context OpenCLDevice::getOpenCLContext() {
