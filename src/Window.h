@@ -4,14 +4,12 @@
 #include "Vector.h"
 
 #ifdef _LINUX
-    //#include <GL/glew.h>
     #include <GL/glut.h>
     #include <GL/gl.h>
     #include <GL/glext.h>
 #endif //_LINUX
 
 #ifdef _OSX
-    #include <OpenGL/glew.h>
     #include <glut.h>
     #include <OpenGL/gl.h>
     #include <OpenGL/glext.h>
