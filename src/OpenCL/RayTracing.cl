@@ -64,7 +64,13 @@ global char* getChild(float3 rayPos, float3 nodeCentre, global char* node) {
 	return node + (add_int[0]*4);
 }
 
-int push(stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float t_min, float t_max) {
+global char* get_attributes(global char* node) {
+	global short* addr_short = (global short*)node;
+	
+	return node + (addr_short[1] * 4);
+}
+
+int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float t_min, float t_max) {
 	if(curr_index >= STACK_SIZE) {
 		curr_index = STACK_SIZE - 1;
 		for(int i = 1; i < STACK_SIZE; i++) 
@@ -103,15 +109,17 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
 	struct stack short_stack[STACK_SIZE];
 			
 	/* We are out of the volume and we will never get to it. */
-	if(t > t_max) {
+	if(t >= t_max) {
 		collission = true;
 		curr_address = 0; 
 	}
 
 	while(!collission) {
-        collission = true;
 
-        if(no_children(curr_address)) {
+		if(t >= t_out) {
+			collission = true;
+			curr_address = 0;
+		} else if(no_children(curr_address)) {
             collission = true;
         } else {
             /*If we are inside the node*/
@@ -171,17 +179,19 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
 
 					corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
 
-					t_min = max_component((corner_close - origin) / direction);
+					t_min = max_component((corner_close - origin) / direction); 
 					t_max = min_component((corner_far - origin) / direction);
                 }
             }
         }
 	}
+
+	return curr_address;
 }
 
-__kernel void ray_trace(global char* octree,
-                        struct renderinfo info,
-                        int widthOfFramebuffer,
+kernel void ray_trace(global char* octree,
+                      struct renderinfo info,
+                      int widthOfFramebuffer,
                         global unsigned char* frameBuff) {
     int x = get_global_id(0);
 	int y = get_global_id(1);
@@ -189,10 +199,14 @@ __kernel void ray_trace(global char* octree,
 	float3 o = info.viewPortStart + (info.viewStep * x) + (info.up * y);
     float3 d = o-info.eyePos; 
 
+	global char* voxel = find_collission(octree, o, d, 1.0f);
 
+	if(voxel) {
+		global char* attr = get_attributes(voxel);
 
-	int pixel_index = (x*3)+(y*widthOfFramebuffer*3);
-	frameBuff[pixel_index + 0] = 255;
-	frameBuff[pixel_index + 1] = 255;
-	frameBuff[pixel_index + 2] = 255;
+		int pixel_index = (x*3)+(y*widthOfFramebuffer*3);
+		frameBuff[pixel_index + 0] = attr[0];
+		frameBuff[pixel_index + 1] = attr[1];
+		frameBuff[pixel_index + 2] = attr[2];
+	}
 }

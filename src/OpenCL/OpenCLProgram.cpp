@@ -12,7 +12,8 @@ OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
 	const char** source = sourceFile->getSource();
     
 	int err;
-    m_program = clCreateProgramWithSource(device->getOpenCLContext(), sourceFile->getNumLines(), source, NULL, &err);
+	std::vector<size_t> lineLengths = sourceFile->getLineLength(); 
+    m_program = clCreateProgramWithSource(device->getOpenCLContext(), sourceFile->getNumLines(), source, &lineLengths[0], &err);
 	
 	if(clIsError(err)){
         clPrintError(err); return;
