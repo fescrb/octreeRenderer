@@ -2,6 +2,7 @@
 #define _SOURCE_FILE_H
 
 #include <vector>
+#include <cstdlib>
 
 class SourceFile {
 	public:
@@ -10,6 +11,7 @@ class SourceFile {
 							
 		const char 		   **getSource();
 		unsigned int	     getNumLines();
+		std::vector<size_t>  getLineLength();
 
 	private:
 		std::vector<char*>	m_vsSourceLines;

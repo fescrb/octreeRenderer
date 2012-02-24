@@ -2,7 +2,6 @@
 
 #include <fstream>
 #include <string>
-#include <cstdlib>
 #include <cstring>
 
 SourceFile::SourceFile(const char* path) {
@@ -14,7 +13,12 @@ SourceFile::SourceFile(const char* path) {
 
 		in.getline(line, 1024);
 		
-		char *sLine = (char*) malloc(strlen(line)+1);
+		int size = strlen(line);
+		
+		line[size] = '\n';
+		line[size+1] = '\0';
+		
+		char *sLine = (char*) malloc(size+2);
 		strcpy(sLine, line);
 		
 		m_vsSourceLines.push_back(sLine);
@@ -34,4 +38,11 @@ const char** SourceFile::getSource() {
 
 unsigned int SourceFile::getNumLines() {
 	return m_vsSourceLines.size();
+}
+
+std::vector<size_t> SourceFile::getLineLength() {
+	std::vector<size_t> sizes;
+	for(int i = 0; i < m_vsSourceLines.size(); i++) 
+		sizes.push_back(strlen(m_vsSourceLines[i]));
+	return sizes;
 }
