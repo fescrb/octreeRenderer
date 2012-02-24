@@ -127,13 +127,15 @@ GLuint OpenCLDevice::getFrameBuffer() {
                  GL_RGB,
                  GL_UNSIGNED_BYTE,
                  frameBuffer);
+	
+	free(frameBuffer);
     
     return m_texture;
 }
 
 char* OpenCLDevice::getFrame() {
 	int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
-	char* frameBuffer = (char*) malloc(size);
+	char* frameBuffer = (char*) malloc(size+1);
     
     cl_int error;
     error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 0, NULL, NULL);
