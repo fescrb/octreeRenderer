@@ -53,9 +53,7 @@ bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, global char* node) {
 
 global char* getChild(float3 rayPos, float3 nodeCentre, global char* node) {
 	int counter = 0;
-	bool found = false;
 	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
-	char flag = 0 | (1 << xyz_flag);
 	for(int i = 0; i <= xyz_flag; i++) 
 		if(node[0] & (1 << i))
 			counter++;
