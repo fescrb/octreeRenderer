@@ -63,6 +63,8 @@ Device* DeviceManager::getDevice(int index) {
 	return 0;
 }
 
+//#include "Image.h"
+
 std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
 	int devices = getNumDevices();
 	
@@ -72,14 +74,32 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
     
     info->maxOctreeDepth = m_pDataManager->getMaxOctreeDepth();
 	
-	for(int i = 0; i < 1; i++) {
-		Device *thisDevice = getDevice(i);
+	std::vector<Device*> device_list = getDeviceList();
+	
+	for(int i = 0; i < devices; i++) 
+		device_list[i]->makeFrameBuffer(resolution);
+	
+	for(int i = 0; i < devices; i++) 
+		device_list[i]->sendData(fullOctree);
+	
+	for(int i = 0; i < devices; i++) 
+		device_list[i]->render(int2(),resolution,info);
+	
+	for(int i = 0; i < devices; i++) 
+		textures.push_back(device_list[i]->getFrameBuffer());
 		
-		thisDevice->makeFrameBuffer(resolution);
-		thisDevice->sendData(fullOctree);
-		thisDevice->render(int2(),resolution,info);
-		textures.push_back(thisDevice->getFrameBuffer());
-	}
+		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());
+		//image.toBMP("frame.bmp");
+	
 	
 	return textures;
+}
+
+std::vector<Device*> DeviceManager::getDeviceList() {
+	std::vector<Device*> ret;
+    for (int i = 0; i < m_vContext.size(); i++) {
+        std::vector<Device*> dev = m_vContext[i]->getDeviceList();
+        ret.insert(ret.end(), dev.begin(), dev.end());
+    }
+    return ret;
 }

@@ -30,6 +30,8 @@ class DeviceManager {
 		int						 getNumDevices();
 		Device					*getDevice(int index);
 		
+		std::vector<Device*>     getDeviceList();
+		
 		std::vector<GLuint>		 renderFrame(renderinfo *info, int2 resolution);
 		
 	private:
