@@ -207,13 +207,17 @@ void Window::recalculateViewportVectors() {
 	float4 up = direction(info->up);
 	float4 viewDir = direction(info->viewDir);
 	
+	up = normalize(up);
+	
     float4 viewportStep = float4x4::rotationAroundVector( up, _PI/2.0f) * viewDir;
+	
+	printf("%f %f %f %f\n", viewportStep[0], viewportStep[1], viewportStep[2], viewportStep[3]);
 	
 	float stepMagnitude = ((info->eyePlaneDist * tan(info->fov/2.0f))*2.0f)/(float)m_size[0];
 	viewportStep = viewportStep * stepMagnitude;
 	
 	up = normalize(up) * stepMagnitude;
-	float4 viewportStart(( (viewDir*info->eyePlaneDist) - (viewportStep*((float)m_size[0]/2.0f)) ) - (up*((float)m_size[1]/2.0f)) );
+	float4 viewportStart(( (eyepos + (viewDir*info->eyePlaneDist)) - (viewportStep*((float)m_size[0]/2.0f)) ) - (up*((float)m_size[1]/2.0f)) );
 	
 	info->up = up;
 	info->viewPortStart = viewportStart;
