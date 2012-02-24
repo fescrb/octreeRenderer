@@ -82,6 +82,8 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	short_stack[curr_index].node_centre = voxelCentre;
 	short_stack[curr_index].t_min = t_min;
 	short_stack[curr_index].t_max = t_max;
+	curr_index++;
+	return curr_index;
 }
 
 global char* find_collission(global char* octree, float3 origin, float3 direction, float t) {
