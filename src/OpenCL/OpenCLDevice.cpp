@@ -10,6 +10,14 @@
 #include "SourceFile.h"
 #include "SourceFileManager.h"
 
+void staticOnRenderingFinished(cl_event event, cl_int event_command_exec_status, void *user_data){
+	printf("Rendering Finished\n");
+}
+
+void staticOnBufferRead(cl_event event, cl_int event_command_exec_status, void *user_data){
+	printf("Buffer Read\n");
+}
+
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 :	m_DeviceID(device_id),
     m_context(context),
@@ -37,8 +45,33 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
 	
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
+    
+    // We create the events for the OpenCL calls termination.
+	m_eventRenderingFinished = clCreateUserEvent(context, &err);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+	m_eventFrameBufferRead = clCreateUserEvent(context, &err);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+	
+	err = clSetEventCallback( m_eventRenderingFinished,
+							  CL_COMPLETE ,
+							  staticOnRenderingFinished,
+							  (void*)this);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
+	
+	err = clSetEventCallback( m_eventFrameBufferRead,
+							  CL_COMPLETE ,
+							  staticOnBufferRead,
+							  (void*)this);
+	if(clIsError(err)){
+		clPrintError(err); return;
+	}
 }
-
 
 OpenCLDevice::~OpenCLDevice(){
 
@@ -58,7 +91,6 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 			}
 		}
 		m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
-		
 		if(clIsError(error)){
 			clPrintError(error);
 		}
@@ -93,7 +125,7 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
     
     size_t offset[2] = {start[0], start[1]};
     size_t dimensions[2] = {size[0], size[1]};
-    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
 	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -138,12 +170,24 @@ char* OpenCLDevice::getFrame() {
 	char* frameBuffer = (char*) malloc(size+1);
     
     cl_int error;
-    error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 0, NULL, NULL);
+    error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){
         clPrintError(error);
     }
-    error = clFinish(m_commandQueue);
+    cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
+    error = clWaitForEvents(2, events);
+	if(clIsError(error)){
+        clPrintError(error);
+    }
     return frameBuffer;
+}
+
+void OpenCLDevice::onRenderingFinished() {
+	
+}
+
+void OpenCLDevice::onBufferRead() {
+	
 }
 
 cl_context OpenCLDevice::getOpenCLContext() {

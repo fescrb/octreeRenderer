@@ -66,7 +66,7 @@ Device* DeviceManager::getDevice(int index) {
 //#include "Image.h"
 
 std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
-	int devices = getNumDevices();
+	int devices = 1;//getNumDevices();
 	
 	std::vector<GLuint> textures;
 	

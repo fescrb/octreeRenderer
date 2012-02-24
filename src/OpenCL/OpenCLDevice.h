@@ -29,6 +29,9 @@ class OpenCLDevice:
 		
 		cl_context			 getOpenCLContext();
 		cl_device_id		 getOpenCLDeviceID();
+		
+		void 				 onRenderingFinished();
+		void 				 onBufferRead();
         
 	private:
 
@@ -41,6 +44,9 @@ class OpenCLDevice:
         cl_kernel            m_rayTraceKernel;
         
         GLuint               m_texture;
+		
+		cl_event             m_eventRenderingFinished;
+		cl_event             m_eventFrameBufferRead; 
         
         cl_mem               m_frameBuff;
         int2                 m_frameBufferResolution;
