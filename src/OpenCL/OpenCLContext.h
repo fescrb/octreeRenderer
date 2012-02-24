@@ -19,10 +19,10 @@ class OpenCLContext :
 		unsigned int                     getNumDevices();
 		Device                          *getDevice(int index);
 
+		std::vector<Device*>    		 getDeviceList();
+		
 	private:
         unsigned int                     getNumPlatforms();
-        
-        std::vector<OpenCLDevice*>       getDeviceList();
         
         std::vector<OpenCLPlatform*>     m_vpPlatforms;
 

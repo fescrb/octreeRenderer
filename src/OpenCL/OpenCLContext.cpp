@@ -57,11 +57,13 @@ unsigned int OpenCLContext::getNumPlatforms() {
     return m_vpPlatforms.size();
 }
 
-std::vector<OpenCLDevice*> OpenCLContext::getDeviceList() {
-    std::vector<OpenCLDevice*> ret;
+std::vector<Device*> OpenCLContext::getDeviceList() {
+    std::vector<Device*> ret;
     for (int i = 0; i < m_vpPlatforms.size(); i++) {
         std::vector<OpenCLDevice*> dev = m_vpPlatforms[i]->getDeviceList();
-        ret.insert(ret.end(), dev.begin(), dev.end());
+		for(int j = 0; j < dev.size(); j++) {
+			ret.push_back(dev[j]);
+		}
     }
     return ret;
 }

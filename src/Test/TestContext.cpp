@@ -17,3 +17,9 @@ unsigned int TestContext::getNumDevices() {
 Device* TestContext::getDevice(int index) {
 	return m_hostCPU;
 }
+
+std::vector<Device*> TestContext::getDeviceList() {
+	std::vector<Device*> devList;
+	devList.push_back(m_hostCPU);
+	return devList;
+}
