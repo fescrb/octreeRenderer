@@ -25,6 +25,6 @@ void high_res_timer:: reset() {
     uint64_t time = mach_absolute_time();
     mach_timebase_info_data_t time_info;
     kern_return_t error = mach_timebase_info(&time_info);
-    m_seconds = (double)time * ((double)NANOSECS_PER_SECOND * (double)time_info.numer / (double) time_info.denom );
+    m_seconds = (double)time * ((double)time_info.numer / ((double) time_info.denom * NANOSECS_PER_SECOND));
 #endif //_OSX
 }
