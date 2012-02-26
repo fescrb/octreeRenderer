@@ -11,6 +11,8 @@
     #include <OpenCL/cl.h>
 #endif //_OSX
 
+#include "HighResTimer.h"
+
 class OpenCLProgram;
 
 class OpenCLDevice:
@@ -50,6 +52,11 @@ class OpenCLDevice:
         
         cl_mem               m_frameBuff;
         int2                 m_frameBufferResolution;
+        
+        high_res_timer       m_renderingStart;
+        high_res_timer       m_renderingEnd;
+        high_res_timer       m_frameBufferToOpenGLStart;
+        high_res_timer       m_frameBufferToOpenGLEnd;
 };
 
 #endif //_OPENCL_DEVICE_H

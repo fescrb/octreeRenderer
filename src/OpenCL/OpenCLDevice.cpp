@@ -162,6 +162,8 @@ GLuint OpenCLDevice::getFrameBuffer() {
 	
 	free(frameBuffer);
     
+    m_renderingEnd.reset();
+    
     return m_texture;
 }
 
@@ -183,11 +185,11 @@ char* OpenCLDevice::getFrame() {
 }
 
 void OpenCLDevice::onRenderingFinished() {
-	
+	m_renderingEnd.reset();
 }
 
 void OpenCLDevice::onBufferRead() {
-	
+	m_renderingEnd.reset();
 }
 
 cl_context OpenCLDevice::getOpenCLContext() {
