@@ -33,7 +33,9 @@ class OpenCLDevice:
 		cl_device_id		 getOpenCLDeviceID();
 		
 		void 				 onRenderingFinished();
-		void 				 onBufferRead();
+        
+        high_res_timer       getRenderTime();
+        high_res_timer       getBufferToTextureTime();
         
 	private:
 
@@ -53,10 +55,10 @@ class OpenCLDevice:
         cl_mem               m_frameBuff;
         int2                 m_frameBufferResolution;
         
-        high_res_timer       m_renderingStart;
-        high_res_timer       m_renderingEnd;
-        high_res_timer       m_frameBufferToOpenGLStart;
-        high_res_timer       m_frameBufferToOpenGLEnd;
+        high_res_timer       m_renderStart;
+        high_res_timer       m_renderEnd;
+        high_res_timer       m_transferStart;
+        high_res_timer       m_transferEnd;
 };
 
 #endif //_OPENCL_DEVICE_H

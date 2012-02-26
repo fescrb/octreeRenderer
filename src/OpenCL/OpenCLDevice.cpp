@@ -11,11 +11,8 @@
 #include "SourceFileManager.h"
 
 void staticOnRenderingFinished(cl_event event, cl_int event_command_exec_status, void *user_data){
-	printf("Rendering Finished\n");
-}
-
-void staticOnBufferRead(cl_event event, cl_int event_command_exec_status, void *user_data){
-	printf("Buffer Read\n");
+    printf("Event\n");
+	((OpenCLDevice*)user_data)->onRenderingFinished();
 }
 
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
@@ -63,14 +60,6 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 	if(clIsError(err)){
 		clPrintError(err); return;
 	}
-	
-	err = clSetEventCallback( m_eventFrameBufferRead,
-							  CL_COMPLETE ,
-							  staticOnBufferRead,
-							  (void*)this);
-	if(clIsError(err)){
-		clPrintError(err); return;
-	}
 }
 
 OpenCLDevice::~OpenCLDevice(){
@@ -107,6 +96,8 @@ void OpenCLDevice::sendData(OctreeSegment* segment) {
 }
 
 void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
+    m_renderStart.reset();
+    
 	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -162,7 +153,7 @@ GLuint OpenCLDevice::getFrameBuffer() {
 	
 	free(frameBuffer);
     
-    m_renderingEnd.reset();
+    m_transferEnd.reset();
     
     return m_texture;
 }
@@ -185,11 +176,16 @@ char* OpenCLDevice::getFrame() {
 }
 
 void OpenCLDevice::onRenderingFinished() {
-	m_renderingEnd.reset();
+	m_renderEnd.reset();
+    m_transferStart.reset();
 }
 
-void OpenCLDevice::onBufferRead() {
-	m_renderingEnd.reset();
+high_res_timer OpenCLDevice::getRenderTime() {
+    return m_renderEnd - m_renderStart;
+}
+
+high_res_timer OpenCLDevice::getBufferToTextureTime() {
+    return m_transferEnd - m_transferStart;
 }
 
 cl_context OpenCLDevice::getOpenCLContext() {
