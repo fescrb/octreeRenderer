@@ -1,15 +1,15 @@
-#ifndef _TEST_CONTEXT_H
-#define _TEST_CONTEXT_H
+#ifndef _SERIAL_CONTEXT_H
+#define _SERIAL_CONTEXT_H
 
 #include "Context.h"
 
-class TestDevice;
+class SerialDevice;
 
-class TestContext
+class SerialContext
 :	public Context {
 
 	public:
-		explicit 				 TestContext();
+		explicit 				 SerialContext();
 		void					 printDeviceInfo();	
 		
 		unsigned int			 getNumDevices();
@@ -18,8 +18,8 @@ class TestContext
 		std::vector<Device*>	 getDeviceList();
 
 	private:
-		TestDevice				*m_hostCPU;
+		SerialDevice				*m_hostCPU;
 
 };
 
-#endif //_TEST_CONTEXT
+#endif //_SERIAL_CONTEXT_H

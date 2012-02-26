@@ -17,10 +17,10 @@ if(USE_OPENCL)
      add_subdirectory(OpenCL)
 endif(USE_OPENCL)
 
-if(USE_TEST_IMPLEMENTATION)
-     include_directories(Test)
-     add_subdirectory(Test)
-endif(USE_TEST_IMPLEMENTATION)
+if(USE_SERIAL_IMPLEMENTATION)
+     include_directories(Serial)
+     add_subdirectory(Serial)
+endif(USE_SERIAL_IMPLEMENTATION)
 
 include(CMakeSources.cmake)
 

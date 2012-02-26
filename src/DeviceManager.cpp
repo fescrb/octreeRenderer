@@ -9,8 +9,8 @@
 	#include "OpenCLContext.h"
 #endif
 
-#ifdef USE_HOST_CPU
-	#include "TestContext.h"
+#ifdef USE_SERIAL
+	#include "SerialContext.h"
 #endif
 
 DeviceManager::DeviceManager(DataManager *dataManager)
@@ -20,11 +20,11 @@ DeviceManager::DeviceManager(DataManager *dataManager)
 void DeviceManager::detectDevices() {
 	#ifdef USE_OPENCL
 		m_vContext.push_back(new OpenCLContext());
-	#endif
+	#endif //USE_OPENCL
 	
-	#ifdef USE_HOST_CPU
-		m_vContext.push_back(new TestContext());
-	#endif
+	#ifdef USE_SERIAL
+		m_vContext.push_back(new SerialContext());
+	#endif //DUSE_SERIAL
 	
 	printDeviceInfo();
 }

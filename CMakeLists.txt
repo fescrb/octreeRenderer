@@ -41,11 +41,11 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 if(NOT USE_OPENCL)
-	set(USE_TEST_IMPLEMENTATION "Yes")
+	set(USE_SERIAL_IMPLEMENTATION "Yes")
 	
-	message("MESSAGE: Using Host as device")
+	message("MESSAGE: Using serial implementation")
 	
-	add_definitions(-DUSE_HOST_CPU)
+	add_definitions(-DUSE_SERIAL)
 endif(NOT USE_OPENCL)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")

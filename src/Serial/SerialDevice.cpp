@@ -1,6 +1,6 @@
-#include "TestDevice.h"
+#include "SerialDevice.h"
 
-#include "TestDeviceInfo.h"
+#include "SerialDeviceInfo.h"
 #include "OctreeSegment.h"
 #include "RenderInfo.h"
 
@@ -61,23 +61,23 @@ char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
 	return node + (add_int[0]*4);
 }
 
-TestDevice::TestDevice()
+SerialDevice::SerialDevice()
 :	m_pOctreeData(0),
  	m_pFrame(0),
     m_texture(0){
-	m_pDeviceInfo = new TestDeviceInfo();
+	m_pDeviceInfo = new SerialDeviceInfo();
 }
 
-TestDevice::~TestDevice() {
+SerialDevice::~SerialDevice() {
 	if(m_pFrame)
 		free(m_pFrame);
 }
 
-void TestDevice::printInfo() {
+void SerialDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
 }
 
-void TestDevice::makeFrameBuffer(int2 size) {
+void SerialDevice::makeFrameBuffer(int2 size) {
     // Generate frame buffer if non-existant or not the same size;
     if (size != m_frameBufferResolution) {
         if(m_pFrame)
@@ -95,7 +95,7 @@ void TestDevice::makeFrameBuffer(int2 size) {
     }
 }
 
-void TestDevice::sendData(OctreeSegment* segment) {
+void SerialDevice::sendData(OctreeSegment* segment) {
 	m_pOctreeData = segment->getData();
 }
 
@@ -115,7 +115,7 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
-void TestDevice::render(int2 start, int2 size, renderinfo *info) {	
+void SerialDevice::render(int2 start, int2 size, renderinfo *info) {	
     m_renderStart.reset();
     
 	float half_size = 256.0f;
@@ -223,7 +223,7 @@ void TestDevice::render(int2 start, int2 size, renderinfo *info) {
     m_renderEnd.reset();
 }
 
-GLuint TestDevice::getFrameBuffer() {
+GLuint SerialDevice::getFrameBuffer() {
     m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
@@ -253,11 +253,11 @@ GLuint TestDevice::getFrameBuffer() {
     return m_texture;
 }
 
-char* TestDevice::getFrame() {
+char* SerialDevice::getFrame() {
 	return m_pFrame;
 }
 
-void TestDevice::setFramePixel(int x, int y, char red, char green, char blue) {
+void SerialDevice::setFramePixel(int x, int y, char red, char green, char blue) {
 	char* pixelPtr = &m_pFrame[(y*m_frameBufferResolution[0]*3)+(x*3)];
 	
 	pixelPtr[0] = red;
@@ -265,10 +265,10 @@ void TestDevice::setFramePixel(int x, int y, char red, char green, char blue) {
 	pixelPtr[2] = blue;
 }
 
-high_res_timer TestDevice::getRenderTime() {
+high_res_timer SerialDevice::getRenderTime() {
     return m_renderEnd - m_renderStart;
 }
 
-high_res_timer TestDevice::getBufferToTextureTime() {
+high_res_timer SerialDevice::getBufferToTextureTime() {
     return m_transferEnd - m_transferStart;
 }

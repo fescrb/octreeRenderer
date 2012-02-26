@@ -1,13 +1,13 @@
-#ifndef _TEST_DEVICE_H
-#define _TEST_DEVICE_H
+#ifndef _SERIAL_DEVICE_H
+#define _SERIAL_DEVICE_H
 
 #include "Device.h"
 
-class TestDevice
+class SerialDevice
 :	public Device {
     public:
-		explicit		 TestDevice();
-        virtual 		~TestDevice();
+		explicit		 SerialDevice();
+        virtual 		~SerialDevice();
 
         void			 printInfo();
         void             makeFrameBuffer(int2 size);
@@ -34,4 +34,4 @@ class TestDevice
 									   char red, char green, char blue);
 };
 
-#endif // _TEST_DEVICE_H
+#endif // _SERIAL_DEVICE_H

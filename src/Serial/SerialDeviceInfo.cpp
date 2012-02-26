@@ -1,10 +1,10 @@
-#include "TestDeviceInfo.h"
+#include "SerialDeviceInfo.h"
 
 #include <fstream>
 
 using namespace std;
 
-TestDeviceInfo::TestDeviceInfo() {
+SerialDeviceInfo::SerialDeviceInfo() {
 	
 	ifstream cpuinfo;
 
@@ -20,14 +20,14 @@ TestDeviceInfo::TestDeviceInfo() {
 	}*/
 }
 
-TestDeviceInfo::~TestDeviceInfo() {
+SerialDeviceInfo::~SerialDeviceInfo() {
 
 }
 		
-void TestDeviceInfo::printInfo() {
+void SerialDeviceInfo::printInfo() {
 
 }
 
-char* TestDeviceInfo::getName() {
+char* SerialDeviceInfo::getName() {
     return NULL;
 }
