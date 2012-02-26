@@ -116,6 +116,8 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 }
 
 void TestDevice::render(int2 start, int2 size, renderinfo *info) {	
+    m_renderStart.reset();
+    
 	float half_size = 256.0f;
 
 	int2 end = start+size;
@@ -218,9 +220,11 @@ void TestDevice::render(int2 start, int2 size, renderinfo *info) {
 			}
 		}
 	}
+    m_renderEnd.reset();
 }
 
 GLuint TestDevice::getFrameBuffer() {
+    m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
     
@@ -245,7 +249,7 @@ GLuint TestDevice::getFrameBuffer() {
                  GL_RGB,
                  GL_UNSIGNED_BYTE,
                  m_pFrame);
-    
+    m_transferEnd.reset();
     return m_texture;
 }
 
@@ -259,4 +263,12 @@ void TestDevice::setFramePixel(int x, int y, char red, char green, char blue) {
 	pixelPtr[0] = red;
 	pixelPtr[1] = green;
 	pixelPtr[2] = blue;
+}
+
+high_res_timer TestDevice::getRenderTime() {
+    return m_renderEnd - m_renderStart;
+}
+
+high_res_timer TestDevice::getBufferToTextureTime() {
+    return m_transferEnd - m_transferStart;
 }

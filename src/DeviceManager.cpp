@@ -87,6 +87,10 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
 	
 	for(int i = 0; i < devices; i++) 
 		textures.push_back(device_list[i]->getFrameBuffer());
+    
+    for(int i = 0; i < devices; i++) {
+        printf("%d %f %f\n", i, (double)device_list[i]->getRenderTime(), (double)device_list[i]->getBufferToTextureTime());
+    }
 		
 		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());
 		//image.toBMP("frame.bmp");
