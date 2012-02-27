@@ -5,8 +5,27 @@
 
 struct aabox {
     public:
-        explicit        aabox();
-        mesh            cull(mesh);
+        explicit        aabox(const float4& corner, 
+                              const float3& sizes) 
+                        :   m_corner(corner), 
+                            m_sizes(sizes){}
+        
+        explicit        aabox(const float4& corner1, 
+                              const float4& corner2) 
+                        :   m_corner(corner1), 
+                            m_sizes(corner2[0]-corner1[0], corner2[1]-corner1[1], corner2[2]-corner1[2]){}
+                            
+                        aabox(const aabox& other) 
+                        :   m_corner(other.m_corner), 
+                            m_sizes(other.m_sizes){}
+        
+        // TODO
+        mesh            cull(mesh) {
+            mesh resultantMesh;
+            
+            
+            return resultantMesh;
+        }
         
     private:
         float4          m_corner;
