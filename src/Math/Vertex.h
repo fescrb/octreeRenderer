@@ -5,12 +5,18 @@
 
 struct vertex {
     public:
-        explicit                 vertex(float4 position, 
-                                        float4 normal, 
-                                        float4  colour) 
+                                 vertex(){};
+        explicit                 vertex(const float4& position, 
+                                        const float4& normal, 
+                                        const float4&  colour) 
                                  :  m_position(position), 
                                     m_normal(normal), 
                                     m_colour(colour) {};
+                                    
+                                 vertex(const vertex& other) 
+                                 :  m_position(other.m_position), 
+                                    m_normal(other.m_normal), 
+                                    m_colour(other.m_colour) {};
         
         inline float4            getPosition() {
             return m_position;
@@ -22,6 +28,15 @@ struct vertex {
         
         inline float4            getColour() {
             return m_colour;
+        }
+        
+        inline vertex&           operator=(const vertex& rhs){
+            if(this != &rhs) {
+                m_position = rhs.m_position;
+                m_normal = rhs.m_normal;
+                m_colour = rhs.m_colour;
+            }
+            return *this;
         }
         
     private:

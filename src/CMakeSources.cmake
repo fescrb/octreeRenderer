@@ -2,8 +2,7 @@ set(sources ${sources}
 			DeviceManager.cpp
 			DataManager.cpp
             ProgramState.cpp
-            Window.cpp
-			main.cpp )
+            Window.cpp )
 
 set(headers ${headers}
 			DeviceManager.h

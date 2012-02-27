@@ -29,13 +29,18 @@ endif(USE_SERIAL_IMPLEMENTATION)
 
 include(CMakeSources.cmake)
 
-add_executable(octreeRenderer ${sources})
+add_executable(octreeRenderer octreeRenderer.cpp ${sources})
 target_link_libraries(octreeRenderer ${Device_LIBRARIES})
+
+add_executable(geometryToOctree geometryToOctree.cpp ${sources})
+target_link_libraries(geometryToOctree ${Device_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(octreeRenderer rt)
+    target_link_libraries(geometryToOctree rt)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 install(TARGETS octreeRenderer RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION bin)
+install(TARGETS geometryToOctree RUNTIME DESTINATION bin LIBRARY DESTINATION bin ARCHIVE DESTINATION bin)
 
 install(FILES ${shaders} DESTINATION bin/shaders)
