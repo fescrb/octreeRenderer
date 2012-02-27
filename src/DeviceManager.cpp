@@ -17,6 +17,8 @@
 	#include "SerialContext.h"
 #endif
 
+#include <cstdio>
+
 DeviceManager::DeviceManager(DataManager *dataManager)
 :	m_pDataManager(dataManager){
 }
