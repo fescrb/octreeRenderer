@@ -22,6 +22,8 @@ if len(sys.argv) > 1 :
         argc+=1
         if command == "verbose":
             verbose = " VERBOSE=1 "
+        if command == "openmp":
+            extra_defs = extra_defs + ' -DUSE_OPENMP="Yes" '
         if command == "noocl":
             use_ocl = ' -DDONT_USE_OPENCL="Yes" '
         if command == "debugfindocl":

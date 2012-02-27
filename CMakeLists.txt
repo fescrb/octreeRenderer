@@ -25,6 +25,27 @@ if(USE_OPENCL)
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
 
+if(USE_OPENMP)
+
+	find_package(OpenMP)
+
+	if(OPENMP_FOUND)
+		message("Message: Using OpenMP")
+		set(USE_OPENMP "Yes")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+		# We need to compile the serial implementation to use OpenMP
+		set(USE_SERIAL_IMPLEMENTATION "Yes")
+		set(USE_OPENMP_IMPLEMENTATION "Yes")
+		add_definitions(-DUSE_OPENMP)
+	else(OPENMP_FOUND)
+		message("Error: OpenMP not found")
+		set(USE_OPENMP "No")
+	endif(OPENMP_FOUND)
+
+endif(USE_OPENMP)
+
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 set(Device_LIBRARIES ${Device_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES}) 
@@ -40,13 +61,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions(-D_OSX)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-if(NOT USE_OPENCL)
+if(NOT USE_OPENCL AND NOT USE_OPENMP)
 	set(USE_SERIAL_IMPLEMENTATION "Yes")
 	
 	message("MESSAGE: Using serial implementation")
 	
 	add_definitions(-DUSE_SERIAL)
-endif(NOT USE_OPENCL)
+endif(NOT USE_OPENCL AND NOT USE_OPENMP)
 
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})

@@ -17,8 +17,8 @@ class SerialContext
 		
 		std::vector<Device*>	 getDeviceList();
 
-	private:
-		SerialDevice				*m_hostCPU;
+	protected:
+		SerialDevice			*m_hostCPU;
 
 };
 

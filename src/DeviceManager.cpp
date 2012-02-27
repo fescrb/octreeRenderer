@@ -9,6 +9,10 @@
 	#include "OpenCLContext.h"
 #endif
 
+#ifdef USE_OPENMP
+    #include "OpenMPContext.h"
+#endif
+
 #ifdef USE_SERIAL
 	#include "SerialContext.h"
 #endif
@@ -22,9 +26,13 @@ void DeviceManager::detectDevices() {
 		m_vContext.push_back(new OpenCLContext());
 	#endif //USE_OPENCL
 	
-	#ifdef USE_SERIAL
+    #ifdef USE_OPENMP
+        m_vContext.push_back(new OpenMPContext());
+    #else
+	#if USE_SERIAL
 		m_vContext.push_back(new SerialContext());
-	#endif //DUSE_SERIAL
+    #endif //USE_SERIAL
+	#endif //USE_OPENMP
 	
 	printDeviceInfo();
 }

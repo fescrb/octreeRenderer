@@ -17,6 +17,11 @@ if(USE_OPENCL)
      add_subdirectory(OpenCL)
 endif(USE_OPENCL)
 
+if(USE_OPENMP_IMPLEMENTATION)
+     include_directories(OpenMP)
+     add_subdirectory(OpenMP)
+endif(USE_OPENMP_IMPLEMENTATION)
+
 if(USE_SERIAL_IMPLEMENTATION)
      include_directories(Serial)
      add_subdirectory(Serial)
