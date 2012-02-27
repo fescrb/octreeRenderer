@@ -12,7 +12,8 @@ class SerialDevice
         void			 printInfo();
         void             makeFrameBuffer(int2 size);
         void 			 sendData(OctreeSegment* segment);
-        void			 render(int2 start, int2 size, renderinfo *info);
+        void             traceRay(int x, int y, renderinfo* info);
+        virtual void	 render(int2 start, int2 size, renderinfo *info);
         GLuint           getFrameBuffer();
         char    		*getFrame();
     
