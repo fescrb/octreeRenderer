@@ -30,6 +30,18 @@ struct vertex {
             return m_colour;
         }
         
+        inline void              setPosition(const float4& position) {
+            m_position = position;
+        }
+        
+        inline void              setNormal(const float4& normal) {
+            m_normal = normal;
+        }
+        
+        inline void              setColour(const float4& colour) {
+            m_colour = colour;
+        }
+        
         inline vertex&           operator=(const vertex& rhs){
             if(this != &rhs) {
                 m_position = rhs.m_position;
