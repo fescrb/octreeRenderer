@@ -10,8 +10,7 @@
 #include "SourceFile.h"
 #include "SourceFileManager.h"
 
-void staticOnRenderingFinished(cl_event event, cl_int event_command_exec_status, void *user_data){
-    printf("Event\n");
+void CL_CALLBACK staticOnRenderingFinished(cl_event event, cl_int event_command_exec_status, void *user_data){
 	((OpenCLDevice*)user_data)->onRenderingFinished();
 }
 
@@ -42,24 +41,6 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
 	
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
-    
-    // We create the events for the OpenCL calls termination.
-	m_eventRenderingFinished = clCreateUserEvent(context, &err);
-	if(clIsError(err)){
-		clPrintError(err); return;
-	}
-	m_eventFrameBufferRead = clCreateUserEvent(context, &err);
-	if(clIsError(err)){
-		clPrintError(err); return;
-	}
-	
-	err = clSetEventCallback( m_eventRenderingFinished,
-							  CL_COMPLETE ,
-							  staticOnRenderingFinished,
-							  (void*)this);
-	if(clIsError(err)){
-		clPrintError(err); return;
-	}
 }
 
 OpenCLDevice::~OpenCLDevice(){
@@ -120,6 +101,13 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
 	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
+    error = clSetEventCallback( m_eventRenderingFinished,
+								CL_COMPLETE ,
+								staticOnRenderingFinished,
+								(void*)this);
+	if(clIsError(error)){
+		clPrintError(error);
+	}
 }
 
 GLuint OpenCLDevice::getFrameBuffer() {
@@ -167,8 +155,9 @@ char* OpenCLDevice::getFrame() {
     if(clIsError(error)){
         clPrintError(error);
     }
-    cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
-    error = clWaitForEvents(2, events);
+    //cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
+    //error = clWaitForEvents(2, events);
+    error = clFinish(m_commandQueue);
 	if(clIsError(error)){
         clPrintError(error);
     }
