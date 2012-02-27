@@ -155,9 +155,8 @@ char* OpenCLDevice::getFrame() {
     if(clIsError(error)){
         clPrintError(error);
     }
-    //cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
-    //error = clWaitForEvents(2, events);
-    error = clFinish(m_commandQueue);
+    cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
+    error = clWaitForEvents(2, events);
 	if(clIsError(error)){
         clPrintError(error);
     }

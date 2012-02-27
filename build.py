@@ -22,6 +22,11 @@ if len(sys.argv) > 1 :
         argc+=1
         if command == "verbose":
             verbose = " VERBOSE=1 "
+        if command == "release":
+            build_type = ' -DCMAKE_BUILD_TYPE="Release" '
+        if command == "tobin":
+            extra_defs = extra_defs + ' -DCMAKE_INSTALL_PREFIX="." '
+            #set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
         if command == "openmp":
             extra_defs = extra_defs + ' -DUSE_OPENMP="Yes" '
         if command == "noocl":
