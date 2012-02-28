@@ -1,5 +1,10 @@
 #include "Window.h"
 
+#include "SourceFileManager.h"
+#include "SourceFile.h"
+
+#include <cstdio>
+
 /**
  * Statically define methods.
  *

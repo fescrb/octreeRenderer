@@ -29,6 +29,4 @@ int main(int argc, char** argv) {
 	state->getDeviceManager()->detectDevices();
     
     window->run();
-
-	//char* frame = manager.renderFrame(&dev, renderInfo);
 }

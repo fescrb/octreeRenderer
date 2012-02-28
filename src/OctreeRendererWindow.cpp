@@ -5,8 +5,6 @@
 
 #include "ProgramState.h"
 #include "RenderInfo.h"
-#include "SourceFileManager.h"
-#include "SourceFile.h"
 
 #include "DeviceManager.h"
 
@@ -31,71 +29,22 @@ OctreeRendererWindow::OctreeRendererWindow(int argc, char** argv, int2 dimension
 void OctreeRendererWindow::initGL() {
     glEnable(GL_TEXTURE_2D);
     
-    m_vertexShader = compileShader(GL_VERTEX_SHADER, "NoTransform.vert");
-    m_fragmentShader = compileShader(GL_FRAGMENT_SHADER, "Coalesce.frag");
+    m_vertexShader = Shader(GL_VERTEX_SHADER, "NoTransform.vert");
+    m_fragmentShader = Shader(GL_FRAGMENT_SHADER, "Coalesce.frag");
     
-    m_programObject = linkProgram(m_vertexShader, m_fragmentShader);
-    
-    resize(m_size[0],m_size[1]);
-}
-
-GLuint OctreeRendererWindow::compileShader(GLenum type, const char* fileName) {
-    GLuint shaderID = glCreateShader(type);
-    SourceFile *sourceFile = SourceFileManager::getSource(fileName);
-    const GLchar** source = sourceFile->getSource();
-    
-    glShaderSource(shaderID, sourceFile->getNumLines(), source, NULL);
-    
-    glCompileShader(shaderID);
-    
-    GLint status;
-    glGetShaderiv(shaderID, GL_COMPILE_STATUS, &status);
-    
-    if(!status) {
-        printf("Error compiling shader from file %s.\n", fileName);
-    }
-    
-    char log[512];
-        
-    glGetShaderInfoLog(shaderID, 512, NULL, log);
-    
-     printf("Shader compile log:\n%s\n", log);
-    
-    return shaderID;
-}
-
-GLuint OctreeRendererWindow::linkProgram(GLuint vertexShader, GLuint fragmentShader) {
-    GLuint programID = glCreateProgram();
-    
-    glAttachShader(programID, vertexShader);
-    glAttachShader(programID, fragmentShader);
-    
-    glLinkProgram(programID);
-    
-    GLint status;
-    glGetProgramiv(programID, GL_LINK_STATUS, &status);
-    
-    if(!status) {
-        
-        printf("Error linking shader.\n");
-    }
-    
-    char log[512];
-
-    glGetProgramInfoLog(programID, 512, NULL, log);
-        
-    printf("Program link log:\n%s\n", log);
+    m_programObject = Program(m_vertexShader, m_fragmentShader);
     
     GLint numAtts, numUni;
-    glGetProgramiv(programID, GL_ACTIVE_ATTRIBUTES, &numAtts);
-    glGetProgramiv(programID, GL_ACTIVE_UNIFORMS, &numUni);
+    GLint status;
+    glGetProgramiv(m_programObject, GL_ACTIVE_ATTRIBUTES, &numAtts);
+    glGetProgramiv(m_programObject, GL_ACTIVE_UNIFORMS, &numUni);
     
-    m_vertAttr = glGetAttribLocation(programID, "vertex");
+    m_vertAttr = glGetAttribLocation(m_programObject, "vertex");
     
     glVertexAttribPointer(m_vertAttr, 2, GL_FLOAT, GL_FALSE, 0, square);
     glEnableVertexAttribArray(m_vertAttr);
     
-    m_textUniform = glGetUniformLocation(programID, "myTexture");
+    m_textUniform = glGetUniformLocation(m_programObject, "myTexture");
     GLenum error = glGetError();
     
     if(m_textUniform < 0 || error != GL_NO_ERROR) {
@@ -108,14 +57,14 @@ GLuint OctreeRendererWindow::linkProgram(GLuint vertexShader, GLuint fragmentSha
         }
     }
     
-    glValidateProgram(programID);
-    glGetProgramiv(programID, GL_VALIDATE_STATUS, &status);
+    glValidateProgram(m_programObject);
+    glGetProgramiv(m_programObject, GL_VALIDATE_STATUS, &status);
     
     if(!status) {
         printf("Error Invalid Program\n");
     }
     
-    return programID;
+    resize(m_size[0],m_size[1]);
 }
 
 void OctreeRendererWindow::render() {
