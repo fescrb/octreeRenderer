@@ -4,6 +4,7 @@ set(sources ${sources}
             ProgramState.cpp
             Window.cpp
             OctreeRendererWindow.cpp
+            GeometryOctreeWindow.cpp
             )
 
 set(headers ${headers}
@@ -12,6 +13,7 @@ set(headers ${headers}
             ProgramState.h
             Window.h
             OctreeRendererWindow.h
+            GeometryOctreeWindow.h
 			)
 
 set(shaders ${shaders}
