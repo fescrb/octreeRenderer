@@ -27,7 +27,14 @@ class OBJFileReader {
         
         float4                   getVertexFromLine(char* line);
         
-        std::vector<triangle>    getFaceFromLine(char* line, const OBJFileData* data);
+        /**
+         * Processes the given string and creates all the triangles it describes.
+         * If more than 1 triangle is defined they are treated as a triangle fan.
+         * @param line The string containing face data.
+         * @param data A pointer to the current obj file status.
+         * @return A list of all the triangles defined in the line.
+         */
+        std::vector<triangle>    getFacesFromLine(char* line, const OBJFileData* data);
         
         int                      countCharacter(char character, const char* line);
         

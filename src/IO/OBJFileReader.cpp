@@ -31,7 +31,7 @@ mesh OBJFileReader::getMesh() {
                 tmp.setW(0.0f);
                 data->normalList.push_back(tmp);
             case TYPE_FACE_DECLARATION:
-                ;
+                mesh.appendTriangles(getFacesFromLine(line,data));
             default:
                 ; // We do nothing.
         }
@@ -64,7 +64,7 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     return float4(atof(x),atof(y),atof(z),1.0f);
 }
 
-std::vector<triangle> OBJFileReader::getFaceFromLine(char* line, const OBJFileData* data) {
+std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileData* data) {
     std::vector<triangle> triangles;
     
     int vertex_count = countCharacter(' ', line);
