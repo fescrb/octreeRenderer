@@ -10,7 +10,11 @@ struct mesh {
         explicit                 mesh(){};
         
         inline void              appendTriangle(const triangle& triangl) {
-            triangles.push_back(triangl);
+            m_triangles.push_back(triangl);
+        }
+        
+        inline void              appendTriangles(const std::vector<triangle>& triangles) {
+            m_triangles.insert(m_triangles.end(), triangles.begin(), triangles.end());
         }
         
         inline triangle          getTriangle(const int& index) {
@@ -22,15 +26,15 @@ struct mesh {
         }
         
         inline void              removeTriangle(const int& index) {
-            triangles.erase(triangles.begin()+index);
+            m_triangles.erase(m_triangles.begin()+index);
         }
         
         inline triangle&         operator[](const int& index) {
-            return triangles[index];
+            return m_triangles[index];
         }
         
     private:
-        std::vector<triangle>    triangles;
+        std::vector<triangle>    m_triangles;
 };
 
 #endif //_MESH_H
