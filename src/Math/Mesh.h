@@ -7,7 +7,7 @@
 
 struct mesh {
     public:
-        explicit                 mesh();
+        explicit                 mesh(){};
         
         inline void              appendTriangle(const triangle& triangl) {
             triangles.push_back(triangl);

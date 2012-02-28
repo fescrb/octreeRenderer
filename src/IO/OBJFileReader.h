@@ -25,4 +25,4 @@ class OBJFileReader {
         char*                    m_filename;
 };
 
-#endif _OBJ_FILE_READER_H
+#endif //_OBJ_FILE_READER_H

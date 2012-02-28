@@ -22,13 +22,15 @@ mesh OBJFileReader::getMesh() {
 
         in.getline(line, 1024);
         
+        float4 tmp;
+        
         switch(getLineType(line)){
             case TYPE_VERTEX_DECLARATION:
                 vertexList.push_back(getVertexFromLine(line));
             case TYPE_NORMAL_DECLARATION:
-                float4 normal = getVertexFromLine(line);
-                normal.setW(0.0f);
-                normalList.push_back(normal);
+                tmp = getVertexFromLine(line); // tmp = normal
+                tmp.setW(0.0f);
+                normalList.push_back(tmp);
             case TYPE_FACE_DECLARATION:
                 ;
             default:
@@ -44,9 +46,9 @@ OBJFileReader::LineType OBJFileReader::getLineType(const char* line) {
         case '#':
             return TYPE_COMMENT;
         case 'v':
-            if(line[1] = ' ')
+            if(line[1] == ' ')
                 return TYPE_VERTEX_DECLARATION;
-            if(line[1] = 'n')
+            if(line[1] == 'n')
                 return TYPE_NORMAL_DECLARATION;
         case 'f':
             return TYPE_FACE_DECLARATION;
@@ -60,5 +62,5 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     char* x = strtok(NULL, " ");
     char* y = strtok(NULL, " ");
     char* z = strtok(NULL, " ");
-    retutn float4(atof(x),atof(y),atof(z),1.0f);
+    return float4(atof(x),atof(y),atof(z),1.0f);
 }
