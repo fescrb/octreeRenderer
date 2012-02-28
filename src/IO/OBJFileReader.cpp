@@ -64,55 +64,82 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     return float4(atof(x),atof(y),atof(z),1.0f);
 }
 
-triangle OBJFileReader::getFaceFromLine(char* line, const OBJFileData* data) {
+std::vector<triangle> OBJFileReader::getFaceFromLine(char* line, const OBJFileData* data) {
+    std::vector<triangle> triangles;
+    
+    int vertex_count = countCharacter(' ', line);
+    
+    char **all_vertices = (char**) malloc (sizeof(char*)*vertex_count + 1);
+    
     strtok(line, " ");
-    char* vertices[3] = {strtok(NULL, " "), strtok(NULL, " "), strtok(NULL, "\n")};
     
-    int   vertex_indices[3] = {-1, -1, -1};
-    int   normal_indices[3] = {-1, -1, -1};
+    for(int i = 0; i < vertex_count-1; i++)
+        all_vertices[i] = strtok(NULL, " ");
     
-    // Boolean containing whether we haven't declared a normal.
-    bool  undeclared_normal = false;
+    all_vertices[vertex_count-1] = strtok(NULL, " \n");
     
-    for(int i = 0; i < 3; i++) {
-        int size = strlen(vertices[i]);
-        std::string data[] = {std::string(), std::string() ,std::string()};
-        int counter = 0; // The amount of '/' we have encountered.
+    for(int vert = 1; vert < vertex_count; vert+=2) {
+        char* vertices[3] = {all_vertices[0], all_vertices[vert], all_vertices[vert+1]};
         
-        for(int j = 0; j < size; j++) {
-            if(vertices[i][j] == '/') {
-                counter++;
-            } else {
-                data[counter].push_back(vertices[i][j]);
+        int   vertex_indices[3] = {-1, -1, -1};
+        int   normal_indices[3] = {-1, -1, -1};
+        
+        // Boolean containing whether we haven't declared a normal.
+        bool  undeclared_normal = false;
+        
+        for(int i = 0; i < 3; i++) {
+            int size = strlen(vertices[i]);
+            std::string data[] = {std::string(), std::string() ,std::string()};
+            int counter = 0; // The amount of '/' we have encountered.
+            
+            for(int j = 0; j < size; j++) {
+                if(vertices[i][j] == '/') {
+                    counter++;
+                } else {
+                    data[counter].push_back(vertices[i][j]);
+                }
             }
+            
+            vertex_indices[i] = atoi(data[0].data());
+            if(counter == 2)
+                normal_indices[i] = atoi(data[2].data());
+            else
+                undeclared_normal = true;
         }
         
-        vertex_indices[i] = atoi(data[0].data());
-        if(counter == 2)
-            normal_indices[i] = atoi(data[2].data());
-        else
-            undeclared_normal = true;
+        vertex first(data->vertexList[vertex_indices[0]]);
+        vertex secnd(data->vertexList[vertex_indices[1]]);
+        vertex third(data->vertexList[vertex_indices[2]]);
+        
+        if(undeclared_normal) {
+            // Calculate face normal
+            float4 temp_scnd = secnd.getPosition() - first.getPosition();
+            float4 temp_thrd = third.getPosition() - first.getPosition();
+            
+            float4 normal = cross(temp_thrd, temp_scnd);
+            
+            first.setNormal(normal);
+            secnd.setNormal(normal);
+            third.setNormal(normal);
+        } else {
+            first.setNormal(data->normalList[normal_indices[0]]);
+            secnd.setNormal(data->normalList[normal_indices[1]]);
+            third.setNormal(data->normalList[normal_indices[2]]);
+        }
+        
+        triangles.push_back(triangle(first, secnd, third));
     }
     
-    vertex first(data->vertexList[vertex_indices[0]]);
-    vertex secnd(data->vertexList[vertex_indices[1]]);
-    vertex third(data->vertexList[vertex_indices[2]]);
+    return triangles;
+}
+
+int OBJFileReader::countCharacter(char character, const char* line) {
+    int counter = 0;
+    int lineSize = strlen(line);
     
-    if(undeclared_normal) {
-        // Calculate face normal
-        float4 temp_scnd = secnd.getPosition() - first.getPosition();
-        float4 temp_thrd = third.getPosition() - first.getPosition();
-        
-        float4 normal = cross(temp_thrd, temp_scnd);
-        
-        first.setNormal(normal);
-        secnd.setNormal(normal);
-        third.setNormal(normal);
-    } else {
-        first.setNormal(data->normalList[normal_indices[0]]);
-        secnd.setNormal(data->normalList[normal_indices[1]]);
-        third.setNormal(data->normalList[normal_indices[2]]);
-    }
+    for(int i = 0; i < lineSize; i++)
+        if(line[i] == character)
+            counter++;
     
-    return triangle(first, secnd, third);
+    return counter;
 }

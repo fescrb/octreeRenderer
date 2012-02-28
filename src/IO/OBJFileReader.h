@@ -21,14 +21,16 @@ class OBJFileReader {
         };
         
         mesh                     getMesh();
-        
+     
+    private:
         LineType                 getLineType(const char* line);
         
         float4                   getVertexFromLine(char* line);
         
-        triangle                 getFaceFromLine(char* line, const OBJFileData* data);
+        std::vector<triangle>    getFaceFromLine(char* line, const OBJFileData* data);
         
-    private:
+        int                      countCharacter(char character, const char* line);
+        
         char*                    m_filename;
 };
 
