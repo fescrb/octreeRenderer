@@ -1,5 +1,5 @@
 #include "ProgramState.h"
-#include "Window.h"
+#include "OctreeRendererWindow.h"
 
 #include "DeviceManager.h"
 
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
 	}
     
     ProgramState *state = new ProgramState(argc, argv);
-    Window *window = new Window(argc, argv, resolution, state);
+    OctreeRendererWindow *window = new OctreeRendererWindow(argc, argv, resolution, state);
 	
 	state->getDeviceManager()->detectDevices();
     

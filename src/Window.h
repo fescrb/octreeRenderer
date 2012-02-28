@@ -19,40 +19,22 @@ class ProgramState;
 
 class Window {
 	public:
-		explicit				 Window(int argc, char** argv, int2 dimensions, ProgramState* state);
+		explicit				 Window(int argc, char** argv, int2 dimensions);
 
-		void				
-		render();
+		virtual void             render() = 0;
     
-        void                     initGL();
-		
-		GLuint 					 compileShader(GLenum type, const char* fileName);
-		GLuint					 linkProgram(GLuint vertexShader, GLuint fragmentShader);
+        virtual void             initGL() = 0;
     
-		void					 resize(GLint width, GLint height);
+		virtual void			 resize(GLint width, GLint height);
         int2                     getSize();
     
         void                     run();
     
         void                     setRenderWindow(Window *window);
     
-        void                     recalculateViewportVectors();
-    
-    private:
+    protected:
     
         int2                     m_size;
-    
-        ProgramState            *m_pProgramState;
-		
-		GLuint					 m_vertexShader;
-		GLuint					 m_fragmentShader;
-		
-		GLuint					 m_programObject;
-		
-		GLint 					 m_vertAttr;
-		GLint					 m_textAttr;
-		
-		GLint					 m_textUniform;
 };
 
 #endif //_WINDOW_H
