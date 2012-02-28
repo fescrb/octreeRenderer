@@ -14,6 +14,10 @@ mesh OBJFileReader::getMesh() {
     
     mesh objMesh;
     OBJFileData* data = new OBJFileData;
+    // Indexing is different, so we pad.
+    data->vertexList.push_back(float4());
+    data->normalList.push_back(float4());
+    
     int normalCounter = 0;
     
     while(!in.eof()) {
@@ -31,7 +35,7 @@ mesh OBJFileReader::getMesh() {
                 tmp.setW(0.0f);
                 data->normalList.push_back(tmp);
             case TYPE_FACE_DECLARATION:
-                mesh.appendTriangles(getFacesFromLine(line,data));
+                objMesh.appendTriangles(getFacesFromLine(line,data));
             default:
                 ; // We do nothing.
         }
