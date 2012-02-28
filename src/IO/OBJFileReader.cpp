@@ -30,11 +30,13 @@ mesh OBJFileReader::getMesh() {
         
         switch(getLineType(line)){
             case TYPE_VERTEX_DECLARATION:
-                data->vertexList.push_back(getVertexFromLine(line));
+                data->vertexList.push_back(getVertexFromLine(line)); 
+                break;
             case TYPE_NORMAL_DECLARATION:
                 tmp = getVertexFromLine(line); // tmp = normal
                 tmp.setW(0.0f);
                 data->normalList.push_back(tmp);
+                break;
             case TYPE_FACE_DECLARATION:
                 objMesh.appendTriangles(getFacesFromLine(line,data));
             default:
@@ -65,7 +67,7 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     strtok(line, " ");
     char* x = strtok(NULL, " ");
     char* y = strtok(NULL, " ");
-    char* z = strtok(NULL, " \n");
+    char* z = strtok(NULL, " \n\0");
     return float4(atof(x),atof(y),atof(z),1.0f);
 }
 
@@ -78,12 +80,13 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
     
     strtok(line, " ");
     
-    for(int i = 0; i < vertex_count-1; i++)
+    for(int i = 0; i < vertex_count-1; i++) {
         all_vertices[i] = strtok(NULL, " ");
+    }
     
-    all_vertices[vertex_count-1] = strtok(NULL, " \n");
+    all_vertices[vertex_count-1] = strtok(NULL, " \n\0");
     
-    for(int vert = 1; vert < vertex_count; vert+=2) {
+    for(int vert = 1; vert < vertex_count - 1; vert++) {
         char* vertices[3] = {all_vertices[0], all_vertices[vert], all_vertices[vert+1]};
         
         int   vertex_indices[3] = {-1, -1, -1};
