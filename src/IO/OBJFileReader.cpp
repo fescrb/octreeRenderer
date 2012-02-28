@@ -6,6 +6,7 @@
 
 OBJFileReader::OBJFileReader(const char* filename) {
     m_filename = (char*)malloc(strlen(filename)+1);
+    strcpy(m_filename, filename);
 }
         
 mesh OBJFileReader::getMesh() {
