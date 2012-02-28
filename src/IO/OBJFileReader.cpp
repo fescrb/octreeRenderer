@@ -13,8 +13,7 @@ mesh OBJFileReader::getMesh() {
     in.open(m_filename);
     
     mesh objMesh;
-    std::vector<float4> vertexList;
-    std::vector<float4> normalList;
+    OBJFileData* data = new OBJFileData;
     int normalCounter = 0;
     
     while(!in.eof()) {
@@ -26,11 +25,11 @@ mesh OBJFileReader::getMesh() {
         
         switch(getLineType(line)){
             case TYPE_VERTEX_DECLARATION:
-                vertexList.push_back(getVertexFromLine(line));
+                data->vertexList.push_back(getVertexFromLine(line));
             case TYPE_NORMAL_DECLARATION:
                 tmp = getVertexFromLine(line); // tmp = normal
                 tmp.setW(0.0f);
-                normalList.push_back(tmp);
+                data->normalList.push_back(tmp);
             case TYPE_FACE_DECLARATION:
                 ;
             default:
@@ -61,6 +60,59 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     strtok(line, " ");
     char* x = strtok(NULL, " ");
     char* y = strtok(NULL, " ");
-    char* z = strtok(NULL, " ");
+    char* z = strtok(NULL, " \n");
     return float4(atof(x),atof(y),atof(z),1.0f);
+}
+
+triangle OBJFileReader::getFaceFromLine(char* line, const OBJFileData* data) {
+    strtok(line, " ");
+    char* vertices[3] = {strtok(NULL, " "), strtok(NULL, " "), strtok(NULL, "\n")};
+    
+    int   vertex_indices[3] = {-1, -1, -1};
+    int   normal_indices[3] = {-1, -1, -1};
+    
+    // Boolean containing whether we haven't declared a normal.
+    bool  undeclared_normal = false;
+    
+    for(int i = 0; i < 3; i++) {
+        int size = strlen(vertices[i]);
+        std::string data[] = {std::string(), std::string() ,std::string()};
+        int counter = 0; // The amount of '/' we have encountered.
+        
+        for(int j = 0; j < size; j++) {
+            if(vertices[i][j] == '/') {
+                counter++;
+            } else {
+                data[counter].push_back(vertices[i][j]);
+            }
+        }
+        
+        vertex_indices[i] = atoi(data[0].data());
+        if(counter == 2)
+            normal_indices[i] = atoi(data[2].data());
+        else
+            undeclared_normal = true;
+    }
+    
+    vertex first(data->vertexList[vertex_indices[0]]);
+    vertex secnd(data->vertexList[vertex_indices[1]]);
+    vertex third(data->vertexList[vertex_indices[2]]);
+    
+    if(undeclared_normal) {
+        // Calculate face normal
+        float4 temp_scnd = secnd.getPosition() - first.getPosition();
+        float4 temp_thrd = third.getPosition() - first.getPosition();
+        
+        float4 normal = cross(temp_thrd, temp_scnd);
+        
+        first.setNormal(normal);
+        secnd.setNormal(normal);
+        third.setNormal(normal);
+    } else {
+        first.setNormal(data->normalList[normal_indices[0]]);
+        secnd.setNormal(data->normalList[normal_indices[1]]);
+        third.setNormal(data->normalList[normal_indices[2]]);
+    }
+    
+    return triangle(first, secnd, third);
 }

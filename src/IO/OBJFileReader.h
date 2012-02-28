@@ -7,8 +7,6 @@ class OBJFileReader {
     public:
         explicit                 OBJFileReader(const char* filename);
         
-        mesh                     getMesh();
-        
         enum                     LineType {
             TYPE_COMMENT, 
             TYPE_VERTEX_DECLARATION,
@@ -17,9 +15,18 @@ class OBJFileReader {
             TYPE_UNKOWN
         };
         
+        struct                   OBJFileData {
+            std::vector<float4>  vertexList;
+            std::vector<float4>  normalList;
+        };
+        
+        mesh                     getMesh();
+        
         LineType                 getLineType(const char* line);
         
         float4                   getVertexFromLine(char* line);
+        
+        triangle                 getFaceFromLine(char* line, const OBJFileData* data);
         
     private:
         char*                    m_filename;
