@@ -16,7 +16,7 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0f, 1.0f, 0.0f, 1.0f);
+    //gluPerspective(45.0f, (double)width/(double)height, );
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }
