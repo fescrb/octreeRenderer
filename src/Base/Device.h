@@ -5,13 +5,7 @@
 
 #include "HighResTimer.h"
 
-#ifdef _LINUX
-	#include <GL/gl.h>
-#endif //_LINUX
-
-#ifdef _OSX
-	#include <OpenGL/gl.h>
-#endif //_OSX
+#include "Graphics.h"
 
 class DeviceInfo;
 class OctreeSegment;
