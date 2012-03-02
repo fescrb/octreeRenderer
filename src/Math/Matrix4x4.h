@@ -3,6 +3,8 @@
 
 #include "Vector.h"
 
+#include "AABox.h"
+
 template <class t>
 struct matrix4x4 {
     public:
@@ -53,6 +55,45 @@ struct matrix4x4 {
             return (m_column1*x) + (m_column2*y) + (m_column3*z) + (m_column4*w);
         }
         
+        
+        inline vertex        operator*(const vertex& rhs) {
+            vertex vert(operator*(rhs.getPosition()), operator*(rhs.getNormal()), rhs.getColour());
+            
+            return vert;
+        }
+        
+        inline triangle      operator*(const triangle& rhs) {
+            triangle tri(
+                operator*(rhs.getVertex(0)),
+                operator*(rhs.getVertex(1)),
+                operator*(rhs.getVertex(2))
+            );
+            
+            return tri;
+        }
+        
+        inline mesh          operator*(const mesh& rhs) {
+            mesh new_mesh();
+            
+            std::vector<triangle> triangles = rhs.getTriangleList();
+            
+            for(int i = 0; i < triangles.size(); i++)
+                new_mesh.appendTriangle(operator*(triangles[i]));
+            
+            return new_mesh;
+        }
+        
+        inline aabox         operator*(const aabox& rhs) {
+            mesh new_mesh();
+            
+            std::vector<triangle> triangles = rhs.getTriangleList();
+            
+            for(int i = 0; i < triangles.size(); i++)
+                new_mesh.appendTriangle(operator*(triangles[i]));
+            
+            return new_mesh;
+        }
+        
         inline matrix4x4 	 transpose() {
             vector4<t> col1Copy(m_column1), 
             col2Copy(m_column2), 
@@ -83,7 +124,7 @@ struct matrix4x4 {
         }
         
         static inline matrix4x4		 
-        translationMatrix(F32 x, F32 y, F32 z) {
+        translationMatrix(t x, t y, t z) {
             return matrix4x4(vector4<t>( 1, 0, 0, 0),
                             vector4<t>( 0, 1, 0, 0),
                             vector4<t>( 0, 0, 1, 0),
