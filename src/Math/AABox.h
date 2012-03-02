@@ -15,6 +15,8 @@ struct aabox {
                         :   m_corner(corner1), 
                             m_sizes(corner2[0]-corner1[0], corner2[1]-corner1[1], corner2[2]-corner1[2]){}
                             
+        explicit        aabox(const mesh& meshToBound);
+                            
                         aabox(const aabox& other) 
                         :   m_corner(other.m_corner), 
                             m_sizes(other.m_sizes){}
@@ -25,6 +27,10 @@ struct aabox {
             
             
             return resultantMesh;
+        }
+        
+        inline float4   getCentre() {
+            return m_corner + direction(m_sizes/2.0f);
         }
         
     private:

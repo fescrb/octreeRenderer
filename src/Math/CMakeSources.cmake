@@ -1,4 +1,6 @@
 set(this_sources 	${this_sources}
+                    Mesh.cpp
+                    AABox.cpp
 					 )
 
 set(this_headers 	${this_headers}
@@ -8,6 +10,9 @@ set(this_headers 	${this_headers}
 					Vector.h
                     Rect.h
 					Matrix4x4.h
-					Matrix.h )
+					Matrix.h
+                    Mesh.h
+                    AABox.h
+                    )
 					
 set(this_shaders 	RenderInfo.h )

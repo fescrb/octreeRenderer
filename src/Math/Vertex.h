@@ -29,15 +29,15 @@ struct vertex {
                                     m_normal(other.m_normal), 
                                     m_colour(other.m_colour) {};
         
-        inline float4            getPosition() {
+        inline float4            getPosition() const {
             return m_position;
         }
         
-        inline float4            getNormal() {
+        inline float4            getNormal() const {
             return m_normal;
         }
         
-        inline float4            getColour() {
+        inline float4            getColour() const {
             return m_colour;
         }
         

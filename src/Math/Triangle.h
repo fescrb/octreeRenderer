@@ -31,8 +31,17 @@ struct triangle {
             }
         }
         
-        inline vertex    getVertex(const int& index) {
-            return vertex(operator[](index));
+        inline vertex    getVertex(const int& index) const {
+            switch(index) {
+                case 0:
+                    return m_vert0;
+                case 1:
+                    return m_vert1;
+                case 2:
+                    return m_vert2;
+                default:
+                    return m_vert0;
+            }
         }
         
     private:
