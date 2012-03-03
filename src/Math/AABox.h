@@ -29,8 +29,12 @@ struct aabox {
             return resultantMesh;
         }
         
-        inline float4   getCentre() {
+        inline float4   getCentre() const {
             return m_corner + direction(m_sizes/2.0f);
+        }
+        
+        inline float4   getCorner() const {
+            return m_corner;
         }
         
     private:

@@ -1,7 +1,10 @@
 #include "GeometryOctreeWindow.h"
 
-GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimensions)
-:   Window(argc, argv, dimensions){
+#include "OctreeCreator.h"
+
+GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator)
+:   Window(argc, argv, dimensions),
+    m_octreeCreator(octreeCreator){
     
 }
 
@@ -22,5 +25,6 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
 }
 
 void GeometryOctreeWindow::render() {
+    glClear();
     
 }

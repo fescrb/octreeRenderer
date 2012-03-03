@@ -3,6 +3,8 @@
 
 #include "Window.h"
 
+class OctreeCreator;
+
 class GeometryOctreeWindow 
 :   public Window {
     public:
@@ -15,6 +17,8 @@ class GeometryOctreeWindow
         void                     render();
         
     private:
+        
+        OctreeCreator           *m_octreeCreator;
 };
 
 #endif //_GEOMETRY_OCTREE_WINDOW_H

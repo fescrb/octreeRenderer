@@ -9,7 +9,7 @@ class ProgramState;
 
 class Window {
 	public:
-		explicit				 Window(int argc, char** argv, int2 dimensions);
+		explicit				 Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer = true);
 
 		virtual void             render() = 0;
     

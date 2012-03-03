@@ -19,7 +19,7 @@ GLfloat square[] = {0.0f, 0.0f,
 };
 
 OctreeRendererWindow::OctreeRendererWindow(int argc, char** argv, int2 dimensions, ProgramState* state)
-:   Window(argc, argv, dimensions),
+:   Window(argc, argv, dimensions, false),
     m_pProgramState(state){
     setRenderWindow(this);
     
