@@ -25,18 +25,20 @@ void staticResize(GLint width, GLint height) {
     renderWindow->resize(width, height);
 }
 
-Window::Window(int argc, char** argv, int2 dimensions)
+Window::Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer)
 :	m_size(dimensions){
 	glutInit(&argc, argv);
 	glutInitWindowSize(dimensions[0], dimensions[1]);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+
+	unsigned int depth_buffer = useDepthBuffer ? GLUT_DEPTH : 0;
+	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | depth_buffer);
 
 	glutCreateWindow("Octree Renderer");
-    
+
 	glutReshapeFunc(staticResize);
-	
+
     glutDisplayFunc(staticRender);
-    
+
     glutIdleFunc(staticRender);
 }
 

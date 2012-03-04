@@ -5,19 +5,19 @@
 
 class OctreeCreator;
 
-class GeometryOctreeWindow 
+class GeometryOctreeWindow
 :   public Window {
     public:
-        explicit                 GeometryOctreeWindow(int argc, char** argv, int2 dimensions);
-        
+        explicit                 GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator);
+
         void                     initGL();
-        
+
         void                     resize(GLint width, GLint height);
-        
+
         void                     render();
-        
+
     private:
-        
+
         OctreeCreator           *m_octreeCreator;
 };
 
