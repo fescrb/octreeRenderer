@@ -12,7 +12,7 @@ GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimension
 }
 
 void GeometryOctreeWindow::initGL() {
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 void GeometryOctreeWindow::resize(GLint width, GLint height) {
@@ -40,5 +40,12 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
 
 void GeometryOctreeWindow::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    m_octreeCreator->render();
+    
+    glutSwapBuffers();
+}
 
+void GeometryOctreeWindow::idle() {
+    
 }

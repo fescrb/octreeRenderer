@@ -21,6 +21,10 @@ void staticRender() {
     renderWindow->render();
 }
 
+void staticIdle() {
+    renderWindow->idle();
+}
+
 void staticResize(GLint width, GLint height) {
     renderWindow->resize(width, height);
 }
@@ -39,7 +43,7 @@ Window::Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer)
 
     glutDisplayFunc(staticRender);
 
-    glutIdleFunc(staticRender);
+    glutIdleFunc(staticIdle);
 }
 
 void Window::resize(GLint width, GLint height) {

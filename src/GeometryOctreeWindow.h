@@ -15,6 +15,7 @@ class GeometryOctreeWindow
         void                     resize(GLint width, GLint height);
 
         void                     render();
+        void                     idle();
 
     private:
 

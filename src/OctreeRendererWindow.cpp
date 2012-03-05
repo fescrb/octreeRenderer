@@ -89,6 +89,10 @@ void OctreeRendererWindow::render() {
     glutSwapBuffers();
 }
 
+void OctreeRendererWindow::idle() {
+    render();
+};
+
 void OctreeRendererWindow::resize(GLint width, GLint height) {
     Window::resize(width, height);
     

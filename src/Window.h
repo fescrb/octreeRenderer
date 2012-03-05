@@ -12,6 +12,7 @@ class Window {
 		explicit				 Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer = true);
 
 		virtual void             render() = 0;
+        virtual void             idle() = 0;
     
         virtual void             initGL() = 0;
     

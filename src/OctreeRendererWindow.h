@@ -14,6 +14,8 @@ class OctreeRendererWindow
         void                     render();
     
         void                     initGL();
+        
+        void                     idle();
     
         void                     resize(GLint width, GLint height);
     
