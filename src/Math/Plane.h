@@ -38,24 +38,8 @@ struct plane {
             return dot(m_normal, point-m_pointInPlane);
         }
         
-        std::vector<triangle>    cull(const triangle& triangleToCull) {
-            std::vector<triangle> result(0);
-            
-            bool within_pane[3] = { 
-                insidePlane(triangleToCull.getVertex(0).getPosition()),
-                insidePlane(triangleToCull.getVertex(1).getPosition()),
-                insidePlane(triangleToCull.getVertex(2).getPosition())
-            };
-            
-            if(within_pane[0] && within_pane[1] && within_pane[2]) {
-                result.push_back(triangleToCull);
-            } else if (within_pane[0] || within_pane[1] || within_pane[2]) {
-                
-            }
-            
-            return result;
-        }
-    
+        std::vector<triangle>    cull(const triangle& triangleToCull);
+        
     private:
         float4                   m_pointInPlane;
         float4                   m_normal;
