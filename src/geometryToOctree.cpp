@@ -1,6 +1,8 @@
 #include "AABox.h"
 
 #include "OBJFileReader.h"
+#include "OctreeCreator.h"
+#include "GeometryOctreeWindow.h"
 
 #include <cstdio>
 #include <cstring>
@@ -21,16 +23,22 @@ int main(int argc, char** argv) {
         printf("Type geometryToOctree -help for more info.\n");
         exit(1);
     }
-    
+
     if(!strcmp(argv[1], "-help")) {
         //Printout help and exit.
         printHelp();
         exit(0);
     }
-    
+
     OBJFileReader* objFile = new OBJFileReader(argv[1]);
-    
-    objFile->getMesh();
-    
+
+    OctreeCreator* octreeCreator = new OctreeCreator(objFile->getMesh());
+
+    int2 dim(600, 400);
+
+    GeometryOctreeWindow* window = new GeometryOctreeWindow(argc, argv, dim, octreeCreator);
+
+    window->run();
+
     return 0;
 }

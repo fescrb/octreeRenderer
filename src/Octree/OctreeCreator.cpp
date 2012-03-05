@@ -16,6 +16,14 @@ OctreeCreator::OctreeCreator(mesh meshToConvert)
     m_aabox = translation_matrix * m_aabox;
 }
 
+void OctreeCreator::render() {
+    m_mesh.render();
+}
+
+void OctreeCreator::convert() {
+
+}
+
 aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
     return m_aabox;
 }

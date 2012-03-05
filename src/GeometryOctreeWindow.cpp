@@ -6,10 +6,13 @@ GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimension
 :   Window(argc, argv, dimensions),
     m_octreeCreator(octreeCreator){
 
+    setRenderWindow(this);
+
+    initGL();
 }
 
 void GeometryOctreeWindow::initGL() {
-
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 void GeometryOctreeWindow::resize(GLint width, GLint height) {
