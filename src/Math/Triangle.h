@@ -5,6 +5,7 @@
 
 struct triangle {
     public:
+                         triangle(){};
         explicit         triangle(const vertex& vertex1, 
                                   const vertex& vertex2, 
                                   const vertex& vertex3) 

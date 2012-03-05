@@ -22,13 +22,7 @@ struct aabox {
                         :   m_corner(other.m_corner),
                             m_sizes(other.m_sizes){}
 
-        // TODO
-        mesh            cull(mesh) {
-            mesh resultantMesh;
-
-
-            return resultantMesh;
-        }
+        mesh            cull(const mesh& meshToCull); 
 
         inline float4   getCentre() const {
             return m_corner + direction(m_sizes/2.0f);
@@ -40,6 +34,10 @@ struct aabox {
 
         inline float4   getCorner() const {
             return m_corner;
+        }
+        
+        inline float4   getFarCorner() const {
+            return m_corner + direction(m_sizes);
         }
 
     private:
