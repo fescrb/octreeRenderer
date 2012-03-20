@@ -30,8 +30,9 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(45.0f, (double)width/(double)height, near_distance, near_distance + end_to_end_distance );
-    float4 eye_pos = normalize(mesh_bounding_box.getCorner()) * center_distance_to_camera;
+    float4 eye_pos = normalize(mesh_bounding_box.getCorner()) * center_distance_to_camera * 100.0f;
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
     gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2],
               0.0f, 0.0f, 0.0f,
               0.0f, 1.0f, 0.0f);

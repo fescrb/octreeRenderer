@@ -4,6 +4,7 @@
 #include "Vector.h"
 
 #include "Triangle.h"
+#include "Line.h"
 
 #include <vector>
 
@@ -37,6 +38,8 @@ struct plane {
         inline F32               isInFront(const float4& point) {
             return dot(m_normal, point-m_pointInPlane);
         }
+        
+        float4                   getIntersectionPoint(const line& intersecting_line);
         
         std::vector<triangle>    cull(const triangle& triangleToCull);
         

@@ -1,6 +1,7 @@
 set(this_sources 	${this_sources}
                     Mesh.cpp
                     AABox.cpp
+                    Plane.cpp
 					 )
 
 set(this_headers 	${this_headers}

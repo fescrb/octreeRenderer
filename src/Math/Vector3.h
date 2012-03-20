@@ -105,7 +105,7 @@ struct vector3{
 			array[2] = m_y;
 		}
 		
-		inline vector3<t> neg() {
+		inline vector3<t> neg() const {
 			return vector3<t>(-m_x, -m_y, -m_z);
 		}
 
