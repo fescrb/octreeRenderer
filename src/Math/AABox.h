@@ -36,6 +36,14 @@ struct aabox {
             return m_corner;
         }
         
+        inline void     setCorner(const float4& corner) {
+            m_corner = corner;
+        }
+        
+        inline void     setSizes(const float3& sizes) {
+            m_sizes = sizes;
+        }
+        
         inline float4   getFarCorner() const {
             return m_corner + direction(m_sizes);
         }

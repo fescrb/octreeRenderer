@@ -33,6 +33,7 @@ mesh aabox::cull(const mesh& meshToCull) {
     std::vector<triangle> to_add; to_add.clear();
     
     for(int i = 0; i < mesh_size; i++) {
+        to_process.clear();
         to_process.push_back(meshToCull.getTriangle(i));
         
         for(int j = 0; j < 6 && !to_process.empty(); j++) {
