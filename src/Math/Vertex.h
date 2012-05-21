@@ -7,22 +7,11 @@ struct vertex {
     public:
                                  vertex(){};
         explicit                 vertex(const float4& position, 
-                                        const float4& normal, 
-                                        const float4& colour) 
+                                        const float4& normal = float4(0.0f), 
+                                        const float4& colour = float4(1.0f)) 
                                  :  m_position(position), 
                                     m_normal(normal), 
                                     m_colour(colour) {};
-                                 
-        explicit                 vertex(const float4& position, 
-                                        const float4& normal) 
-                                 :  m_position(position), 
-                                    m_normal(normal), 
-                                    m_colour(1.0f) {};
-                                    
-        explicit                 vertex(const float4& position) 
-                                 :  m_position(position), 
-                                    m_normal(0.0f), 
-                                    m_colour(1.0f) {};
                                     
                                  vertex(const vertex& other) 
                                  :  m_position(other.m_position), 

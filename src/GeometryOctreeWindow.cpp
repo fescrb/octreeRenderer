@@ -42,6 +42,7 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
 void GeometryOctreeWindow::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    m_octreeCreator->convert();
     m_octreeCreator->render();
     
     glutSwapBuffers();

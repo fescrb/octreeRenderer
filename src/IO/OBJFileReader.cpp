@@ -119,23 +119,18 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
         vertex secnd(data->vertexList[vertex_indices[1]]);
         vertex third(data->vertexList[vertex_indices[2]]);
         
+        triangle new_triangle(first, secnd, third);
+        
         if(undeclared_normal) {
-            // Calculate face normal
-            float4 temp_scnd = secnd.getPosition() - first.getPosition();
-            float4 temp_thrd = third.getPosition() - first.getPosition();
-            
-            float4 normal = cross(temp_thrd, temp_scnd);
-            
-            first.setNormal(normal);
-            secnd.setNormal(normal);
-            third.setNormal(normal);
+            new_triangle.generateNormals();
         } else {
-            first.setNormal(data->normalList[normal_indices[0]]);
-            secnd.setNormal(data->normalList[normal_indices[1]]);
-            third.setNormal(data->normalList[normal_indices[2]]);
+            new_triangle[0].setNormal(data->normalList[normal_indices[0]]);
+            new_triangle[1].setNormal(data->normalList[normal_indices[1]]);
+            new_triangle[2].setNormal(data->normalList[normal_indices[2]]);
+            
         }
         
-        triangles.push_back(triangle(first, secnd, third));
+        triangles.push_back(new_triangle);
     }
     
     return triangles;

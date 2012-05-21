@@ -63,6 +63,18 @@ struct triangle {
             return new_vertex;
         }
         
+        inline void      generateNormals() {
+            // Calculate face normal
+            float4 temp_scnd = m_vert1.getPosition() - m_vert0.getPosition();
+            float4 temp_thrd = m_vert2.getPosition() - m_vert0.getPosition();
+            
+            float4 normal = cross(temp_thrd, temp_scnd);
+            
+            m_vert0.setNormal(normal);
+            m_vert1.setNormal(normal);
+            m_vert2.setNormal(normal);
+        }
+        
     private:
         vertex           m_vert0, m_vert1, m_vert2;
 };
