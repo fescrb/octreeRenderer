@@ -23,6 +23,8 @@ class OpenCLPlatform {
 		inline unsigned int          getNumDevices(){
 			return m_vpDevices.size();
 		}
+		
+		OpenCLPlatformInfo*          getInfo();
     
         std::vector<OpenCLDevice*>   getDeviceList();
     

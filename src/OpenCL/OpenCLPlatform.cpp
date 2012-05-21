@@ -52,8 +52,12 @@ std::vector<OpenCLDevice*> OpenCLPlatform::getDeviceList() {
 }
 
 void OpenCLPlatform::printInfo() {
-    m_pPlatformInfo->printInfo();
+    getInfo()->printInfo();
     for(int i = 0; i < getNumDevices(); i++) {
         m_vpDevices[i]->printInfo();
     }
+}
+
+OpenCLPlatformInfo* OpenCLPlatform::getInfo() {
+    return m_pPlatformInfo;
 }

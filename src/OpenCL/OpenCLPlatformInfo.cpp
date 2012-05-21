@@ -62,3 +62,7 @@ void OpenCLPlatformInfo::printInfo() {
 	printf("Platform Version:               %s\n", m_sPlatformVersion);
 	printf("Platform Extensions:            %s\n", m_sPlatformExtensions);
 }
+
+char* OpenCLPlatformInfo::getName() {
+    return m_sPlatformName;
+}

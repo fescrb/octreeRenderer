@@ -15,6 +15,8 @@ class OpenCLPlatformInfo {
                             ~OpenCLPlatformInfo();
     
         void                 printInfo();
+        
+        char*                getName();
     
     private:
         char                *m_sPlatformProfile;
