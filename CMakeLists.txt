@@ -6,6 +6,10 @@ if(DONT_USE_OPENCL)
      set(USE_OPENCL "No")
 endif(DONT_USE_OPENCL)
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+     set(USE_OPENMP "Yes")
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
 cmake_minimum_required(VERSION 2.6)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
