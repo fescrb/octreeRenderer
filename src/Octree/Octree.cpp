@@ -15,27 +15,32 @@ Octree* Octree::getSimpleOctree() {
 	
 	// Create root node + atts
 	Attributes rootAtts;
-	rootAtts.setAttributes(128, 128, 128, 128);
+	rootAtts.setColour(128, 128, 128, 128);
+    rootAtts.setNormal(0.0f, 0.0f, -1.0f);
 	OctreeNode *root = new OctreeNode(rootAtts);
 	
 	// Create topleft node + atts
 	Attributes topleftAtts;
-	topleftAtts.setAttributes(255, 255, 255, 255);
+	topleftAtts.setColour(255, 255, 255, 255);
+    rootAtts.setNormal(-0.57445626f, 0.57445626f, -0.57445626f);
 	OctreeNode *topleft = new OctreeNode(topleftAtts);
 	
 	// Create topright node + atts
 	Attributes toprightAtts;
-	toprightAtts.setAttributes(255, 0, 0, 255);
+	toprightAtts.setColour(255, 0, 0, 255);
+    rootAtts.setNormal(0.57445626f, 0.57445626f, -0.57445626f);
 	OctreeNode *topright = new OctreeNode(toprightAtts);
 	
 	// Create bottomleft node + atts
 	Attributes bottomleftAtts;
-	bottomleftAtts.setAttributes(0, 255, 0, 255);
+	bottomleftAtts.setColour(0, 255, 0, 255);
+    rootAtts.setNormal(-0.57445626f, -0.57445626f, -0.57445626f);
 	OctreeNode *bottomleft = new OctreeNode(bottomleftAtts);
 	
 	// Create bottomright node + atts
 	Attributes bottomrightAtts;
-	bottomrightAtts.setAttributes(0, 0, 255, 255);
+	bottomrightAtts.setColour(0, 0, 255, 255);
+    rootAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
 	OctreeNode *bottomright = new OctreeNode(bottomrightAtts);
 	
 	octree->m_pRootNode = root;
