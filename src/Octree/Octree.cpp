@@ -1,5 +1,6 @@
 #include "Octree.h"
 
+#include "OctreeHeader.h"
 #include "OctreeNode.h"
 #include "OctreeSegment.h"
 
@@ -12,6 +13,7 @@ Octree::Octree() {
 
 Octree* Octree::getSimpleOctree() {
 	Octree *octree = new Octree();
+    octree->m_pHeader = new OctreeHeader();
 	
 	// Create root node + atts
 	Attributes rootAtts;
@@ -22,27 +24,29 @@ Octree* Octree::getSimpleOctree() {
 	// Create topleft node + atts
 	Attributes topleftAtts;
 	topleftAtts.setColour(255, 255, 255, 255);
-    rootAtts.setNormal(-0.57445626f, 0.57445626f, -0.57445626f);
+    topleftAtts.setNormal(-0.57445626f, 0.57445626f, -0.57445626f);
 	OctreeNode *topleft = new OctreeNode(topleftAtts);
 	
 	// Create topright node + atts
 	Attributes toprightAtts;
 	toprightAtts.setColour(255, 0, 0, 255);
-    rootAtts.setNormal(0.57445626f, 0.57445626f, -0.57445626f);
+    toprightAtts.setNormal(0.57445626f, 0.57445626f, -0.57445626f);
 	OctreeNode *topright = new OctreeNode(toprightAtts);
 	
 	// Create bottomleft node + atts
 	Attributes bottomleftAtts;
 	bottomleftAtts.setColour(0, 255, 0, 255);
-    rootAtts.setNormal(-0.57445626f, -0.57445626f, -0.57445626f);
+    bottomleftAtts.setNormal(-0.57445626f, -0.57445626f, -0.57445626f);
 	OctreeNode *bottomleft = new OctreeNode(bottomleftAtts);
 	
 	// Create bottomright node + atts
 	Attributes bottomrightAtts;
 	bottomrightAtts.setColour(0, 0, 255, 255);
-    rootAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
+    bottomrightAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
 	OctreeNode *bottomright = new OctreeNode(bottomrightAtts);
 	
+    octree->m_pHeader->setAttributeSize(rootAtts.getSize());
+    
 	octree->m_pRootNode = root;
 	root->addChild(topleft, OctreeNode::Y | OctreeNode::Z );
 	root->addChild(topright, OctreeNode::X | OctreeNode::Y | OctreeNode::Z);
@@ -60,16 +64,20 @@ unsigned int Octree::getNumberOfNodes() {
 	return m_pRootNode->getNumberOfNodes();
 }
 
-OctreeSegment* Octree::flatten() {
+Bin Octree::getHeader() {
+    return m_pHeader->flatten();
+}
+
+Bin Octree::flatten() {
 	unsigned int numOfNodes = getNumberOfNodes();
 
 	unsigned int memoryRequired = 0;
 
-	memoryRequired += numOfNodes * 4; // For children flags + attribute pointer.
+	memoryRequired += numOfNodes * 8; // For children flags + attribute pointer.
 
 	memoryRequired += (numOfNodes - 1) * 4; // For children pointers, minus 1 as root node doesn't need one.
 
-	memoryRequired += numOfNodes * 4; // For the attributes.
+	memoryRequired += numOfNodes * m_pHeader->getAttributeSize(); // For the attributes.
 
 	// Debug cout
 	//printf("We need %d bytes of memory\n", memoryRequired);
@@ -78,5 +86,5 @@ OctreeSegment* Octree::flatten() {
 
 	m_pRootNode->flatten(buffer);
 
-	return new OctreeSegment(buffer, memoryRequired);
+	return Bin(buffer, memoryRequired);
 }

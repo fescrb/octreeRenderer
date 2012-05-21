@@ -4,6 +4,9 @@
 class Octree;
 class OctreeSegment;
 
+class Device;
+#include "Bin.h"
+
 class DataManager {
 	public:
 		explicit 				 DataManager();
@@ -12,8 +15,10 @@ class DataManager {
 		Octree 				 	*getOctree();
 		
 		int 					 getMaxOctreeDepth();
+        
+        void                     sendDataToDevice(Device* device);
 		
-		OctreeSegment			*getFullOctree();
+		Bin			             getFullOctree();
 
 	private:
 	

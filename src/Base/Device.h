@@ -6,6 +6,7 @@
 #include "HighResTimer.h"
 
 #include "Graphics.h"
+#include "Bin.h"
 
 class DeviceInfo;
 class OctreeSegment;
@@ -25,7 +26,7 @@ class Device {
          * @param The dimensions of the required framebuffer.
          */
         virtual void             makeFrameBuffer(int2 size) = 0;
-        virtual void             sendData(OctreeSegment* segment) = 0;
+        virtual void             sendData(Bin bin) = 0;
         virtual void             render(int2 start, int2 size, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always

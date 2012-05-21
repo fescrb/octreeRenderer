@@ -1,8 +1,11 @@
 #ifndef _OCTREE_H
 #define _OCTREE_H
 
+class OctreeHeader;
 class OctreeNode;
 class OctreeSegment;
+
+#include "Bin.h"
 
 class Octree {
 	public:
@@ -12,10 +15,13 @@ class Octree {
 
 		unsigned int			 getDepth();
 		unsigned int			 getNumberOfNodes();
-
-		OctreeSegment			*flatten();
+        
+        
+        Bin                      getHeader();
+		Bin			             flatten();
 
 	private:
+        OctreeHeader            *m_pHeader;
 		OctreeNode				*m_pRootNode;
 };
 

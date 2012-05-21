@@ -29,6 +29,8 @@ if len(sys.argv) > 1 :
             #set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
         if command == "openmp":
             extra_defs = extra_defs + ' -DUSE_OPENMP="Yes" '
+        if command == "noomp":
+            extra_defs = extra_defs + ' -DDONT_USE_OPENMP="Yes" '
         if command == "noocl":
             use_ocl = ' -DDONT_USE_OPENCL="Yes" '
         if command == "debugfindocl":

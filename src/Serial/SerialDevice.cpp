@@ -21,13 +21,14 @@ float max(float3 vector) {
 }
 
 char* getAttributes(char* node) {
-	short* addr_short = (short*)node;
-	
-	return node + (addr_short[1] * 4);
+	int* addr_int = (int*)node;
+    //printf("addr %d displacement %d\n", addr_int[1],(addr_int[1] & ~(255 << 24)));
+	return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
 bool noChildren(char* node) {
-	return !node[0];
+    //printf("1 %d 2 %d\n",((int*)node)[0],((int*)node+4)[0]);
+	return !node[7];
 }
 
 char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
@@ -40,25 +41,18 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	return flag;
 }
 
-char makeChildFlag(float3 rayPos, float3 nodeCentre) {
-	return 0 | (1 << makeXYZFlag(rayPos, nodeCentre));
-}
-
 bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
-	return node[0] & makeChildFlag(rayPos,nodeCentre);  
+    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));  
 }
 
 char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
-	int counter = 0;
-	bool found = false;
 	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
-	char flag = 0 | (1 << xyz_flag);
-	for(int i = 0; i <= xyz_flag; i++) 
-		if(node[0] & (1 << i))
-			counter++;
-	node+=(counter*4);
-	int* add_int = (int*)node;
-	return node + (add_int[0]*4);
+    int *node_int = (int*)node;
+    int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
+    node_int+=(pos+2);
+    node+=(pos+2)*4;
+	//printf("pos %d loc %d\n",pos,node_int[0]);
+    return node + (node_int[0]*4);
 }
 
 SerialDevice::SerialDevice()
@@ -95,8 +89,8 @@ void SerialDevice::makeFrameBuffer(int2 size) {
     }
 }
 
-void SerialDevice::sendData(OctreeSegment* segment) {
-	m_pOctreeData = segment->getData();
+void SerialDevice::sendData(Bin bin) {
+	m_pOctreeData = bin.getDataPointer();
 }
 
 struct Stack {
@@ -164,18 +158,17 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                 float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
                 
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
-                                     xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
-                                     xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
+                                      xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
+                                      xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
                 
                 float3 tmp_corner_far(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
                                       d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
                                       d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
                 
-                float tmp_max = min((tmp_corner_far - rayPos) / d);
+                float tmp_max = min((tmp_corner_far - o) / d);
                 
                 if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
                     // If the voxel we are at is not empty, go down.
-                    
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
                     
                     curr_address = getChild(rayPos,voxelCentre,curr_address);

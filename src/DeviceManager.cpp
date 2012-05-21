@@ -79,8 +79,6 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
 	int devices = getNumDevices();
 	
 	std::vector<GLuint> textures;
-	
-	OctreeSegment* fullOctree = m_pDataManager->getFullOctree();
     
     info->maxOctreeDepth = m_pDataManager->getMaxOctreeDepth();
 	
@@ -90,7 +88,7 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
 		device_list[i]->makeFrameBuffer(resolution);
 	
 	for(int i = 0; i < devices; i++) 
-		device_list[i]->sendData(fullOctree);
+		m_pDataManager->sendDataToDevice(device_list[i]);
 	
 	for(int i = 0; i < devices; i++) 
 		device_list[i]->render(int2(),resolution,info);
@@ -101,6 +99,7 @@ std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution
     for(int i = 0; i < devices; i++) {
         printf("%d %f %f\n", i, (double)device_list[i]->getRenderTime(), (double)device_list[i]->getBufferToTextureTime());
     }
+    //exit(0);
 		
 		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());
 		//image.toBMP("frame.bmp");

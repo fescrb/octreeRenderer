@@ -61,16 +61,26 @@ char* OctreeNode::flatten(char* buffer) {
 	short* buffer_short = (short*) buffer;
 
 	// Create children flag. Then write it.
-	char flags = 0;
-	for(int i = 0; i < 8; i++) {
-		if(m_vChildren[i]){
-			flags |= (1 << i);
-		}
-	}
-	buffer[0] = flags;
-
-	// Write the number of children.
-	buffer_short[1] = numberOfChildren + 1;
+    char flags = 0;
+    int positions = 0;
+    int counter = 0;
+    for(int i = 0; i < 8; i++) {
+        if(m_vChildren[i]){
+            printf("i %d flag %d pos %d\n", i, flags, positions);
+            flags |= ( 1 << i );
+            positions |= (counter << (i*3));
+            counter ++;
+        }
+    }
+    buffer_int[0] = positions;
+    buffer_int++;
+    buffer+=sizeof(int);
+    
+    // Write the number of children. This is the attribute pointer (for now).
+    buffer_int[0] = numberOfChildren + 1;
+    printf("buff_int %d\n",  buffer_int[0]);
+    buffer[3] = flags ;
+    printf("buff %d flags %d buff_int %d\n", buffer[3], flags,  buffer_int[0]);
 
 	// Find out where we will write the attributes. Then write
 	char* end = buffer + ((numberOfChildren + 1 ) *4);
@@ -89,3 +99,41 @@ char* OctreeNode::flatten(char* buffer) {
 
 	return end;
 }
+
+/*
+ * char* OctreeNode::flatten(char* buffer) {
+    int* buffer_int = (int*) buffer;
+    short* buffer_short = (short*) buffer;
+
+    // Create children flag. Then write it.
+    int flags = 0;
+    int counter = 0;
+    for(int i = 0; i < 8; i++) {
+        if(m_vChildren[i]){
+            flags |= (counter << (i*3));
+            counter ++;
+        }
+    }
+    buffer_int[0] = flags;
+
+    // Write the number of children. This is the attribute pointer (for now).
+    buffer_int[1] = numberOfChildren + 1;
+
+    // Find out where we will write the attributes. Then write
+    char* end = buffer + ((numberOfChildren + 1 ) *4);
+    end = m_attributes.flatten(end);
+
+    buffer_int++;
+
+    for(int i = 0; i < 8; i++) {
+        if(m_vChildren[i]){
+            buffer_int[0] = (int*)end - buffer_int;
+            //printf("diff %d\n", buffer_int[0]);
+            buffer_int++;
+            end = m_vChildren[i]->flatten(end);
+        }
+    }
+
+    return end;
+}
+ * */

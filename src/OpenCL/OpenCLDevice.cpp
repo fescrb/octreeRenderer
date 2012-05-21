@@ -72,8 +72,8 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
     }
 }
 
-void OpenCLDevice::sendData(OctreeSegment* segment) {
-    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, segment->getSize(), (void*)segment->getData(), 0, NULL, NULL);
+void OpenCLDevice::sendData(Bin bin){
+    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
 }
 
 void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
