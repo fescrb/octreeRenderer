@@ -7,7 +7,7 @@
 
 struct mesh {
     public:
-                                         mesh(){};
+                                         mesh():m_triangles(){};
                                          mesh(const mesh& other)
                                          :  m_triangles(other.m_triangles){};
 
@@ -41,6 +41,15 @@ struct mesh {
 
         inline triangle&                 operator[](const int& index){
             return m_triangles[index];
+        }
+        
+        inline mesh&                     operator=(const mesh& other) {
+            if(this != &other) {
+                this->m_triangles.clear();
+                for(int i = 0; i < other.getTriangleCount(); i++) 
+                    this->m_triangles.push_back(other.getTriangle(i));
+            }
+            return *this;
         }
 
         //inline mesh&                 operator*(const );

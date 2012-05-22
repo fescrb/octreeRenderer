@@ -8,78 +8,14 @@
 
 OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
 :   m_mesh(meshToConvert),
-    m_aabox(meshToConvert){
+    m_aabox(meshToConvert),
+    m_depth(depth){
     // We need to centre the mesh at the origin.
     float4 off_centre_difference = float4() - m_aabox.getCentre();
-    
-    printf("centre %f %f %f\n", m_aabox.getCentre()[0], m_aabox.getCentre()[1], m_aabox.getCentre()[2]);
-    printf("corner %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2]);
-    printf("sizes %f %f %f\n", m_aabox.getSizes()[0], m_aabox.getSizes()[1], m_aabox.getSizes()[2]);
-    printf("off centre diff %f %f %f\n", off_centre_difference[0], off_centre_difference[1], off_centre_difference[2]);
 
     float4x4 translation_matrix = float4x4::translationMatrix(off_centre_difference[0], off_centre_difference[1], off_centre_difference[2]);
-
-    for(int i = 0; i < m_mesh.getTriangleCount(); i++)
-    {
-        printf("%d vertex 0 (%f %f %f %f) (%f %f %f %f), vertex 1 (%f %f %f %f) (%f %f %f %f), vertex 2 (%f %f %f %f) (%f %f %f %f)\n", i
-            ,m_mesh.getTriangle(i)[0].getPosition()[0]
-            ,m_mesh.getTriangle(i)[0].getPosition()[1]
-            ,m_mesh.getTriangle(i)[0].getPosition()[2]
-            ,m_mesh.getTriangle(i)[0].getPosition()[3]
-            ,m_mesh.getTriangle(i)[0].getNormal()[0]
-            ,m_mesh.getTriangle(i)[0].getNormal()[1]
-            ,m_mesh.getTriangle(i)[0].getNormal()[2]
-            ,m_mesh.getTriangle(i)[0].getNormal()[3]
-            ,m_mesh.getTriangle(i)[1].getPosition()[0]
-            ,m_mesh.getTriangle(i)[1].getPosition()[1]
-            ,m_mesh.getTriangle(i)[1].getPosition()[2]
-            ,m_mesh.getTriangle(i)[1].getPosition()[3]
-            ,m_mesh.getTriangle(i)[1].getNormal()[0]
-            ,m_mesh.getTriangle(i)[1].getNormal()[1]
-            ,m_mesh.getTriangle(i)[1].getNormal()[2]
-            ,m_mesh.getTriangle(i)[1].getNormal()[3]
-            ,m_mesh.getTriangle(i)[2].getPosition()[0]
-            ,m_mesh.getTriangle(i)[2].getPosition()[1]
-            ,m_mesh.getTriangle(i)[2].getPosition()[2]
-            ,m_mesh.getTriangle(i)[2].getPosition()[3]
-            ,m_mesh.getTriangle(i)[2].getNormal()[0]
-            ,m_mesh.getTriangle(i)[2].getNormal()[1]
-            ,m_mesh.getTriangle(i)[2].getNormal()[2]
-            ,m_mesh.getTriangle(i)[2].getNormal()[3]
-        );
-    }
     
     m_mesh = translation_matrix * m_mesh;
-    
-    for(int i = 0; i < m_mesh.getTriangleCount(); i++)
-    {
-        printf("%d vertex 0 (%f %f %f %f) (%f %f %f %f), vertex 1 (%f %f %f %f) (%f %f %f %f), vertex 2 (%f %f %f %f) (%f %f %f %f)\n", i
-            ,m_mesh.getTriangle(i)[0].getPosition()[0]
-            ,m_mesh.getTriangle(i)[0].getPosition()[1]
-            ,m_mesh.getTriangle(i)[0].getPosition()[2]
-            ,m_mesh.getTriangle(i)[0].getPosition()[3]
-            ,m_mesh.getTriangle(i)[0].getNormal()[0]
-            ,m_mesh.getTriangle(i)[0].getNormal()[1]
-            ,m_mesh.getTriangle(i)[0].getNormal()[2]
-            ,m_mesh.getTriangle(i)[0].getNormal()[3]
-            ,m_mesh.getTriangle(i)[1].getPosition()[0]
-            ,m_mesh.getTriangle(i)[1].getPosition()[1]
-            ,m_mesh.getTriangle(i)[1].getPosition()[2]
-            ,m_mesh.getTriangle(i)[1].getPosition()[3]
-            ,m_mesh.getTriangle(i)[1].getNormal()[0]
-            ,m_mesh.getTriangle(i)[1].getNormal()[1]
-            ,m_mesh.getTriangle(i)[1].getNormal()[2]
-            ,m_mesh.getTriangle(i)[1].getNormal()[3]
-            ,m_mesh.getTriangle(i)[2].getPosition()[0]
-            ,m_mesh.getTriangle(i)[2].getPosition()[1]
-            ,m_mesh.getTriangle(i)[2].getPosition()[2]
-            ,m_mesh.getTriangle(i)[2].getPosition()[3]
-            ,m_mesh.getTriangle(i)[2].getNormal()[0]
-            ,m_mesh.getTriangle(i)[2].getNormal()[1]
-            ,m_mesh.getTriangle(i)[2].getNormal()[2]
-            ,m_mesh.getTriangle(i)[2].getNormal()[3]
-        );
-    }
     m_aabox = translation_matrix * m_aabox;
 }
 
@@ -88,24 +24,27 @@ void OctreeCreator::render() {
 }
 
 void OctreeCreator::convert() {
-    aabox new_aabox = m_aabox;
-    new_aabox.setSizes(new_aabox.getSizes()*0.5f);
+    octree<mesh*> mesh_octree = octree<mesh*>();
+    float3 half_size = m_aabox.getSizes()/2.0f;
+    float4 centre = m_aabox.getCentre();
+    float4 corner = m_aabox.getCorner();
     
-    printf("Start mesh size %d\n", m_mesh.getTriangleCount());
-    printf("BBox (%f %f %f) (%f %f %f)\n",
-        new_aabox.getCorner()[0],
-        new_aabox.getCorner()[1],
-        new_aabox.getCorner()[2],
-        new_aabox.getSizes()[0],
-        new_aabox.getSizes()[1],
-        new_aabox.getSizes()[2]
-    );
+    mesh_octree.m_node = new mesh(m_mesh);
+    mesh_octree.allocateChildren();
     
-    mesh res_mesh = new_aabox.cull(m_mesh);
+    for(int i = 0; i < 8; i++) {
+        float4 new_corner = float4(0.0f, 0.0f, 0.0f, 1.0f);
+        
+        i & octree<mesh>::X ? new_corner.setX(centre[0]): new_corner.setX(corner[0]);
+        i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
+        i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
+        
+        if( createSubtree(&(mesh_octree.m_children[i]), *(mesh_octree.m_node), aabox(new_corner, half_size), m_depth)) {
+            mesh_octree.m_children_flag |= (1<<i);
+        }
+    }
     
-    printf("Mesh size %d\n", res_mesh.getTriangleCount());
-    
-    for(int i = 0; i < res_mesh.getTriangleCount(); i++) {
+    /*for(int i = 0; i < res_mesh.getTriangleCount(); i++) {
         triangle tri = res_mesh.getTriangle(i);
         
         vertex v = tri.getVertex(0); float4 pos = v.getPosition(); float4 nor = v.getNormal();
@@ -114,9 +53,42 @@ void OctreeCreator::convert() {
         printf("Triangle %d vertex 2: x %f y %f z %f nx %f ny %f nz %f\n", i, pos[0], pos[1], pos[2], nor[0], nor[1], nor[2]);
         v = tri.getVertex(2); pos = v.getPosition(); nor = v.getNormal();
         printf("Triangle %d vertex 3: x %f y %f z %f nx %f ny %f nz %f\n", i, pos[0], pos[1], pos[2], nor[0], nor[1], nor[2]);
-    }
+    }*/
 }
 
 aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
     return m_aabox;
+}
+
+bool OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth) {
+    printf("cre\n");
+    pNode[0] = octree<mesh*>();
+    pNode->m_node = new mesh(box.cull(m));
+    
+    if(pNode->m_node->getTriangleCount()) {
+        depth--;
+        
+        if(depth>=0) {
+            float3 half_size = box.getSizes()/2.0f;
+            float4 centre = box.getCentre();
+            float4 corner = box.getCorner();
+            
+            pNode->allocateChildren();
+            
+            for(int i = 0; i < 8; i++) {
+                float4 new_corner = float4(0.0f, 0.0f, 0.0f, 1.0f);
+                
+                i & octree<mesh>::X ? new_corner.setX(centre[0]): new_corner.setX(corner[0]);
+                i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
+                i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
+                
+                if( createSubtree(&(pNode->m_children[i]), *(pNode->m_node), aabox(new_corner, half_size), depth)) {
+                    pNode->m_children_flag |= (1<<i);
+                }
+            }
+        }
+        
+        return true;
+    }
+    return false;
 }

@@ -2,6 +2,7 @@
 #define _OCTREE_CREATOR_H
 
 #include "AABox.h"
+#include <OctreeStruct.h>
 
 class Octree;
 
@@ -15,8 +16,14 @@ class OctreeCreator {
         aabox                    getMeshAxisAlignedBoundingBox();
 
     private:
+        /**
+         * @ret true if it contains triangles, false otherwise
+         */
+        bool                     createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth);
+        
         mesh                     m_mesh;
         aabox                    m_aabox;
+        int                      m_depth;
         
         Octree                  *m_octree;
 };

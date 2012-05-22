@@ -1,5 +1,7 @@
 #include "Octree.h"
 
+#include "OctreeStruct.h"
+
 #include "OctreeHeader.h"
 #include "OctreeNode.h"
 #include "OctreeSegment.h"

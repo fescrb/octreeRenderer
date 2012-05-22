@@ -23,6 +23,12 @@ int main(int argc, char** argv) {
         printf("Type geometryToOctree -help for more info.\n");
         exit(1);
     }
+    
+    int depth = 1;
+    
+    if(argc == 3) {
+        depth = atoi(argv[2]);
+    }
 
     if(!strcmp(argv[1], "-help")) {
         //Printout help and exit.
@@ -32,7 +38,7 @@ int main(int argc, char** argv) {
 
     OBJFileReader* objFile = new OBJFileReader(argv[1]);
 
-    OctreeCreator* octreeCreator = new OctreeCreator(objFile->getMesh());
+    OctreeCreator* octreeCreator = new OctreeCreator(objFile->getMesh(), depth);
 
     int2 dim(600, 400);
 
