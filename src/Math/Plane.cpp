@@ -9,9 +9,6 @@ float4 plane::getIntersectionPoint(const line& intersecting_line) {
     float scalar = ( dot(m_normal,origin) - dot(m_normal, m_pointInPlane) ) / dot(m_normal, direction);
     scalar*=-1.0f;
     
-    printf("line o (%f %f %f) d (%f %f %f)\n", origin[0], origin[1], origin[2], direction[0], direction[1], direction[2]);
-    printf("scalar %f\n",scalar);
-    
     return intersecting_line.getPositionAt(scalar);
 }
 
@@ -43,7 +40,7 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
                 missing_vertices.push_back(triangleToCull.getVertex(i));
         
         if(counter == 1) {
-            printf("vertex 0 (%f %f %f) (%f %f %f), missing vert (%f %f %f) (%f %f %f)\n"
+            /*printf("vertex 0 (%f %f %f) (%f %f %f), missing vert (%f %f %f) (%f %f %f)\n"
                 ,vertices[0].getPosition()[0]
                 ,vertices[0].getPosition()[1]
                 ,vertices[0].getPosition()[2]
@@ -56,17 +53,17 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
                 ,missing_vertices[0].getNormal()[0]
                 ,missing_vertices[0].getNormal()[1]
                 ,missing_vertices[0].getNormal()[2]
-            );
+            );*/
             vertex new_vertex_one = line::linearInterpolation(vertices[0], missing_vertices[0], getIntersectionPoint(line(vertices[0], missing_vertices[0])));
-            printf("new vert 1 (%f %f %f) (%f %f %f)\n"
+            /*printf("new vert 1 (%f %f %f) (%f %f %f)\n"
                 , new_vertex_one.getPosition()[0], new_vertex_one.getPosition()[1], new_vertex_one.getPosition()[2]
                 , new_vertex_one.getNormal()[0], new_vertex_one.getNormal()[1], new_vertex_one.getNormal()[2]
-            );
+            );*/
             vertex new_vertex_two = line::linearInterpolation(vertices[0], missing_vertices[1], getIntersectionPoint(line(vertices[0],missing_vertices[1])));
-            printf("new vert 2 (%f %f %f) (%f %f %f)\n"
+            /*printf("new vert 2 (%f %f %f) (%f %f %f)\n"
                 , new_vertex_two.getPosition()[0], new_vertex_two.getPosition()[1], new_vertex_two.getPosition()[2]
                 , new_vertex_two.getNormal()[0], new_vertex_two.getNormal()[1], new_vertex_two.getNormal()[2]
-            );
+            );*/
             
             float4 normal = cross(new_vertex_one.getPosition()-vertices[0].getPosition(),new_vertex_two.getPosition()-vertices[0].getPosition());
             
@@ -76,7 +73,7 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
                 result.push_back(triangle(vertices[0],new_vertex_two,new_vertex_one));
             }
         } else {
-            printf("vertex 0 (%f %f %f) (%f %f %f), missing vert (%f %f %f) (%f %f %f)\n"
+            /*printf("vertex 0 (%f %f %f) (%f %f %f), missing vert (%f %f %f) (%f %f %f)\n"
                 ,vertices[0].getPosition()[0]
                 ,vertices[0].getPosition()[1]
                 ,vertices[0].getPosition()[2]
@@ -89,17 +86,17 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
                 ,missing_vertices[0].getNormal()[0]
                 ,missing_vertices[0].getNormal()[1]
                 ,missing_vertices[0].getNormal()[2]
-            );
+            );*/
             vertex new_vertex_one = line::linearInterpolation(vertices[0], missing_vertices[0],(getIntersectionPoint(line(vertices[0], missing_vertices[0]))));
-            printf("new vert 1 (%f %f %f) (%f %f %f)\n"
+            /*printf("new vert 1 (%f %f %f) (%f %f %f)\n"
                 , new_vertex_one.getPosition()[0], new_vertex_one.getPosition()[1], new_vertex_one.getPosition()[2]
                 , new_vertex_one.getNormal()[0], new_vertex_one.getNormal()[1], new_vertex_one.getNormal()[2]
-            );
+            );*/
             vertex new_vertex_two = line::linearInterpolation(vertices[1], missing_vertices[0],getIntersectionPoint(line(vertices[1], missing_vertices[0])));
-            printf("new vert 2 (%f %f %f) (%f %f %f)\n"
+            /*printf("new vert 2 (%f %f %f) (%f %f %f)\n"
                 , new_vertex_two.getPosition()[0], new_vertex_two.getPosition()[1], new_vertex_two.getPosition()[2]
                 , new_vertex_two.getNormal()[0], new_vertex_two.getNormal()[1], new_vertex_two.getNormal()[2]
-            );
+            );*/
             
             float4 normal = cross(new_vertex_one.getPosition()-vertices[0].getPosition(), vertices[1].getPosition()-vertices[0].getPosition());
             

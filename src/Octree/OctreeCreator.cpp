@@ -1,8 +1,12 @@
 #include "OctreeCreator.h"
 
-#include "AABox.h"
+#include "Octree.h"
+#include "OctreeNode.h"
 
+#include "AABox.h"
 #include "Matrix.h"
+
+#include "MathUtil.h"
 
 #include <cstdio>
 
@@ -29,20 +33,18 @@ void OctreeCreator::convert() {
     float4 centre = m_aabox.getCentre();
     float4 corner = m_aabox.getCorner();
     
-    mesh_octree.m_node = new mesh(m_mesh);
-    mesh_octree.allocateChildren();
     
-    for(int i = 0; i < 8; i++) {
-        float4 new_corner = float4(0.0f, 0.0f, 0.0f, 1.0f);
-        
-        i & octree<mesh>::X ? new_corner.setX(centre[0]): new_corner.setX(corner[0]);
-        i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
-        i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
-        
-        if( createSubtree(&(mesh_octree.m_children[i]), *(mesh_octree.m_node), aabox(new_corner, half_size), m_depth)) {
-            mesh_octree.m_children_flag |= (1<<i);
-        }
-    }
+    OctreeNode *root = createSubtree(&mesh_octree, m_mesh, m_aabox, m_depth);
+   
+    printf("Root node col %f %f %f %f normal %f %f %f\n",
+        root->getAttributes().getColour()[0],
+        root->getAttributes().getColour()[1],
+        root->getAttributes().getColour()[2],
+        root->getAttributes().getColour()[3],
+        root->getAttributes().getNormal()[0],
+        root->getAttributes().getNormal()[1],
+        root->getAttributes().getNormal()[2]
+    );
     
     /*for(int i = 0; i < res_mesh.getTriangleCount(); i++) {
         triangle tri = res_mesh.getTriangle(i);
@@ -60,13 +62,17 @@ aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
     return m_aabox;
 }
 
-bool OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth) {
+OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth) {
     printf("cre\n");
     pNode[0] = octree<mesh*>();
     pNode->m_node = new mesh(box.cull(m));
     
     if(pNode->m_node->getTriangleCount()) {
         depth--;
+        
+        OctreeNode *this_node = new OctreeNode();
+        bool has_children = false;
+        int children = 0;
         
         if(depth>=0) {
             float3 half_size = box.getSizes()/2.0f;
@@ -75,6 +81,9 @@ bool OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int d
             
             pNode->allocateChildren();
             
+            float4 colour = float4();
+            float4 normal = float4();
+            
             for(int i = 0; i < 8; i++) {
                 float4 new_corner = float4(0.0f, 0.0f, 0.0f, 1.0f);
                 
@@ -82,13 +91,65 @@ bool OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int d
                 i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
                 i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
                 
-                if( createSubtree(&(pNode->m_children[i]), *(pNode->m_node), aabox(new_corner, half_size), depth)) {
+                OctreeNode* child_node = createSubtree(&(pNode->m_children[i]), *(pNode->m_node), aabox(new_corner, half_size), depth);
+                
+                if(child_node) {
                     pNode->m_children_flag |= (1<<i);
+                    has_children = true;
+                    colour+=child_node->getAttributes().getColour();
+                    printf("child_colour %f %f %f %f\n",
+                           child_node->getAttributes().getColour()[0],
+                           child_node->getAttributes().getColour()[1],
+                           child_node->getAttributes().getColour()[2],
+                           child_node->getAttributes().getColour()[3]
+                    );
+                    normal+=child_node->getAttributes().getNormal();
+                    printf("child normal %f %f %f\n",
+                           child_node->getAttributes().getNormal()[0],
+                           child_node->getAttributes().getNormal()[1],
+                           child_node->getAttributes().getNormal()[2]
+                    );
+                    this_node->addChild(child_node, i);
+                    children++;
                 }
             }
+            
+            if(has_children) {
+                normal/=(float)children;
+                colour/=(float)children;
+                
+                Attributes atts;
+                atts.setColour(colour);
+                atts.setNormal(normal[0],normal[1], normal[2]);
+                
+                this_node->setAttributes(atts);
+            }
+        } 
+        
+        if(!has_children){
+            float4 colour = float4();
+            float4 normal = float4();
+            float total_area = 0;
+            for(int i = 0; i < pNode->m_node->getTriangleCount(); i++) {
+                float area = pNode->m_node->getTriangle(i).getSurfaceArea();
+                total_area+=area;
+                colour += pNode->m_node->getTriangle(i).getAverageColour() * area;
+                normal += pNode->m_node->getTriangle(i).getAverageNormal() * area;
+            }
+            colour/=total_area;
+            normal/=total_area;
+            normal=normalize(normal);
+            
+            printf("child node col %f %f %f %f nor %f %f %f\n-----------\n",colour[0],colour[1],colour[2],colour[3],normal[0],normal[1],normal[2]);
+            
+            Attributes atts;
+            atts.setColour(colour);
+            atts.setNormal(normal[0],normal[1], normal[2]);
+            
+            this_node->setAttributes(atts);
         }
         
-        return true;
+        return this_node;
     }
-    return false;
+    return NULL;
 }

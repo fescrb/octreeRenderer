@@ -25,6 +25,11 @@ public:
         return vector4(m_x+rhs.m_x, m_y+rhs.m_y, m_z+rhs.m_z, m_w+rhs.m_w);
     }
     
+    inline vector4&  operator+=(const vector4 &rhs) {
+        this->operator=(this->operator+(rhs));
+        return *this;
+    }
+    
     inline vector4   operator-(const vector4 &rhs) const{
         return vector4(m_x-rhs.m_x, m_y-rhs.m_y, m_z-rhs.m_z, m_w-rhs.m_w);
     }
@@ -41,8 +46,18 @@ public:
         return vector4(m_x/rhs,m_y/rhs,m_z/rhs, m_w/rhs);
     }
     
+    inline vector4   operator/=(const t &rhs) {
+        this->operator=(this->operator/(rhs));
+        return *this;
+    }
+    
     inline vector4   operator/(const vector4 &rhs) const{
         return vector4(m_x/rhs.m_x,m_y/rhs.m_y,m_z/rhs.m_z, m_w/rhs.m_w);
+    }
+    
+    inline vector4&  operator/=(const vector4 &rhs) {
+        this->operator=(this->operator/(rhs));
+        return *this;
     }
     
     inline bool      operator==(const vector4 &rhs)const{

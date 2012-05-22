@@ -19,6 +19,7 @@ class OctreeNode {
 		void					 cleanChildrenPointers();
 
 		void					 setAttributes(Attributes att);
+        Attributes               getAttributes();
 
 		char 					*flatten(char* buffer);
 

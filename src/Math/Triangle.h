@@ -76,6 +76,26 @@ struct triangle {
             m_vert2.setNormal(normal);
         }
         
+        inline float4    getAverageNormal() const{
+            return (m_vert0.getNormal() + m_vert1.getNormal() + m_vert2.getNormal())/3.0f;
+        }
+        
+        inline float4    getAverageColour() const{
+            return (m_vert0.getColour() + m_vert1.getColour() + m_vert2.getColour())/3.0f;
+        }
+        
+        float            getSurfaceArea() const {
+            float4 l1 = m_vert1.getPosition() - m_vert0.getPosition();
+            float4 l2 = m_vert2.getPosition() - m_vert0.getPosition();
+            float l_l1 = mag(l1);
+            float l_l2 = mag(l2);
+            
+            float angle = acos((dot(l1,l2)) / (l_l1*l_l2));
+            float opposite = sin(angle)*l_l1;
+            
+            return (opposite*l_l2)/2.0f;
+        }
+        
     private:
         vertex           m_vert0, m_vert1, m_vert2;
 };

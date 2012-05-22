@@ -1,36 +1,59 @@
 #include "Attributes.h"
 
 #include <cmath>
-
 #include <stdio.h>
+
+#include "MathUtil.h"
 
 Attributes::Attributes() 
 :   m_has_normal(false) {
 
 }
 
-void Attributes::setColour(char red,
-                           char green,
-                           char blue,
-                           char alpha) {
+void Attributes::setColour(unsigned char red,
+                           unsigned char green,
+                           unsigned char blue,
+                           unsigned char alpha) {
 	m_red = red;
 	m_green = green;
 	m_blue = blue;
 	m_alpha = alpha;
 }
 
+void Attributes::setColour(float4 colour) {
+    setColour(
+        float_to_8_bit_unsigned_fixed_point(colour[0]),
+        float_to_8_bit_unsigned_fixed_point(colour[1]),
+        float_to_8_bit_unsigned_fixed_point(colour[2]),
+        float_to_8_bit_unsigned_fixed_point(colour[3])
+    );
+    printf("colors %d\n",m_red);
+}
+        
+float4 Attributes::getColour() {
+    return float4( unsigned_8bit_fixed_point_to_float(m_red),
+                   unsigned_8bit_fixed_point_to_float(m_green),
+                   unsigned_8bit_fixed_point_to_float(m_blue),
+                   unsigned_8bit_fixed_point_to_float(m_alpha)
+    );
+}
+
 void Attributes::setNormal(float x,
                            float y,
                            float z ) {
     m_has_normal=true;
-    float range =127.0f; // Max value of a 7 bit unsigned integer.
-    float step = 1.0f/range;
-    m_x = x/step;
-    m_y = y/step;
-    m_z = z/step;
-    //printf("range %f step %f %d\n", range, step);
-    //printf("x %f %d y %f %d z %f %d\n", x, m_x, y, m_y, z, m_z);
+    m_x = float_to_fixed_point_8bit(x);
+    m_y = float_to_fixed_point_8bit(y);
+    m_z = float_to_fixed_point_8bit(z);
     m_w = 0;
+}
+
+float4 Attributes::getNormal() {
+    return float4( fixed_point_8bit_to_float(m_x),
+                   fixed_point_8bit_to_float(m_y),
+                   fixed_point_8bit_to_float(m_z),
+                   fixed_point_8bit_to_float(m_w)
+    );
 }
 
 

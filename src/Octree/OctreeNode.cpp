@@ -25,6 +25,10 @@ void OctreeNode::setAttributes(Attributes att) {
 	m_attributes = att;
 }
 
+Attributes OctreeNode::getAttributes() {
+    return m_attributes;
+}
+
 unsigned int OctreeNode::getDepth() {
 	unsigned int maxDepth = 0;
 

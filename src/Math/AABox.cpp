@@ -38,7 +38,7 @@ mesh aabox::cull(const mesh& meshToCull) {
         to_process.clear();
         to_process.push_back(meshToCull.getTriangle(i));
         
-        printf("triangle to process: (%f %f %f) (%f %f %f) (%f %f %f)\n"
+        /*printf("triangle to process: (%f %f %f) (%f %f %f) (%f %f %f)\n"
             , to_process[0].getVertex(0).getPosition()[0]
             , to_process[0].getVertex(0).getPosition()[1]
             , to_process[0].getVertex(0).getPosition()[2]
@@ -48,7 +48,7 @@ mesh aabox::cull(const mesh& meshToCull) {
             , to_process[0].getVertex(2).getPosition()[0]
             , to_process[0].getVertex(2).getPosition()[1]
             , to_process[0].getVertex(2).getPosition()[2]
-        );
+        );*/
         
         for(int j = 0; j < 6 && !to_process.empty(); j++) {
             to_add.clear();
@@ -57,7 +57,7 @@ mesh aabox::cull(const mesh& meshToCull) {
                 triangle this_triangle = to_process[to_process.size() - 1];
                 to_process.pop_back();
                 
-                printf("this triange: (%f %f %f) (%f %f %f) (%f %f %f)\n"
+                /*printf("this triange: (%f %f %f) (%f %f %f) (%f %f %f)\n"
                     , this_triangle.getVertex(0).getPosition()[0]
                     , this_triangle.getVertex(0).getPosition()[1]
                     , this_triangle.getVertex(0).getPosition()[2]
@@ -67,20 +67,20 @@ mesh aabox::cull(const mesh& meshToCull) {
                     , this_triangle.getVertex(2).getPosition()[0]
                     , this_triangle.getVertex(2).getPosition()[1]
                     , this_triangle.getVertex(2).getPosition()[2]
-                );
+                );*/
                 
-                printf("this plane (%f %f %f) (%f %f %f)\n"
+                /*printf("this plane (%f %f %f) (%f %f %f)\n"
                     , aabox_planes[j].getPointInPlane()[0]
                     , aabox_planes[j].getPointInPlane()[1]
                     , aabox_planes[j].getPointInPlane()[2]
                     , aabox_planes[j].getNormal()[0]
                     , aabox_planes[j].getNormal()[1]
                     , aabox_planes[j].getNormal()[2]
-                );
+                );*/
                 
                 std::vector<triangle> this_result = aabox_planes[j].cull(this_triangle);
                 
-                for(int k = 0; k < this_result.size(); k++) {
+                /*for(int k = 0; k < this_result.size(); k++) {
                     printf("this result %d: (%f %f %f) (%f %f %f) (%f %f %f)\n", k
                         , this_result[k].getVertex(0).getPosition()[0]
                         , this_result[k].getVertex(0).getPosition()[1]
@@ -94,7 +94,7 @@ mesh aabox::cull(const mesh& meshToCull) {
                     );
                 }
                 
-                printf("--------------\n");
+                printf("--------------\n");*/
                 
                 to_add.insert(to_add.end(), this_result.begin(), this_result.end());
             }

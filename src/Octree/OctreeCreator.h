@@ -5,6 +5,7 @@
 #include <OctreeStruct.h>
 
 class Octree;
+class OctreeNode;
 
 class OctreeCreator {
     public:
@@ -19,7 +20,7 @@ class OctreeCreator {
         /**
          * @ret true if it contains triangles, false otherwise
          */
-        bool                     createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth);
+        OctreeNode              *createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth);
         
         mesh                     m_mesh;
         aabox                    m_aabox;
