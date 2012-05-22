@@ -22,13 +22,11 @@ float max(float3 vector) {
 
 char* getAttributes(char* node) {
 	int* addr_int = (int*)node;
-    //printf("addr %d displacement %d\n", addr_int[1],(addr_int[1] & ~(255 << 24)));
 	return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
 bool noChildren(char* node) {
-    //printf("1 %d 2 %d\n",((int*)node)[0],((int*)node+4)[0]);
-	return !node[7];
+    return !node[7];
 }
 
 char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
@@ -51,7 +49,6 @@ char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
     int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
     node_int+=(pos+2);
     node+=(pos+2)*4;
-	//printf("pos %d loc %d\n",pos,node_int[0]);
     return node + (node_int[0]*4);
 }
 

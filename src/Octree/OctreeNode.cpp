@@ -66,7 +66,6 @@ char* OctreeNode::flatten(char* buffer) {
     int counter = 0;
     for(int i = 0; i < 8; i++) {
         if(m_vChildren[i]){
-            printf("i %d flag %d pos %d\n", i, flags, positions);
             flags |= ( 1 << i );
             positions |= (counter << (i*3));
             counter ++;
@@ -78,9 +77,7 @@ char* OctreeNode::flatten(char* buffer) {
     
     // Write the number of children. This is the attribute pointer (for now).
     buffer_int[0] = numberOfChildren + 1;
-    printf("buff_int %d\n",  buffer_int[0]);
     buffer[3] = flags ;
-    printf("buff %d flags %d buff_int %d\n", buffer[3], flags,  buffer_int[0]);
 
 	// Find out where we will write the attributes. Then write
 	char* end = buffer + ((numberOfChildren + 1 ) *4);

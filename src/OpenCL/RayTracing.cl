@@ -26,7 +26,7 @@ float max_component(float3 vector) {
 }
 
 bool no_children(__global char* address) {
-    return !address[0];
+    return !address[7];
 }
 
 char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
@@ -43,29 +43,22 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	return flag;
 }
 
-char makeChildFlag(float3 rayPos, float3 nodeCentre) {
-	return 0 | (1 << makeXYZFlag(rayPos, nodeCentre));
-}
-
 bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, global char* node) {
-	return node[0] & makeChildFlag(rayPos,nodeCentre);  
+	return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));  
 }
 
 global char* getChild(float3 rayPos, float3 nodeCentre, global char* node) {
-	int counter = 0;
-	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
-	for(int i = 0; i <= xyz_flag; i++) 
-		if(node[0] & (1 << i))
-			counter++;
-	node+=(counter*4);
-	global int* add_int = (global int*)node;
-	return node + (add_int[0]*4);
+    char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
+    global int *node_int = (global int*)node;
+    int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
+    node_int+=(pos+2);
+    node+=(pos+2)*4;
+    return node + (node_int[0]*4);
 }
 
 global char* get_attributes(global char* node) {
-	global short* addr_short = (global short*)node;
-	
-	return node + (addr_short[1] * 4);
+    global int* addr_int = (global int*)node;
+    return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
 int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float t_min, float t_max) {
