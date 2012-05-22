@@ -19,6 +19,8 @@ mesh OBJFileReader::getMesh() {
     data->vertexList.push_back(float4());
     data->normalList.push_back(float4());
     
+    float4 vert;
+    std::vector<triangle> triangles;
     int normalCounter = 0;
     
     while(!in.eof()) {
@@ -30,7 +32,10 @@ mesh OBJFileReader::getMesh() {
         
         switch(getLineType(line)){
             case TYPE_VERTEX_DECLARATION:
-                data->vertexList.push_back(getVertexFromLine(line)); 
+                vert = getVertexFromLine(line);
+                printf("vertex %f %f %f %f\n", vert[0], vert[1], vert[2], vert[3]);
+                data->vertexList.push_back(vert); 
+                //data->vertexList.push_back(getVertexFromLine(line)); 
                 break;
             case TYPE_NORMAL_DECLARATION:
                 tmp = getVertexFromLine(line); // tmp = normal
@@ -38,7 +43,23 @@ mesh OBJFileReader::getMesh() {
                 data->normalList.push_back(tmp);
                 break;
             case TYPE_FACE_DECLARATION:
-                objMesh.appendTriangles(getFacesFromLine(line,data));
+                triangles = getFacesFromLine(line,data);
+                objMesh.appendTriangles(triangles);
+                for(int i = 0; i < triangles.size(); i++) {
+                    printf("triangle %d: (%f %f %f) (%f %f %f) (%f %f %f)\n", i
+                        , triangles[i].getVertex(0).getPosition()[0]
+                        , triangles[i].getVertex(0).getPosition()[1]
+                        , triangles[i].getVertex(0).getPosition()[2]
+                        , triangles[i].getVertex(1).getPosition()[0]
+                        , triangles[i].getVertex(1).getPosition()[1]
+                        , triangles[i].getVertex(1).getPosition()[2]
+                        , triangles[i].getVertex(2).getPosition()[0]
+                        , triangles[i].getVertex(2).getPosition()[1]
+                        , triangles[i].getVertex(2).getPosition()[2]
+                    );
+                    printf("mesh now size %d \n",objMesh.getTriangleCount());
+                }
+                //objMesh.appendTriangles(getFacesFromLine(line,data));
             default:
                 ; // We do nothing.
         }
@@ -127,7 +148,30 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
             new_triangle[0].setNormal(data->normalList[normal_indices[0]]);
             new_triangle[1].setNormal(data->normalList[normal_indices[1]]);
             new_triangle[2].setNormal(data->normalList[normal_indices[2]]);
-            
+        }
+        
+        if(mag(new_triangle.getVertex(0).getNormal()) != 1.0f || mag(new_triangle.getVertex(1).getNormal()) != 1.0f || mag(new_triangle.getVertex(2).getNormal()) != 1.0f) {
+            printf("vertex 0 (%f %f %f) (%f %f %f), vertex 1 (%f %f %f) (%f %f %f), vertex 2 (%f %f %f) (%f %f %f)\n"
+                ,new_triangle[0].getPosition()[0]
+                ,new_triangle[0].getPosition()[1]
+                ,new_triangle[0].getPosition()[2]
+                ,new_triangle[0].getNormal()[0]
+                ,new_triangle[0].getNormal()[1]
+                ,new_triangle[0].getNormal()[2]
+                ,new_triangle[1].getPosition()[0]
+                ,new_triangle[1].getPosition()[1]
+                ,new_triangle[1].getPosition()[2]
+                ,new_triangle[1].getNormal()[0]
+                ,new_triangle[1].getNormal()[1]
+                ,new_triangle[1].getNormal()[2]
+                ,new_triangle[2].getPosition()[0]
+                ,new_triangle[2].getPosition()[1]
+                ,new_triangle[2].getPosition()[2]
+                ,new_triangle[2].getNormal()[0]
+                ,new_triangle[2].getNormal()[1]
+                ,new_triangle[2].getNormal()[2]
+            );
+            printf("Normal not 1\n");
         }
         
         triangles.push_back(new_triangle);

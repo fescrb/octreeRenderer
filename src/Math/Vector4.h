@@ -49,6 +49,10 @@ public:
         return m_x==rhs.m_x && m_y==rhs.m_y && m_z==rhs.m_z && m_w==rhs.m_w;
     }
     
+    inline bool      operator!=(const vector4 &rhs)const{
+        return !(operator==(rhs));
+    }
+    
     inline t	     operator[](const I32 &index)const{
         switch(index){
             case 0:
@@ -197,6 +201,11 @@ vector4<t> cross(const vector4<t> &lhs, const vector4<t> &rhs) {
 template <class t>
 inline vector4<t> direction(const vector3<t> &vector){
 	return vector4<t>(vector[0],vector[1],vector[2],0.0f);
+}
+
+template <class t>
+inline vector4<t> direction(const vector4<t> &vector){
+    return vector4<t>(vector[0],vector[1],vector[2],0.0f);
 }
 
 template <class t>

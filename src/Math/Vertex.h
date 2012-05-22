@@ -35,7 +35,7 @@ struct vertex {
         }
         
         inline void              setNormal(const float4& normal) {
-            m_normal = normal;
+            m_normal = direction(normal);
         }
         
         inline void              setColour(const float4& colour) {

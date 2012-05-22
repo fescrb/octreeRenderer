@@ -45,6 +45,7 @@ struct triangle {
             }
         }
         
+        // Broken
         inline vertex    interpolate(const float4& position) const{
             float3 scales;
             
