@@ -14,13 +14,13 @@ std::vector<vertex> mesh::getOuterMostVertices() const {
                 vertices[0] = this_vertex;
             if(vertex_pos.getX() < vertices[1].getPosition().getX())
                 vertices[1] = this_vertex;
-            if(vertex_pos.getY() > vertices[2].getPosition().getX())
+            if(vertex_pos.getY() > vertices[2].getPosition().getY())
                 vertices[2] = this_vertex;
-            if(vertex_pos.getY() < vertices[3].getPosition().getX())
+            if(vertex_pos.getY() < vertices[3].getPosition().getY())
                 vertices[3] = this_vertex;
-            if(vertex_pos.getZ() > vertices[4].getPosition().getX())
+            if(vertex_pos.getZ() > vertices[4].getPosition().getZ())
                 vertices[4] = this_vertex;
-            if(vertex_pos.getZ() < vertices[5].getPosition().getX())
+            if(vertex_pos.getZ() < vertices[5].getPosition().getZ())
                 vertices[5] = this_vertex;
         }
        

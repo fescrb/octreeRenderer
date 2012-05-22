@@ -2,6 +2,8 @@
 
 #include "Plane.h"
 
+#include <cstdio>
+
 aabox::aabox(const mesh& meshToBound) {
     std::vector<vertex> max_min = meshToBound.getOuterMostVertices();
     float x_max = max_min[0].getPosition().getX();
@@ -11,7 +13,7 @@ aabox::aabox(const mesh& meshToBound) {
     float z_max = max_min[4].getPosition().getZ();
     float z_min = max_min[5].getPosition().getZ();
     
-    m_corner = position(float3(x_min, y_min, y_max));
+    m_corner = position(float3(x_min, y_min, z_min));
     m_sizes = float3(x_max-x_min, y_max-y_min, z_max-z_min);
 }
 
@@ -35,6 +37,18 @@ mesh aabox::cull(const mesh& meshToCull) {
     for(int i = 0; i < mesh_size; i++) {
         to_process.clear();
         to_process.push_back(meshToCull.getTriangle(i));
+        
+        printf("triangle to process: (%f %f %f) (%f %f %f) (%f %f %f)\n"
+            , to_process[0].getVertex(0).getPosition()[0]
+            , to_process[0].getVertex(0).getPosition()[1]
+            , to_process[0].getVertex(0).getPosition()[2]
+            , to_process[0].getVertex(1).getPosition()[0]
+            , to_process[0].getVertex(1).getPosition()[1]
+            , to_process[0].getVertex(1).getPosition()[2]
+            , to_process[0].getVertex(2).getPosition()[0]
+            , to_process[0].getVertex(2).getPosition()[1]
+            , to_process[0].getVertex(2).getPosition()[2]
+        );
         
         for(int j = 0; j < 6 && !to_process.empty(); j++) {
             to_add.clear();
