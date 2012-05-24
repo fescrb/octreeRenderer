@@ -3,6 +3,8 @@
 
 #include "Vertex.h"
 
+#include <cstdio>
+
 struct triangle {
     public:
                          triangle(){};
@@ -70,6 +72,9 @@ struct triangle {
             float4 temp_thrd = m_vert2.getPosition() - m_vert0.getPosition();
             
             float4 normal = cross(temp_thrd, temp_scnd);
+            double magnitude = mag(normal);
+            normal = normalize(normal);
+            printf("mag %f norm %f %f %f %f\n", magnitude, normal[0], normal[1], normal[2], normal[3]);
             
             m_vert0.setNormal(normal);
             m_vert1.setNormal(normal);
@@ -84,14 +89,19 @@ struct triangle {
             return (m_vert0.getColour() + m_vert1.getColour() + m_vert2.getColour())/3.0f;
         }
         
-        float            getSurfaceArea() const {
+        double            getSurfaceArea() const {
             float4 l1 = m_vert1.getPosition() - m_vert0.getPosition();
             float4 l2 = m_vert2.getPosition() - m_vert0.getPosition();
-            float l_l1 = mag(l1);
-            float l_l2 = mag(l2);
+            double l_l1 = mag(l1);
+            double l_l2 = mag(l2);
             
-            float angle = acos((dot(l1,l2)) / (l_l1*l_l2));
-            float opposite = sin(angle)*l_l1;
+            double cos_angle = (dot(l1,l2)) / (l_l1*l_l2);
+            while(cos_angle > 1.0f)
+                cos_angle-=1.0f;
+            while(cos_angle < -1.0f)
+                cos_angle+=1.0f;
+            double angle = acos(cos_angle);
+            double opposite = sin(angle)*l_l1;
             
             return (opposite*l_l2)/2.0f;
         }
