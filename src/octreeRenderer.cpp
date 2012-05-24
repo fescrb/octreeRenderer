@@ -27,6 +27,7 @@ int main(int argc, char** argv) {
     OctreeRendererWindow *window = new OctreeRendererWindow(argc, argv, resolution, state);
 	
 	state->getDeviceManager()->detectDevices();
+    state->getDeviceManager()->distributeHeaderAndOctreeRoot();
     
     window->run();
 }

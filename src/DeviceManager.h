@@ -26,6 +26,7 @@ class DeviceManager {
 		
 		std::vector<Device*>     getDeviceList();
 		
+        void                     distributeHeaderAndOctreeRoot();
 		std::vector<GLuint>		 renderFrame(renderinfo *info, int2 resolution);
 		
 	private:

@@ -16,7 +16,9 @@ class DataManager {
 		
 		int 					 getMaxOctreeDepth();
         
+        void                     sendHeaderToDevice(Device* device);
         void                     sendDataToDevice(Device* device);
+        
 		
 		Bin			             getFullOctree();
 

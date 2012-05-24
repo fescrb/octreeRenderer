@@ -13,8 +13,14 @@ DataManager::~DataManager() {
 	
 }
 
+void DataManager::sendHeaderToDevice(Device* device) {
+    Bin header = getOctree()->getHeader();
+    device->sendHeader(header);
+}
+
 void DataManager::sendDataToDevice(Device* device) {
-    device->sendData(getFullOctree());
+    Bin octree = getFullOctree();
+    device->sendData(octree);
 }
 
 Octree* DataManager::getOctree() {

@@ -15,7 +15,6 @@ Octree::Octree() {
 
 Octree* Octree::getSimpleOctree() {
 	Octree *octree = new Octree();
-    octree->m_pHeader = new OctreeHeader();
 	
 	// Create root node + atts
 	Attributes rootAtts;
@@ -46,8 +45,6 @@ Octree* Octree::getSimpleOctree() {
 	bottomrightAtts.setColour(0, 0, 255, 255);
     bottomrightAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
 	OctreeNode *bottomright = new OctreeNode(bottomrightAtts);
-	
-    octree->m_pHeader->setAttributeSize(rootAtts.getSize());
     
 	octree->m_pRootNode = root;
 	root->addChild(topleft, OctreeNode::Y | OctreeNode::Z );
@@ -55,11 +52,17 @@ Octree* Octree::getSimpleOctree() {
 	root->addChild(bottomleft, OctreeNode::Z);
 	root->addChild(bottomright, OctreeNode::X | OctreeNode::Z);
 	
+    octree->m_pHeader = new OctreeHeader(octree);
+    
 	return octree;
 }
 
 unsigned int Octree::getDepth() {
 	return m_pRootNode->getDepth();
+}
+
+unsigned int Octree::getAttributeSize() {
+    return m_pRootNode->getAttributes().getSize();
 }
 
 unsigned int Octree::getNumberOfNodes() {

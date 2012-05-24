@@ -13,8 +13,7 @@
 
 struct cl_renderinfo {
 					 cl_renderinfo(){}
-	explicit 		 cl_renderinfo(cl_int maxDept, 
-								   cl_int2 viewport,
+	explicit 		 cl_renderinfo(								   cl_int2 viewport,
 								   cl_float3 eye,
 								   cl_float3 dir,
 								   cl_float3 upV,
@@ -22,8 +21,7 @@ struct cl_renderinfo {
 								   cl_float3 viewS,
 								   cl_float eyePlaneD,
 								   cl_float fovR )
-	: 	maxOctreeDepth(maxDept), 
-		viewportSize(viewport), 
+	: 	viewportSize(viewport), 
 		eyePos(eye), 
 		viewDir(dir), 
 		up(upV), 

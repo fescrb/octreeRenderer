@@ -27,6 +27,7 @@ class Device {
          */
         virtual void             makeFrameBuffer(int2 size) = 0;
         virtual void             sendData(Bin bin) = 0;
+        virtual void             sendHeader(Bin bin) = 0;
         virtual void             render(int2 start, int2 size, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always

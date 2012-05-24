@@ -65,7 +65,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 			clPrintError(error);
 		}
 		m_frameBufferResolution = size;
-		error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
+		error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
 		if(clIsError(error)){
 			clPrintError(error); exit(1);
 		}
@@ -76,6 +76,19 @@ void OpenCLDevice::sendData(Bin bin){
     clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
 }
 
+void OpenCLDevice::sendHeader(Bin bin) {
+    cl_int err = 0;
+    
+    // We create memory for the header.
+    m_header = clCreateBuffer(m_context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, bin.getSize(), NULL, &err);
+    
+    if(clIsError(err)){
+        clPrintError(err); return;
+    }
+    
+    clEnqueueWriteBuffer(m_commandQueue, m_header, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+}
+
 void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
     m_renderStart.reset();
     
@@ -84,13 +97,18 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
         clPrintError(error); exit(1);
     }
     
+    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_mem), &m_header);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
     cl_renderinfo cl_info= convert(*info);
-    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_renderinfo), &cl_info);
+    error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
     int frameBufferWidth = m_frameBufferResolution[0];
-	error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_int), &frameBufferWidth);
+	error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_int), &frameBufferWidth);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }

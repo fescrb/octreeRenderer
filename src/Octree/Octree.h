@@ -14,6 +14,7 @@ class Octree {
 		static Octree 			*getSimpleOctree();
 
 		unsigned int			 getDepth();
+        unsigned int             getAttributeSize();
 		unsigned int			 getNumberOfNodes();
         
         

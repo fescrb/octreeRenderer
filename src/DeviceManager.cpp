@@ -75,20 +75,22 @@ Device* DeviceManager::getDevice(int index) {
 
 //#include "Image.h"
 
-std::vector<GLuint>	DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
+void DeviceManager::distributeHeaderAndOctreeRoot() {
+    for(int i = 0; i < getNumDevices(); i++) {
+        m_pDataManager->sendHeaderToDevice(getDeviceList()[i]);
+        m_pDataManager->sendDataToDevice(getDeviceList()[i]);
+    }
+}
+
+std::vector<GLuint> DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
 	int devices = getNumDevices();
 	
 	std::vector<GLuint> textures;
-    
-    info->maxOctreeDepth = m_pDataManager->getMaxOctreeDepth();
 	
 	std::vector<Device*> device_list = getDeviceList();
 	
 	for(int i = 0; i < devices; i++) 
 		device_list[i]->makeFrameBuffer(resolution);
-	
-	for(int i = 0; i < devices; i++) 
-		m_pDataManager->sendDataToDevice(device_list[i]);
 	
 	for(int i = 0; i < devices; i++) 
 		device_list[i]->render(int2(),resolution,info);

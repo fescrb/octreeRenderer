@@ -16,12 +16,35 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     m_depth(depth),
     m_bboxes(0){
     // We need to centre the mesh at the origin.
-    float4 off_centre_difference = float4() - m_aabox.getCentre();
-
+    float4 off_centre_difference = float4(0.0f,0.0f,0.0f,2.0f) - m_aabox.getCentre();
+    
     float4x4 translation_matrix = float4x4::translationMatrix(off_centre_difference[0], off_centre_difference[1], off_centre_difference[2]);
+    
+    printf("off_centre %f %f %f %f\nsize %d\n", off_centre_difference[0], off_centre_difference[1], off_centre_difference[2], off_centre_difference[3], m_mesh.getTriangleCount());
+    printf("before aabox corner %f %f %f %f size %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2], m_aabox.getCorner()[3], 
+           m_aabox.getSizes()[0],m_aabox.getSizes()[1],m_aabox.getSizes()[2]);
+    
+    /*for(int i = 0; i < m_mesh.getTriangleCount(); i++) {
+        for(int j = 0; j < 3; j++) {
+            float4 pos = m_mesh.getTriangle(i).getVertex(j).getPosition();
+            float4 nor = m_mesh.getTriangle(i).getVertex(j).getNormal();
+            printf("pos (%f %f %f %f) nor (%f %f %f %f)\n", pos[0], pos[1], pos[2], pos[3], nor[0], nor[1], nor[2], nor[3]);
+        }
+    }*/
     
     m_mesh = translation_matrix * m_mesh;
     m_aabox = translation_matrix * m_aabox;
+    
+    printf(" after aabox corner %f %f %f %f size %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2], m_aabox.getCorner()[3], 
+           m_aabox.getSizes()[0],m_aabox.getSizes()[1],m_aabox.getSizes()[2]);
+    
+    /*for(int i = 0; i < m_mesh.getTriangleCount(); i++) {
+        for(int j = 0; j < 3; j++) {
+            float4 pos = m_mesh.getTriangle(i).getVertex(j).getPosition();
+            float4 nor = m_mesh.getTriangle(i).getVertex(j).getNormal();
+            printf("pos (%f %f %f %f) nor (%f %f %f %f)\n", pos[0], pos[1], pos[2], pos[3], nor[0], nor[1], nor[2], nor[3]);
+        }
+    }*/
 }
 
 void OctreeCreator::render() {
@@ -82,7 +105,6 @@ aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
 }
 
 OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bboxes, mesh m, aabox box, int depth) {
-    printf("cre\n");
     pNode[0] = octree<mesh*>();
     pNode->m_node = new mesh(box.cull(m));
     bboxes->m_node = box;
@@ -134,6 +156,7 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bb
                     this_node->addChild(child_node, i);
                     children++;
                 }
+                printf("----------------\n");
             }
             
             if(has_children) {
@@ -151,18 +174,19 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bb
         if(!has_children){
             float4 colour = float4();
             float4 normal = float4();
-            float total_area = 0;
+            double total_area = 0;
             for(int i = 0; i < pNode->m_node->getTriangleCount(); i++) {
-                float area = pNode->m_node->getTriangle(i).getSurfaceArea();
+                double area = pNode->m_node->getTriangle(i).getSurfaceArea();
                 total_area+=area;
                 colour += pNode->m_node->getTriangle(i).getAverageColour() * area;
                 normal += pNode->m_node->getTriangle(i).getAverageNormal() * area;
             }
+            
             colour/=total_area;
             normal/=total_area;
             normal=normalize(normal);
             
-            printf("child node col %f %f %f %f nor %f %f %f\n-----------\n",colour[0],colour[1],colour[2],colour[3],normal[0],normal[1],normal[2]);
+            printf("this col %f %f %f %f nor %f %f %f\n-----------\n",colour[0],colour[1],colour[2],colour[3],normal[0],normal[1],normal[2]);
             
             Attributes atts;
             atts.setColour(colour);

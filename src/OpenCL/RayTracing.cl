@@ -1,8 +1,6 @@
 #define STACK_SIZE 5
 
-struct renderinfo{
-	int   maxOctreeDepth;
-    
+struct renderinfo{    
     int2  viewportSize;
 
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
@@ -183,9 +181,10 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
 }
 
 kernel void ray_trace(global char* octree,
+                      global char* header,
                       struct renderinfo info,
                       int widthOfFramebuffer,
-                        global unsigned char* frameBuff) {
+                      global unsigned char* frameBuff) {
     int x = get_global_id(0);
 	int y = get_global_id(1);
 

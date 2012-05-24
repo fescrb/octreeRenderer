@@ -2,7 +2,9 @@
 
 #include "SerialDeviceInfo.h"
 #include "OctreeSegment.h"
+
 #include "RenderInfo.h"
+#include "MathUtil.h"
 
 #include <cstdlib>
 #include <cmath>
@@ -90,6 +92,10 @@ void SerialDevice::sendData(Bin bin) {
 	m_pOctreeData = bin.getDataPointer();
 }
 
+void SerialDevice::sendHeader(Bin bin) {
+    m_pHeader = bin.getDataPointer();
+}
+
 struct Stack {
 	char* address;
 	float3 far_corner, node_centre;
@@ -132,7 +138,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float3 voxelCentre(0.0f, 0.0f, 0.0f);
     bool collission = false;	
     int curr_index = 0;
-    Stack stack[info->maxOctreeDepth - 1];
+    Stack stack[((int*)m_pHeader)[0] - 1];
     
     // We are out of the volume and we will never get to it.
     
@@ -200,12 +206,47 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     // If there was a collission.
     if(curr_address) {
         char* attributes = getAttributes(curr_address);
-        setFramePixel(x, y, attributes[0], attributes[1], attributes[2]);
+        
+        unsigned char red = attributes[0];
+        unsigned char green = attributes[1];
+        unsigned char blue = attributes[2];
+        
+        // If attributes contains a normal
+        if(((int*)m_pHeader)[1] > 4) {
+            //Fixed direction light coming from (1, 1, 1);
+            float4 direction_towards_light = normalize(float4(-1.0f,-1.0f,-1.0f,0.0f));
+            float4 normal = float4(fixed_point_8bit_to_float(attributes[4]),
+                                   fixed_point_8bit_to_float(attributes[5]),
+                                   fixed_point_8bit_to_float(attributes[6]),
+                                   fixed_point_8bit_to_float(attributes[7]));
+            // K_diff is always 1, for now
+            float diffuse_coefficient = dot(direction_towards_light,normal);
+            if(diffuse_coefficient<0)
+                diffuse_coefficient*=-1.0f;
+            /*printf("dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
+                   direction_towards_light[0],
+                   direction_towards_light[1],
+                   direction_towards_light[2],
+                   direction_towards_light[3],
+                   normal[0],
+                   normal[1],
+                   normal[2],
+                   normal[3],
+                   diffuse_coefficient);*/
+            red*=diffuse_coefficient;
+            green*=diffuse_coefficient;
+            blue*=diffuse_coefficient;
+            
+        }
+        
+        setFramePixel(x, y, red, green, blue);
     }
 }
 
 void SerialDevice::render(int2 start, int2 size, renderinfo *info) {	
     m_renderStart.reset();
+ 
+    //printf("",m_pHeader[1]);
     
 	int2 end = start+size;
 

@@ -12,6 +12,7 @@ class SerialDevice
         void			 printInfo();
         void             makeFrameBuffer(int2 size);
         void 			 sendData(Bin bin);
+        void             sendHeader(Bin bin);
         void             traceRay(int x, int y, renderinfo* info);
         virtual void	 render(int2 start, int2 size, renderinfo *info);
         GLuint           getFrameBuffer();
@@ -28,6 +29,7 @@ class SerialDevice
 		
     private:
         char			*m_pOctreeData;
+        char            *m_pHeader;
         char			*m_pFrame;
         int2             m_frameBufferResolution;
         GLuint           m_texture;
