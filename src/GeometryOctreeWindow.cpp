@@ -28,6 +28,7 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     
     float4 centre = mesh_bounding_box.getCentre();
     float3 size = mesh_bounding_box.getSizes();
+    printf("centre (%f %f %f %f) size (%f %f %f)\n", centre[0], centre[1], centre[2], centre[3], size[0], size[1], size[2]);
     
     float end_to_end_distance = mag(mesh_bounding_box.getSizes());
     float half_end_to_end_distance = end_to_end_distance/2.0f;
@@ -36,7 +37,7 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     
     float light_pos[] ={ mesh_bounding_box.getSizes()[0] * 2.0f, 0.0f, 0.0f} ;
     float color[] = {1.0f, 1.0f, 1.0f, 1.0f};
-    float ambient[] = {1.0f, 1.0f, 1.0f, 1.0f};
+    float ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, &(light_pos[0]));
     //glMaterialfv( );
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
@@ -49,7 +50,7 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     glLoadIdentity();
     float far_plane = near_distance + center_distance_to_camera*2.0f;
     //gluPerspective( fov, aspect, zNear, zFar);
-    gluPerspective(60.0f, (double)width/(double)height, near_distance, far_plane );
+    gluPerspective(30.0f, (double)width/(double)height, near_distance, far_plane );
     //float4 eye_pos = normalize(mesh_bounding_box.getCorner()) * center_distance_to_camera ;
     float4 eye_pos = float4(1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f);
     glMatrixMode(GL_MODELVIEW);

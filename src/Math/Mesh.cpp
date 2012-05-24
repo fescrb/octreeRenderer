@@ -6,7 +6,7 @@ std::vector<vertex> mesh::getOuterMostVertices() const {
     // We initialise the list of vertices with the first vertex of the mesh;
     std::vector<vertex> vertices(6, m_triangles[0].getVertex(0));
     
-    for(int i = 0; i < vertices.size(); i++) 
+    for(int i = 0; i < getTriangleCount(); i++) 
         for(int j = 0; j < 3; j++) {
             vertex this_vertex = m_triangles[i].getVertex(j);
             float4 vertex_pos = this_vertex.getPosition();

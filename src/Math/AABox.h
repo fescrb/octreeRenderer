@@ -47,6 +47,8 @@ struct aabox {
         inline float4   getFarCorner() const {
             return m_corner + direction(m_sizes);
         }
+        
+        void            render() const;
 
     private:
         float4          m_corner;

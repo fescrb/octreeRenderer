@@ -29,7 +29,8 @@ mesh OBJFileReader::getMesh() {
         float4 tmp;
         
         switch(getLineType(line)){
-            case TYPE_VERTEX_DECLARATION:data->vertexList.push_back(getVertexFromLine(line)); 
+            case TYPE_VERTEX_DECLARATION:
+                data->vertexList.push_back(getVertexFromLine(line)); 
                 break;
             case TYPE_NORMAL_DECLARATION:
                 tmp = getVertexFromLine(line); // tmp = normal

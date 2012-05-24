@@ -2,6 +2,8 @@
 
 #include "Plane.h"
 
+#include "Graphics.h"
+
 #include <cstdio>
 
 aabox::aabox(const mesh& meshToBound) {
@@ -114,4 +116,35 @@ mesh aabox::cull(const mesh& meshToCull) {
     }
 
     return resultantMesh;
+}
+
+void aabox::render() const {
+    glColor4f(0.0f, 1.0f, 0.0f, 1.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex4f(m_corner.getX()               , m_corner.getY()               , m_corner.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ(), m_corner.getW());
+    glEnd();
+    
+    glBegin(GL_LINE_LOOP);
+    glVertex4f(m_corner.getX(), m_corner.getY()               , m_corner.getZ()               , m_corner.getW());
+    glVertex4f(m_corner.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    glVertex4f(m_corner.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glEnd();
+    
+    glBegin(GL_LINE_LOOP);
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()               , m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glEnd();
+    
+    glBegin(GL_LINE_LOOP);
+    glVertex4f(m_corner.getX()               , m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glEnd();
 }

@@ -13,7 +13,8 @@
 OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
 :   m_mesh(meshToConvert),
     m_aabox(meshToConvert),
-    m_depth(depth){
+    m_depth(depth),
+    m_bboxes(0){
     // We need to centre the mesh at the origin.
     float4 off_centre_difference = float4() - m_aabox.getCentre();
 
@@ -25,18 +26,36 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
 
 void OctreeCreator::render() {
     m_mesh.render();
+    if(m_bboxes) {
+        renderBBoxSubtree(*m_bboxes);
+    }
+}
+
+void OctreeCreator::renderBBoxSubtree(octree<aabox> subtree) {
+    if(!subtree.hasChildren()) {
+        subtree.m_node.render();
+    } else {
+        for (int i = 0; i < 8; i++) {
+            if(subtree.hasChildAt(i))
+                renderBBoxSubtree(subtree.m_children[i]);
+        }
+    }
 }
 
 void OctreeCreator::convert() {
-    octree<mesh*> mesh_octree = octree<mesh*>();
+    octree<mesh*> *mesh_octree = (octree<mesh*>*) malloc(sizeof(octree<mesh*>));
+    mesh_octree[0] = octree<mesh*>();
+    m_bboxes = (octree<aabox>*) malloc(sizeof(octree<aabox>));
+    m_bboxes[0] = octree<aabox>();
     float3 half_size = m_aabox.getSizes()/2.0f;
     float4 centre = m_aabox.getCentre();
     float4 corner = m_aabox.getCorner();
     
     
-    OctreeNode *root = createSubtree(&mesh_octree, m_mesh, m_aabox, m_depth);
+    OctreeNode *root = createSubtree(mesh_octree, m_bboxes, m_mesh, m_aabox, m_depth);
+    
    
-    printf("Root node col %f %f %f %f normal %f %f %f\n",
+    /*printf("Root node col %f %f %f %f normal %f %f %f\n",
         root->getAttributes().getColour()[0],
         root->getAttributes().getColour()[1],
         root->getAttributes().getColour()[2],
@@ -44,7 +63,7 @@ void OctreeCreator::convert() {
         root->getAttributes().getNormal()[0],
         root->getAttributes().getNormal()[1],
         root->getAttributes().getNormal()[2]
-    );
+    );*/
     
     /*for(int i = 0; i < res_mesh.getTriangleCount(); i++) {
         triangle tri = res_mesh.getTriangle(i);
@@ -62,10 +81,11 @@ aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
     return m_aabox;
 }
 
-OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box, int depth) {
+OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bboxes, mesh m, aabox box, int depth) {
     printf("cre\n");
     pNode[0] = octree<mesh*>();
     pNode->m_node = new mesh(box.cull(m));
+    bboxes->m_node = box;
     
     if(pNode->m_node->getTriangleCount()) {
         depth--;
@@ -80,6 +100,7 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box
             float4 corner = box.getCorner();
             
             pNode->allocateChildren();
+            bboxes->allocateChildren();
             
             float4 colour = float4();
             float4 normal = float4();
@@ -91,10 +112,11 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, mesh m, aabox box
                 i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
                 i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
                 
-                OctreeNode* child_node = createSubtree(&(pNode->m_children[i]), *(pNode->m_node), aabox(new_corner, half_size), depth);
+                OctreeNode* child_node = createSubtree(&(pNode->m_children[i]), &(bboxes->m_children[i]), *(pNode->m_node), aabox(new_corner, half_size), depth);
                 
                 if(child_node) {
-                    pNode->m_children_flag |= (1<<i);
+                    pNode->addChildToFlagAt(i);
+                    bboxes->addChildToFlagAt(i);
                     has_children = true;
                     colour+=child_node->getAttributes().getColour();
                     printf("child_colour %f %f %f %f\n",
