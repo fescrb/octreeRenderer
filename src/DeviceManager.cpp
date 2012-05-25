@@ -46,6 +46,11 @@ DeviceManager::~DeviceManager(){
 	}
 }
 
+void DeviceManager::initialise() {
+    detectDevices();
+    distributeHeaderAndOctreeRoot();
+}
+
 void DeviceManager::printDeviceInfo() {
 	for(int i = 0; i < m_vContext.size(); i++) {
 		m_vContext[i]->printDeviceInfo();
@@ -80,6 +85,10 @@ void DeviceManager::distributeHeaderAndOctreeRoot() {
         m_pDataManager->sendHeaderToDevice(getDeviceList()[i]);
         m_pDataManager->sendDataToDevice(getDeviceList()[i]);
     }
+}
+
+DeviceManager::device_tasks* DeviceManager::getPerDeviceTasks(int2 domain_resolution) {
+    
 }
 
 std::vector<GLuint> DeviceManager::renderFrame(renderinfo *info, int2 resolution) {

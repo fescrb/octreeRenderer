@@ -5,6 +5,7 @@ class OctreeHeader;
 class OctreeNode;
 class OctreeSegment;
 
+#include "RenderInfo.h"
 #include "Bin.h"
 
 class Octree {
@@ -16,6 +17,8 @@ class Octree {
 		unsigned int			 getDepth();
         unsigned int             getAttributeSize();
 		unsigned int			 getNumberOfNodes();
+        
+        renderinfo               getInitialRenderInfo();
         
         
         Bin                      getHeader();

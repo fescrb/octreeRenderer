@@ -15,6 +15,9 @@ struct renderinfo {
 	// Camera info.
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
 	float eyePlaneDist, fov; // Distance from near plane + field of view angle.
+	
+	float3 lightPos;
+    float lightBrightness;
 };
 
 #endif //_RENDER_INFO_H

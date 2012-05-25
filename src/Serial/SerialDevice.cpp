@@ -147,6 +147,8 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
         curr_address = 0; // Set to null.
     }
     
+    float3 rayPos = o;
+    
     // Traversal.
     while(!collission) {
         
@@ -155,7 +157,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
         } else {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
-                float3 rayPos = o + (d * t);
+                rayPos = o + (d * t);
                 
                 char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
                 float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
@@ -214,7 +216,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
         // If attributes contains a normal
         if(((int*)m_pHeader)[1] > 4) {
             //Fixed direction light coming from (1, 1, 1);
-            float4 direction_towards_light = normalize(float4(-1.0f,-1.0f,-1.0f,0.0f));
+            float4 direction_towards_light = normalize(float4(info->lightPos-rayPos, 0.0f));
             float4 normal = float4(fixed_point_8bit_to_float(attributes[4]),
                                    fixed_point_8bit_to_float(attributes[5]),
                                    fixed_point_8bit_to_float(attributes[6]),
@@ -223,7 +225,10 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             float diffuse_coefficient = dot(direction_towards_light,normal);
             if(diffuse_coefficient<0)
                 diffuse_coefficient*=-1.0f;
-            /*printf("dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
+            /*printf("rayPos %f %f %f dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
+                   rayPos[0],
+                   rayPos[1],
+                   rayPos[2],
                    direction_towards_light[0],
                    direction_towards_light[1],
                    direction_towards_light[2],

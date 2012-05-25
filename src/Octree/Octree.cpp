@@ -69,6 +69,30 @@ unsigned int Octree::getNumberOfNodes() {
 	return m_pRootNode->getNumberOfNodes();
 }
 
+renderinfo Octree::getInitialRenderInfo() {
+    renderinfo info;
+    
+    info.eyePos.setX(0); //x
+    info.eyePos.setY(0); //y
+    info.eyePos.setZ(-256.0f); //z
+    
+    info.viewDir.setX(0); //x
+    info.viewDir.setY(0); //y
+    info.viewDir.setZ(1.0f); //z
+    
+    info.up.setX(0); //x
+    info.up.setY(1.0f); //y
+    info.up.setZ(0); //z
+    
+    info.eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
+    info.fov = 1.0f;
+    
+    info.lightPos = float3(128.0f,128.0f,-128.0f);
+    info.lightBrightness = 256;
+    
+    return info;
+}
+
 Bin Octree::getHeader() {
     return m_pHeader->flatten();
 }

@@ -34,3 +34,7 @@ int DataManager::getMaxOctreeDepth() {
 Bin DataManager::getFullOctree() {
 	return getOctree()->flatten();
 }
+
+renderinfo DataManager::getInitialRenderInfo() {
+    return getOctree()->getInitialRenderInfo();
+}

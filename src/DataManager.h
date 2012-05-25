@@ -5,6 +5,8 @@ class Octree;
 class OctreeSegment;
 
 class Device;
+
+#include "RenderInfo.h"
 #include "Bin.h"
 
 class DataManager {
@@ -21,6 +23,8 @@ class DataManager {
         
 		
 		Bin			             getFullOctree();
+        
+        renderinfo               getInitialRenderInfo();
 
 	private:
 	

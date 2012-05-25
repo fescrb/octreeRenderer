@@ -5,6 +5,14 @@ struct renderinfo{
 
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
 	float eyePlaneDist, fov;
+
+    float3 lightPos;
+    float lightBrightness;
+};
+
+struct collission {
+    global char* node_pointer;
+    float3 ray_position;
 };
 
 struct stack{
@@ -81,7 +89,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	return curr_index;
 }
 
-global char* find_collission(global char* octree, float3 origin, float3 direction, float t) {
+struct collission find_collission(global char* octree, float3 origin, float3 direction, float t) {
 
 	float half_size = 256.0f;
 
@@ -111,6 +119,8 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
 		curr_address = 0; 
 	}
 
+    float3 rayPos = origin;
+
 	while(!collission) {
 
 		if(t >= t_out) {
@@ -121,7 +131,7 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
         } else {
             /*If we are inside the node*/
             if(t_min <= t && t < t_max) {
-                float3 rayPos = origin + (direction * t);
+                rayPos = origin + (direction * t);
                 
                 char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
                 float nodeHalfSize = fabs((corner_far-voxelCentre).x)/2.0f;
@@ -183,7 +193,11 @@ global char* find_collission(global char* octree, float3 origin, float3 directio
         }
 	}
 
-	return curr_address;
+    struct collission col;
+    col.node_pointer = curr_address;
+    col.ray_position = rayPos;
+
+	return col;
 }
 
 kernel void ray_trace(global char* octree,
@@ -197,10 +211,10 @@ kernel void ray_trace(global char* octree,
 	float3 o = info.viewPortStart + (info.viewStep * x) + (info.up * y);
     float3 d = o-info.eyePos; 
 
-	global char* voxel = find_collission(octree, o, d, 1.0f);
+	struct collission col = find_collission(octree, o, d, 1.0f);
 
-	if(voxel) {
-		global char* attr = get_attributes(voxel);
+	if(col.node_pointer) {
+		global char* attr = get_attributes(col.node_pointer);
 
 		int pixel_index = (x*3)+(y*widthOfFramebuffer*3);
 
@@ -211,7 +225,7 @@ kernel void ray_trace(global char* octree,
         // If attributes contains a normal
         if(((global int*)header)[1] > 4) {
             //Fixed direction light coming from (1, 1, 1);
-            float4 direction_towards_light = (float4)(0.574803f,0.574803f,-0.574803f,0.0f);
+            float4 direction_towards_light = normalize((float4)(info.lightPos - col.ray_position,0.0f));
             float4 normal = (float4)(fixed_point_8bit_to_float(attr[4]),
                                      fixed_point_8bit_to_float(attr[5]),
                                      fixed_point_8bit_to_float(attr[6]),
@@ -223,7 +237,6 @@ kernel void ray_trace(global char* octree,
             red*=diffuse_coefficient;
             green*=diffuse_coefficient;
             blue*=diffuse_coefficient;
-            
         }
 
 		frameBuff[pixel_index + 0] = red;

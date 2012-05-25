@@ -7,6 +7,7 @@ cl_renderinfo convert(renderinfo info) {
 	cl_float3 up = {info.up[0], info.up[1], info.up[2]};
 	cl_float3 viewPortStart = {info.viewPortStart[0], info.viewPortStart[1], info.viewPortStart[2]};
 	cl_float3 viewStep = {info.viewStep[0], info.viewStep[1], info.viewStep[2]};
+    cl_float3 lightPos = {info.lightPos[0], info.lightPos[1], info.lightPos[2]};
 	cl_renderinfo cl_info(viewportSize,
 		eyePos,
 		viewDir,
@@ -14,7 +15,9 @@ cl_renderinfo convert(renderinfo info) {
 		viewPortStart,
 		viewStep,
 		info.eyePlaneDist,
-		info.fov
+		info.fov,
+        lightPos,
+        info.lightBrightness
 	);
 	
 	return cl_info;
