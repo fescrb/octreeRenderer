@@ -9,11 +9,11 @@ struct rect {
         explicit         rect(int2 origin, int2 size): m_origin(origin), m_size(size){};
         explicit         rect(int x, int y, int width, int height):m_origin(x,y), m_size(width,height){};
     
-        int2&            origin(){
+        int2&            getOrigin(){
             return m_origin;
         }
     
-        int2&            size(){
+        int2&            getSize(){
             return m_size;
         }
     private:

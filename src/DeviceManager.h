@@ -7,6 +7,8 @@
 
 #include "Graphics.h"
 
+#include "Rect.h"
+
 class Device;
 class Context;
 class DataManager;
@@ -32,9 +34,9 @@ class DeviceManager {
 		std::vector<GLuint>		 renderFrame(renderinfo *info, int2 resolution);     
 		
 	private:
-         struct device_tasks {
-            int2                 total_window;
-            std::vector<int2>    tasks;
+        struct device_tasks {
+            rect                 total_window;
+            std::vector<rect>    tasks;
         };
         
         device_tasks            *getPerDeviceTasks(int2 domain_resolution);
