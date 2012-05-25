@@ -23,6 +23,12 @@ float max_component(float3 vector) {
 	return maximum > vector.z ? maximum : vector.z;
 }
 
+float fixed_point_8bit_to_float(char fixed) {
+    float range =127.0f; // Max value of a 7 bit unsigned integer.
+    float step = 1.0f/range;
+    return fixed*step;
+}
+
 bool no_children(__global char* address) {
     return !address[7];
 }
@@ -197,8 +203,31 @@ kernel void ray_trace(global char* octree,
 		global char* attr = get_attributes(voxel);
 
 		int pixel_index = (x*3)+(y*widthOfFramebuffer*3);
-		frameBuff[pixel_index + 0] = attr[0];
-		frameBuff[pixel_index + 1] = attr[1];
-		frameBuff[pixel_index + 2] = attr[2];
+
+        unsigned char red = attr[0];
+        unsigned char green = attr[1];
+        unsigned char blue = attr[2];
+
+        // If attributes contains a normal
+        if(((global int*)header)[1] > 4) {
+            //Fixed direction light coming from (1, 1, 1);
+            float4 direction_towards_light = (float4)(0.574803f,0.574803f,-0.574803f,0.0f);
+            float4 normal = (float4)(fixed_point_8bit_to_float(attr[4]),
+                                     fixed_point_8bit_to_float(attr[5]),
+                                     fixed_point_8bit_to_float(attr[6]),
+                                     fixed_point_8bit_to_float(attr[7]));
+            // K_diff is always 1, for now
+            float diffuse_coefficient = dot(direction_towards_light,normal);
+            if(diffuse_coefficient<0)
+                diffuse_coefficient*=-1.0f;
+            red*=diffuse_coefficient;
+            green*=diffuse_coefficient;
+            blue*=diffuse_coefficient;
+            
+        }
+
+		frameBuff[pixel_index + 0] = red;
+		frameBuff[pixel_index + 1] = green;
+		frameBuff[pixel_index + 2] = blue;
 	}
 }
