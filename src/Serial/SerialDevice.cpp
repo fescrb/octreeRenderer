@@ -37,18 +37,18 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
 	for(int i = 0; i < 3; i++)
 		if(flagVector[i] >= 0.0f)
 			flag |= (1 << i);
-	
+
 	return flag;
 }
 
 bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
-    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));  
+    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));
 }
 
 char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
 	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
     int *node_int = (int*)node;
-    int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
+    int pos = (node_int[0] >> (xyz_flag * 3)) & 7;
     node_int+=(pos+2);
     node+=(pos+2)*4;
     return node + (node_int[0]*4);
@@ -78,7 +78,7 @@ void SerialDevice::makeFrameBuffer(int2 size) {
         m_pFrame = (char*)malloc(3*size[0]*size[1]);
         m_frameBufferResolution = size;
     }
-    
+
     // Clear.
     int i = 0;
     int bufferSize = 3*m_frameBufferResolution[0]*m_frameBufferResolution[1];
@@ -114,70 +114,70 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float half_size = 256.0f;
-    
+
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
     normalize(d);
     float t = 0.0f;
-    
+
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,
                       d[2] >= 0 ? half_size : -half_size);
-    
+
     float3 corner_close(corner_far.neg());
-    
+
     float t_min = max((corner_close - o) / d);
     float t_max = min((corner_far - o) / d);
-    
-    // If we are out 
+
+    // If we are out
     if(t < t_min)
         t = t_min;
-    
+
     char* curr_address = m_pOctreeData;
     float3 voxelCentre(0.0f, 0.0f, 0.0f);
-    bool collission = false;	
+    bool collission = false;
     int curr_index = 0;
     Stack stack[((int*)m_pHeader)[0] - 1];
-    
+
     // We are out of the volume and we will never get to it.
-    
+
     if(t > t_max) {
         collission = true;
         curr_address = 0; // Set to null.
     }
-    
+
     float3 rayPos = o;
-    
+
     // Traversal.
     while(!collission) {
-        
+
         if(noChildren(curr_address)){
             collission = true;
         } else {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 rayPos = o + (d * t);
-                
+
                 char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
                 float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
-                
+
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
                                       xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
                                       xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
-                
+
                 float3 tmp_corner_far(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
                                       d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
                                       d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
-                
+
                 float tmp_max = min((tmp_corner_far - o) / d);
-                
+
                 if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
                     // If the voxel we are at is not empty, go down.
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
-                    
+
                     curr_address = getChild(rayPos,voxelCentre,curr_address);
-                    
+
                     corner_far = tmp_corner_far;
                     voxelCentre = tmpNodeCentre;
                     corner_close =  float3(d[0] >= 0 ? voxelCentre[0] - nodeHalfSize : voxelCentre[0] + nodeHalfSize,
@@ -185,7 +185,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                                            d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
                     t_max = tmp_max;
                     t_min = max((corner_close - rayPos) / d);
-                    
+
                 } else {
                     // If the child is empty, we step the ray.
                     t = tmp_max;
@@ -204,15 +204,15 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             }
         }
     }
-    
+
     // If there was a collission.
     if(curr_address) {
         char* attributes = getAttributes(curr_address);
-        
+
         unsigned char red = attributes[0];
         unsigned char green = attributes[1];
         unsigned char blue = attributes[2];
-        
+
         // If attributes contains a normal
         if(((int*)m_pHeader)[1] > 4) {
             //Fixed direction light coming from (1, 1, 1);
@@ -241,18 +241,18 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             red*=diffuse_coefficient;
             green*=diffuse_coefficient;
             blue*=diffuse_coefficient;
-            
+
         }
-        
+
         setFramePixel(x, y, red, green, blue);
     }
 }
 
-void SerialDevice::render(int2 start, int2 size, renderinfo *info) {	
+void SerialDevice::render(int2 start, int2 size, renderinfo *info) {
     m_renderStart.reset();
- 
+
     //printf("",m_pHeader[1]);
-    
+
 	int2 end = start+size;
 
 	for(int y = start[1]; y < end[1]; y++) {
@@ -260,7 +260,7 @@ void SerialDevice::render(int2 start, int2 size, renderinfo *info) {
 			traceRay(start[0]+x, start[1]+y, info);
 		}
 	}
-    
+
     m_renderEnd.reset();
 }
 
@@ -268,19 +268,19 @@ GLuint SerialDevice::getFrameBuffer() {
     m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
-    
+
 		glBindTexture(GL_TEXTURE_2D, m_texture);
-		
+
 		glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		
+
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		
+
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	} else 
+	} else
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
-    
+
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
@@ -300,7 +300,7 @@ char* SerialDevice::getFrame() {
 
 void SerialDevice::setFramePixel(int x, int y, char red, char green, char blue) {
 	char* pixelPtr = &m_pFrame[(y*m_frameBufferResolution[0]*3)+(x*3)];
-	
+
 	pixelPtr[0] = red;
 	pixelPtr[1] = green;
 	pixelPtr[2] = blue;
