@@ -1,7 +1,10 @@
 #include "OpenMPDevice.h"
 
-void OpenMPDevice::render(int2 start, int2 size, renderinfo *info) {
+void OpenMPDevice::render(rect *window, renderinfo *info) {
 	m_renderStart.reset();
+    
+    int2 start = window->getOrigin();
+    int2 size = window->getSize();
     
 	int2 end = start+size;
 

@@ -35,11 +35,12 @@ class DeviceManager {
 		
 	private:
         struct device_tasks {
+                                 device_tasks() : tasks() {}
             rect                 total_window;
             std::vector<rect>    tasks;
         };
         
-        device_tasks            *getPerDeviceTasks(int2 domain_resolution);
+        void                     setPerDeviceTasks(int2 domain_resolution);
         
         
 		std::vector<Context*>	 m_vContext;
