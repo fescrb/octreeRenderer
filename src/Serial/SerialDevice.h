@@ -14,7 +14,7 @@ class SerialDevice
         void 			 sendData(Bin bin);
         void             sendHeader(Bin bin);
         void             traceRay(int x, int y, renderinfo* info);
-        virtual void	 render(int2 start, int2 size, renderinfo *info);
+        virtual void	 renderTask(int index, renderinfo *info);
         GLuint           getFrameBuffer();
         char    		*getFrame();
     

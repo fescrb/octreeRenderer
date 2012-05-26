@@ -2,11 +2,14 @@
 #define _DEVICE_H
 
 #include "Vector.h"
+#include "Rect.h"
 
 #include "HighResTimer.h"
 
 #include "Graphics.h"
 #include "Bin.h"
+
+#include <vector>
 
 class DeviceInfo;
 class OctreeSegment;
@@ -28,7 +31,8 @@ class Device {
         virtual void             makeFrameBuffer(int2 size) = 0;
         virtual void             sendData(Bin bin) = 0;
         virtual void             sendHeader(Bin bin) = 0;
-        virtual void             render(int2 start, int2 size, renderinfo *info) = 0;
+        virtual void             renderTask(int index, renderinfo *info) = 0;
+        //virtual void             render(rect *window, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.
@@ -40,9 +44,22 @@ class Device {
         virtual high_res_timer   getRenderTime() = 0;
         virtual high_res_timer   getBufferToTextureTime() = 0;
         
+        /*
+         * Task-related functions
+         */
+        
+        void                     clearTasks();
+        void                     addTask(rect task);
+        rect                    *getTask(int index);
+        std::vector<rect>        getTasks();
+        int                      getTaskCount();
+        rect                     getTotalTaskWindow();
+        
     protected:
 
         DeviceInfo               *m_pDeviceInfo;
+        
+        std::vector<rect>         m_tasks;
 };
 
 #endif // _DEVICE_H

@@ -26,7 +26,7 @@ class OpenCLDevice:
 		void    			 makeFrameBuffer(int2 size);
         void                 sendData(Bin bin);
         void                 sendHeader(Bin bin);
-		void				 render(int2 start, int2 size, renderinfo *info);
+		void                 renderTask(int index, renderinfo *info);
 		GLuint   			 getFrameBuffer();
 		char    			*getFrame();
 		

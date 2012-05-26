@@ -89,8 +89,12 @@ void OpenCLDevice::sendHeader(Bin bin) {
     clEnqueueWriteBuffer(m_commandQueue, m_header, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
 }
 
-void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
+void OpenCLDevice::renderTask(int index, renderinfo *info) {
     m_renderStart.reset();
+    
+    rect window = m_tasks[index];
+    
+    printf("start %d %d size %d %d\n", window.getX(), window.getY(), window.getWidth(), window.getHeight());
     
 	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
@@ -113,8 +117,8 @@ void OpenCLDevice::render(int2 start, int2 size, renderinfo *info) {
         clPrintError(error); exit(1);
     }
     
-    size_t offset[2] = {start[0], start[1]};
-    size_t dimensions[2] = {size[0], size[1]};
+    size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
+    size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
 	if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -182,6 +186,7 @@ char* OpenCLDevice::getFrame() {
 }
 
 void OpenCLDevice::onRenderingFinished() {
+    printf("render end\n");
 	m_renderEnd.reset();
     m_transferStart.reset();
 }
