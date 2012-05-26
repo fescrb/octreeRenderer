@@ -6,7 +6,7 @@
 class OpenMPDevice 
 :   public  SerialDevice {
 	public:
-		void		 render(rect *window, renderinfo *info);
+		void		 renderTask(int index, renderinfo *info);
 };
 
 #endif //_OPENMP_DEVICE_H

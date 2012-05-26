@@ -126,9 +126,9 @@ std::vector<GLuint> DeviceManager::renderFrame(renderinfo *info, int2 resolution
     
 	for(int i = 0; i < devices; i++) 
         for(int j = 0; j < device_list[i]->getTaskCount(); j++) {
-            rect *task = device_list[i]->getTask(j);
+            //rect *task = device_list[i]->getTask(j);
             //sk.setX(0);
-            device_list[i]->render(task,info);
+            device_list[i]->renderTask(j,info);
             //device_list[i]->render(rect(int2(),int2(400,400)),info);
         }
     

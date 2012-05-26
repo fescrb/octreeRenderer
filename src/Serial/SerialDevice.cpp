@@ -248,13 +248,14 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     }
 }
 
-void SerialDevice::render(rect *window, renderinfo *info) {	
+void SerialDevice::renderTask(int index, renderinfo *info) {	
     m_renderStart.reset();
  
     //printf("",m_pHeader[1]);
     
-    int2 start = window->getOrigin();
-    int2 size = window->getSize();
+    rect window = m_tasks[index];
+    int2 start = window.getOrigin();
+    int2 size = window.getSize();
     
 	int2 end = start+size;
 

@@ -31,7 +31,8 @@ class Device {
         virtual void             makeFrameBuffer(int2 size) = 0;
         virtual void             sendData(Bin bin) = 0;
         virtual void             sendHeader(Bin bin) = 0;
-        virtual void             render(rect *window, renderinfo *info) = 0;
+        virtual void             renderTask(int index, renderinfo *info) = 0;
+        //virtual void             render(rect *window, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.

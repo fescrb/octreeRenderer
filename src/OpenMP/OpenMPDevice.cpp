@@ -1,10 +1,13 @@
 #include "OpenMPDevice.h"
 
-void OpenMPDevice::render(rect *window, renderinfo *info) {
-	m_renderStart.reset();
+void OpenMPDevice::renderTask(int index, renderinfo *info) { 
+    m_renderStart.reset();
+ 
+    //printf("",m_pHeader[1]);
     
-    int2 start = window->getOrigin();
-    int2 size = window->getSize();
+    rect window = m_tasks[index];
+    int2 start = window.getOrigin();
+    int2 size = window.getSize();
     
 	int2 end = start+size;
 
