@@ -2,6 +2,7 @@
 
 #include "Octree.h"
 #include "OctreeNode.h"
+#include "OctreeHeader.h"
 
 #include "AABox.h"
 #include "Matrix.h"
@@ -102,6 +103,8 @@ void OctreeCreator::convert() {
     OctreeNode *root = createSubtree(mesh_octree, m_bboxes, m_mesh, m_aabox, m_depth);
     
     m_pRootNode = root;
+    
+    this->m_pHeader = new OctreeHeader(this);
     
     m_converted = true;
     

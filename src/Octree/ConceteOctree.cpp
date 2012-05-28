@@ -91,8 +91,6 @@ unsigned int ConcreteOctree::getNumberOfNodes() {
     return m_pRootNode->getNumberOfNodes();
 }
 
-
-
 void ConcreteOctree::setInitialRenderInfo(renderinfo info) {
     m_initial_renderinfo = info;
 }
