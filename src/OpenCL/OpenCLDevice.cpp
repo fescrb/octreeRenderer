@@ -20,26 +20,26 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_frameBufferResolution(int2(0)),
     m_texture(0) {
 	m_pDeviceInfo = new OpenCLDeviceInfo(device_id);
-    
+
     cl_int err = 0;
-    
+
     // Perhaps profiling should be enabled?
     m_commandQueue = clCreateCommandQueue(context, device_id, 0, &err);
-    
+
     if(clIsError(err)){
 		clPrintError(err); return;
 	}
-    
+
     // Create octree memory in the object, the host will only write, not read. And the device will only read.
     // We make it 512 bytes only for now.
     m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 512, NULL, &err);
-    
+
     if(clIsError(err)){
         clPrintError(err); return;
     }
-    
+
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
-	
+
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
 }
 
@@ -78,34 +78,34 @@ void OpenCLDevice::sendData(Bin bin){
 
 void OpenCLDevice::sendHeader(Bin bin) {
     cl_int err = 0;
-    
+
     // We create memory for the header.
     m_header = clCreateBuffer(m_context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, bin.getSize(), NULL, &err);
-    
+
     if(clIsError(err)){
         clPrintError(err); return;
     }
-    
+
     clEnqueueWriteBuffer(m_commandQueue, m_header, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
 }
 
 void OpenCLDevice::renderTask(int index, renderinfo *info) {
     m_renderStart.reset();
-    
+
     rect window = m_tasks[index];
-    
+
     printf("start %d %d size %d %d\n", window.getX(), window.getY(), window.getWidth(), window.getHeight());
-    
+
 	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_mem), &m_header);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     cl_renderinfo cl_info= convert(*info);
     error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
  	if(clIsError(error)){
@@ -116,7 +116,7 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
@@ -132,25 +132,25 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
 	}
 }
 
-GLuint OpenCLDevice::getFrameBuffer() {
+framebuffer_window OpenCLDevice::getFrameBuffer() {
 	if (!m_texture) {
         glGenTextures(1, &m_texture);
-    
+
 		glBindTexture(GL_TEXTURE_2D, m_texture);
-		
+
 		glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		
+
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		
+
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-	} else 
+	} else
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
     char* frameBuffer = getFrame();
-    
+
     glBindTexture(GL_TEXTURE_2D, m_texture);
-    
+
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
@@ -160,18 +160,22 @@ GLuint OpenCLDevice::getFrameBuffer() {
                  GL_RGB,
                  GL_UNSIGNED_BYTE,
                  frameBuffer);
-	
+
 	free(frameBuffer);
-    
+
     m_transferEnd.reset();
-    
-    return m_texture;
+
+    framebuffer_window fb_window;
+    fb_window.window = getTotalTaskWindow();
+    fb_window.texture = m_texture;
+
+    return fb_window;
 }
 
 char* OpenCLDevice::getFrame() {
 	int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
 	char* frameBuffer = (char*) malloc(size+1);
-    
+
     cl_int error;
     error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){

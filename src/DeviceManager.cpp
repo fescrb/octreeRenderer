@@ -27,7 +27,7 @@ void DeviceManager::detectDevices() {
 	#ifdef USE_OPENCL
 		m_vContext.push_back(new OpenCLContext());
 	#endif //USE_OPENCL
-	
+
     #ifdef USE_OPENMP
         m_vContext.push_back(new OpenMPContext());
     #else
@@ -35,7 +35,7 @@ void DeviceManager::detectDevices() {
 		m_vContext.push_back(new SerialContext());
     #endif //USE_SERIAL
 	#endif //USE_OPENMP
-	
+
 	printDeviceInfo();
 }
 
@@ -92,61 +92,55 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
     printf("count %d\n", device_count);
 
     int start = 0;
-    
+
     for (int i = 0; i < device_count; i++) {
         getDevice(i)->clearTasks();
-        
+
         int2 origin = int2(start, 0);
         int2 size = int2(domain_resolution.getX()/device_count,domain_resolution[1]);
-        
+
         if(!i) {
             size.setX(size.getX()+(domain_resolution.getX()%device_count));
         }
-        
+
         start+=size.getX();
-        
+
         rect window = rect(origin, size);
-        
+
         getDevice(i)->addTask(window);
     }
 }
 
-std::vector<GLuint> DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
+std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int2 resolution) {
 	int devices = getNumDevices();
-	
-	std::vector<GLuint> textures;
-	
+
+	std::vector<framebuffer_window> fb_windows;
+
 	std::vector<Device*> device_list = getDeviceList();
-	
+
     setPerDeviceTasks(resolution);
-    
-	for(int i = 0; i < devices; i++) 
+
+	for(int i = 0; i < devices; i++)
 		device_list[i]->makeFrameBuffer(resolution);
-	
-    
-	for(int i = 0; i < devices; i++) 
-        for(int j = 0; j < device_list[i]->getTaskCount(); j++) {
-            //rect *task = device_list[i]->getTask(j);
-            //sk.setX(0);
+
+
+	for(int i = 0; i < devices; i++)
+        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
             device_list[i]->renderTask(j,info);
-            //device_list[i]->render(rect(int2(),int2(400,400)),info);
-        }
-    
-    char* lol = (char*)malloc(sizeof(char)*960000);
-    
-	for(int i = 0; i < devices; i++) 
-		textures.push_back(device_list[i]->getFrameBuffer());
-    
+
+	for(int i = 0; i < devices; i++)
+		fb_windows.push_back(device_list[i]->getFrameBuffer());
+
     for(int i = 0; i < devices; i++) {
         printf("%d %f %f\n", i, (double)device_list[i]->getRenderTime(), (double)device_list[i]->getBufferToTextureTime());
     }
     //exit(0);
-		
+
 		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());
 		//image.toBMP("frame.bmp");
-	
-	
-	return textures;
+
+
+	return fb_windows;
 }
 
 std::vector<Device*> DeviceManager::getDeviceList() {

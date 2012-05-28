@@ -6,6 +6,7 @@
 
 #include "HighResTimer.h"
 
+#include "FramebufferWindow.h"
 #include "Graphics.h"
 #include "Bin.h"
 
@@ -17,49 +18,49 @@ class renderinfo;
 
 class Device {
     public:
-		explicit                 Device();
-        virtual                 ~Device();
-		
-		virtual char            *getName();
+		explicit                     Device();
+        virtual                     ~Device();
 
-        virtual void             printInfo() = 0;
+		virtual char                *getName();
+
+        virtual void                 printInfo() = 0;
 
         /**
          * We clear the framebuffer if we needen't generate it
          * @param The dimensions of the required framebuffer.
          */
-        virtual void             makeFrameBuffer(int2 size) = 0;
-        virtual void             sendData(Bin bin) = 0;
-        virtual void             sendHeader(Bin bin) = 0;
-        virtual void             renderTask(int index, renderinfo *info) = 0;
+        virtual void                 makeFrameBuffer(int2 size) = 0;
+        virtual void                 sendData(Bin bin) = 0;
+        virtual void                 sendHeader(Bin bin) = 0;
+        virtual void                 renderTask(int index, renderinfo *info) = 0;
         //virtual void             render(rect *window, renderinfo *info) = 0;
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.
          * @return The OpenGL texture id containing the framebuffer.
          */
-        virtual GLuint           getFrameBuffer() = 0;
-        virtual char            *getFrame() = 0;
-    
-        virtual high_res_timer   getRenderTime() = 0;
-        virtual high_res_timer   getBufferToTextureTime() = 0;
-        
+        virtual framebuffer_window   getFrameBuffer() = 0;
+        virtual char                *getFrame() = 0;
+
+        virtual high_res_timer       getRenderTime() = 0;
+        virtual high_res_timer       getBufferToTextureTime() = 0;
+
         /*
          * Task-related functions
          */
-        
-        void                     clearTasks();
-        void                     addTask(rect task);
-        rect                    *getTask(int index);
-        std::vector<rect>        getTasks();
-        int                      getTaskCount();
-        rect                     getTotalTaskWindow();
-        
+
+        void                         clearTasks();
+        void                         addTask(rect task);
+        rect                        *getTask(int index);
+        std::vector<rect>            getTasks();
+        int                          getTaskCount();
+        rect                         getTotalTaskWindow();
+
     protected:
 
-        DeviceInfo               *m_pDeviceInfo;
-        
-        std::vector<rect>         m_tasks;
+        DeviceInfo                  *m_pDeviceInfo;
+
+        std::vector<rect>            m_tasks;
 };
 
 #endif // _DEVICE_H

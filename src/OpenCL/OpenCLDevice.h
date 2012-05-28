@@ -27,17 +27,17 @@ class OpenCLDevice:
         void                 sendData(Bin bin);
         void                 sendHeader(Bin bin);
 		void                 renderTask(int index, renderinfo *info);
-		GLuint   			 getFrameBuffer();
+		framebuffer_window   getFrameBuffer();
 		char    			*getFrame();
-		
+
 		cl_context			 getOpenCLContext();
 		cl_device_id		 getOpenCLDeviceID();
-		
+
 		void 				 onRenderingFinished();
-        
+
         high_res_timer       getRenderTime();
         high_res_timer       getBufferToTextureTime();
-        
+
 	private:
 
 		cl_device_id 		 m_DeviceID;
@@ -45,18 +45,18 @@ class OpenCLDevice:
         cl_command_queue     m_commandQueue;
         cl_mem               m_memory;
         cl_mem               m_header;
-		
+
 		OpenCLProgram 		*m_pProgram;
         cl_kernel            m_rayTraceKernel;
-        
+
         GLuint               m_texture;
-		
+
 		cl_event             m_eventRenderingFinished;
-		cl_event             m_eventFrameBufferRead; 
-        
+		cl_event             m_eventFrameBufferRead;
+
         cl_mem               m_frameBuff;
         int2                 m_frameBufferResolution;
-        
+
         high_res_timer       m_renderStart;
         high_res_timer       m_renderEnd;
         high_res_timer       m_transferStart;

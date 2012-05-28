@@ -267,7 +267,7 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
     m_renderEnd.reset();
 }
 
-GLuint SerialDevice::getFrameBuffer() {
+framebuffer_window SerialDevice::getFrameBuffer() {
     m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
@@ -294,7 +294,12 @@ GLuint SerialDevice::getFrameBuffer() {
                  GL_UNSIGNED_BYTE,
                  m_pFrame);
     m_transferEnd.reset();
-    return m_texture;
+
+    framebuffer_window fb_window;
+    fb_window.window = getTotalTaskWindow();
+    fb_window.texture = m_texture;
+
+    return fb_window;
 }
 
 char* SerialDevice::getFrame() {

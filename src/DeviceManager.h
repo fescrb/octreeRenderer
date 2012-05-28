@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Graphics.h"
+#include "FramebufferWindow.h"
 
 #include "Rect.h"
 
@@ -16,36 +17,36 @@ class renderinfo;
 
 class DeviceManager {
 	public:
-		explicit 				 DeviceManager(DataManager *dataManager);
-		virtual					~DeviceManager();
-        
-        void                     initialise();
+		explicit 				         DeviceManager(DataManager *dataManager);
+		virtual					        ~DeviceManager();
 
-		void					 printDeviceInfo();
-		
-		void 					 detectDevices();
+        void                             initialise();
 
-		int						 getNumDevices();
-		Device					*getDevice(int index);
-		
-		std::vector<Device*>     getDeviceList();
-		
-        void                     distributeHeaderAndOctreeRoot();
-		std::vector<GLuint>		 renderFrame(renderinfo *info, int2 resolution);     
-		
+		void					         printDeviceInfo();
+
+		void 					         detectDevices();
+
+		int						         getNumDevices();
+		Device					        *getDevice(int index);
+
+		std::vector<Device*>             getDeviceList();
+
+        void                             distributeHeaderAndOctreeRoot();
+		std::vector<framebuffer_window>  renderFrame(renderinfo *info, int2 resolution);
+
 	private:
         struct device_tasks {
-                                 device_tasks() : tasks() {}
-            rect                 total_window;
-            std::vector<rect>    tasks;
+                                         device_tasks() : tasks() {}
+            rect                         total_window;
+            std::vector<rect>            tasks;
         };
-        
-        void                     setPerDeviceTasks(int2 domain_resolution);
-        
-        
-		std::vector<Context*>	 m_vContext;
-		
-		DataManager				*m_pDataManager;
+
+        void                             setPerDeviceTasks(int2 domain_resolution);
+
+
+		std::vector<Context*>	         m_vContext;
+
+		DataManager				        *m_pDataManager;
 
 };
 

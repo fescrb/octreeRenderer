@@ -6,36 +6,36 @@
 class SerialDevice
 :	public Device {
     public:
-		explicit		 SerialDevice();
-        virtual 		~SerialDevice();
+		explicit		     SerialDevice();
+        virtual 		    ~SerialDevice();
 
-        void			 printInfo();
-        void             makeFrameBuffer(int2 size);
-        void 			 sendData(Bin bin);
-        void             sendHeader(Bin bin);
-        void             traceRay(int x, int y, renderinfo* info);
-        virtual void	 renderTask(int index, renderinfo *info);
-        GLuint           getFrameBuffer();
-        char    		*getFrame();
-    
-        high_res_timer   getRenderTime();
-        high_res_timer   getBufferToTextureTime();
+        void			     printInfo();
+        void                 makeFrameBuffer(int2 size);
+        void 			     sendData(Bin bin);
+        void                 sendHeader(Bin bin);
+        void                 traceRay(int x, int y, renderinfo* info);
+        virtual void	     renderTask(int index, renderinfo *info);
+        framebuffer_window   getFrameBuffer();
+        char    		    *getFrame();
+
+        high_res_timer       getRenderTime();
+        high_res_timer       getBufferToTextureTime();
 
 	protected:
-		high_res_timer   m_renderStart;
-        high_res_timer   m_renderEnd;
-        high_res_timer   m_transferStart;
-        high_res_timer   m_transferEnd;
-		
+		high_res_timer       m_renderStart;
+        high_res_timer       m_renderEnd;
+        high_res_timer       m_transferStart;
+        high_res_timer       m_transferEnd;
+
     private:
-        char			*m_pOctreeData;
-        char            *m_pHeader;
-        char			*m_pFrame;
-        int2             m_frameBufferResolution;
-        GLuint           m_texture;
-        
-        void			 setFramePixel(int x, int y,
-									   char red, char green, char blue);
+        char			    *m_pOctreeData;
+        char                *m_pHeader;
+        char			    *m_pFrame;
+        int2                 m_frameBufferResolution;
+        GLuint               m_texture;
+
+        void			     setFramePixel(int x, int y,
+                                           char red, char green, char blue);
 };
 
 #endif // _SERIAL_DEVICE_H
