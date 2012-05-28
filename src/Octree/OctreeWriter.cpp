@@ -4,6 +4,7 @@
 
 #include "Path.h"
 #include "BinWriter.h"
+#include "RenderInfoWriter.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -18,6 +19,11 @@ OctreeWriter::OctreeWriter(Octree *octree, char* name)
 //! TODO
 void OctreeWriter::write() {
     if(!make_directory(m_sDirectory_name)) {
-        BinWriter writer = BinWriter(m_pOctree->getHeader(), m_sDirectory_name, "header");
+        BinWriter header_writer = BinWriter(m_pOctree->getHeader(), m_sDirectory_name, "header");
+        header_writer.writeAll();
+        BinWriter root_writer = BinWriter(m_pOctree->getRoot(), m_sDirectory_name, "0");
+        root_writer.writeAll();
+        RenderInfoWriter info_writer = RenderInfoWriter(m_pOctree->getInitialRenderInfo(), m_sDirectory_name);
+        info_writer.writeAll();
     }
 }

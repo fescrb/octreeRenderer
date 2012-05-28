@@ -128,7 +128,12 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
             new_triangle[2].setNormal(data->normalList[normal_indices[2]]);
         }
         
-        triangles.push_back(new_triangle);
+        float4 avg_normal = new_triangle.getAverageNormal();
+        //Check for NaN
+        if(   new_triangle.getAverageNormal()[0] == new_triangle.getAverageNormal()[0]
+           || new_triangle.getAverageNormal()[1] == new_triangle.getAverageNormal()[1]
+           || new_triangle.getAverageNormal()[2] == new_triangle.getAverageNormal()[2])
+            triangles.push_back(new_triangle);
     }
     
     return triangles;

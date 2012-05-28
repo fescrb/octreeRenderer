@@ -12,9 +12,9 @@ using namespace std;
 
 int main(int argc, char** argv) {
 	
-    int2 resolution(800,400);
+    int2 resolution(800,600);
 	
-	for(int i = 1; i < argc; i++) {
+	for(int i = 2; i < argc; i++) {
 		if(!strcmp(argv[i],"resolution")){
 			i++;
 			resolution.setX(atoi(argv[i]));

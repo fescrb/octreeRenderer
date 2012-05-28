@@ -4,11 +4,12 @@
 #include "Window.h"
 
 class OctreeCreator;
+class OctreeWriter;
 
 class GeometryOctreeWindow
 :   public Window {
     public:
-        explicit                 GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator);
+        explicit                 GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator, OctreeWriter *octreeWriter);
 
         void                     initGL();
 
@@ -20,6 +21,7 @@ class GeometryOctreeWindow
     private:
 
         OctreeCreator           *m_octreeCreator;
+        OctreeWriter            *m_octreeWriter;
 };
 
 #endif //_GEOMETRY_OCTREE_WINDOW_H

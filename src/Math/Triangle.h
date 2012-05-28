@@ -74,7 +74,7 @@ struct triangle {
             float4 normal = cross(temp_thrd, temp_scnd);
             double magnitude = mag(normal);
             normal = normalize(normal);
-            printf("mag %f norm %f %f %f %f\n", magnitude, normal[0], normal[1], normal[2], normal[3]);
+            //printf("mag %f norm %f %f %f %f\n", magnitude, normal[0], normal[1], normal[2], normal[3]);
             
             m_vert0.setNormal(normal);
             m_vert1.setNormal(normal);

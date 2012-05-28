@@ -11,16 +11,18 @@
 #include <cstdio>
 
 OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
-:   m_mesh(meshToConvert),
+:   m_converted(false),
+    m_mesh(meshToConvert),
     m_aabox(meshToConvert),
     m_depth(depth),
     m_bboxes(0){
+    
     // We need to centre the mesh at the origin.
     float4 off_centre_difference = float4(0.0f,0.0f,0.0f,2.0f) - m_aabox.getCentre();
     
     float4x4 translation_matrix = float4x4::translationMatrix(off_centre_difference[0], off_centre_difference[1], off_centre_difference[2]);
     
-    printf("off_centre %f %f %f %f\nsize %d\n", off_centre_difference[0], off_centre_difference[1], off_centre_difference[2], off_centre_difference[3], m_mesh.getTriangleCount());
+    /*printf("off_centre %f %f %f %f\nsize %d\n", off_centre_difference[0], off_centre_difference[1], off_centre_difference[2], off_centre_difference[3], m_mesh.getTriangleCount());
     printf("before aabox corner %f %f %f %f size %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2], m_aabox.getCorner()[3], 
            m_aabox.getSizes()[0],m_aabox.getSizes()[1],m_aabox.getSizes()[2]);
     
@@ -35,7 +37,7 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     m_mesh = translation_matrix * m_mesh;
     m_aabox = translation_matrix * m_aabox;
     
-    printf(" after aabox corner %f %f %f %f size %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2], m_aabox.getCorner()[3], 
+    /*printf(" after aabox corner %f %f %f %f size %f %f %f\n", m_aabox.getCorner()[0], m_aabox.getCorner()[1], m_aabox.getCorner()[2], m_aabox.getCorner()[3], 
            m_aabox.getSizes()[0],m_aabox.getSizes()[1],m_aabox.getSizes()[2]);
     
     /*for(int i = 0; i < m_mesh.getTriangleCount(); i++) {
@@ -45,6 +47,23 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
             printf("pos (%f %f %f %f) nor (%f %f %f %f)\n", pos[0], pos[1], pos[2], pos[3], nor[0], nor[1], nor[2], nor[3]);
         }
     }*/
+    
+    renderinfo initial;
+    
+    float center_distance_to_camera = mag(m_aabox.getSizes());
+    
+    initial.fov = 30.0f;
+    initial.up = float3(0.0f,1.0f,0.0f);
+    initial.eyePos = float3(1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera);
+    initial.viewPortStart = float3();
+    initial.viewStep = float3();
+    initial.viewDir = normalize(float3() - initial.eyePos);
+    initial.eyePlaneDist = center_distance_to_camera/2.0f;
+
+    initial.lightPos = float3(m_aabox.getSizes()[0] * 2.0f, 0.0f, 0.0f);
+    initial.lightBrightness = 255.0f;
+    
+    setInitialRenderInfo(initial);
 }
 
 void OctreeCreator::render() {
@@ -65,7 +84,12 @@ void OctreeCreator::renderBBoxSubtree(octree<aabox> subtree) {
     }
 }
 
+bool OctreeCreator::isConverted() {
+    return m_converted;
+}
+
 void OctreeCreator::convert() {
+    
     octree<mesh*> *mesh_octree = (octree<mesh*>*) malloc(sizeof(octree<mesh*>));
     mesh_octree[0] = octree<mesh*>();
     m_bboxes = (octree<aabox>*) malloc(sizeof(octree<aabox>));
@@ -76,6 +100,10 @@ void OctreeCreator::convert() {
     
     
     OctreeNode *root = createSubtree(mesh_octree, m_bboxes, m_mesh, m_aabox, m_depth);
+    
+    m_pRootNode = root;
+    
+    m_converted = true;
     
    
     /*printf("Root node col %f %f %f %f normal %f %f %f\n",

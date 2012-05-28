@@ -4,15 +4,19 @@
 #include "AABox.h"
 #include <OctreeStruct.h>
 
-class Octree;
+#include "ConcreteOctree.h"
+
 class OctreeNode;
 
-class OctreeCreator {
+class OctreeCreator 
+:   public ConcreteOctree {
     public:
         explicit                 OctreeCreator(mesh meshToConvert, int depth = 3);
 
         void                     render();
         void                     convert();
+        
+        bool                     isConverted();
 
         aabox                    getMeshAxisAlignedBoundingBox();
 
@@ -24,11 +28,11 @@ class OctreeCreator {
         
         void                     renderBBoxSubtree(octree<aabox> subtree);
         
+        bool                     m_converted;
+        
         mesh                     m_mesh;
         aabox                    m_aabox;
         int                      m_depth;
-        
-        Octree                  *m_octree;
         octree<aabox>           *m_bboxes;
 };
 

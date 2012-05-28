@@ -1,12 +1,12 @@
 #include "DataManager.h"
 
-#include "Octree.h"
+#include "ConcreteOctree.h"
 #include "OctreeSegment.h"
 
 #include "Device.h"
 
-DataManager::DataManager() {
-	m_pOctree = Octree::getSimpleOctree();
+DataManager::DataManager(Octree* octree) {
+	m_pOctree = octree;
 }
 
 DataManager::~DataManager() {
@@ -27,12 +27,8 @@ Octree* DataManager::getOctree() {
 	return m_pOctree;
 }
 
-int DataManager::getMaxOctreeDepth() {
-	return getOctree()->getDepth();
-}
-
 Bin DataManager::getFullOctree() {
-	return getOctree()->flatten();
+	return getOctree()->getRoot();
 }
 
 renderinfo DataManager::getInitialRenderInfo() {

@@ -4,8 +4,20 @@
 #include "DeviceManager.h"
 #include "RenderInfo.h"
 
+#include "ConcreteOctree.h"
+#include "OctreeReader.h"
+
 ProgramState::ProgramState(int argc, char** argv) {
-    m_pDataManager = new DataManager;
+    
+    Octree *octree;
+    
+    if(argc > 1) {
+        octree = new OctreeReader(argv[1]);
+    } else {
+        octree = ConcreteOctree::getSimpleOctree();
+    }
+    
+    m_pDataManager = new DataManager(octree);
     
     m_pDeviceManager = new DeviceManager(m_pDataManager);
     

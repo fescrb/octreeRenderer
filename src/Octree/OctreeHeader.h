@@ -3,12 +3,12 @@
 
 #include "Bin.h"
 
-class Octree;
+class ConcreteOctree;
 
 class OctreeHeader {
     public:
         explicit    OctreeHeader();
-        explicit    OctreeHeader(Octree* octree);
+        explicit    OctreeHeader(ConcreteOctree* octree);
         
         void        setAttributeSize(int size);
         int         getAttributeSize();

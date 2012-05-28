@@ -3,4 +3,6 @@
 
 int make_directory(char* name);
 
+bool path_exists(char* path);
+
 #endif //_PATH_H

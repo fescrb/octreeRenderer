@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-BinWriter::BinWriter(Bin bin, char* path, char* name) 
+BinWriter::BinWriter(Bin bin, char* path, const char* name) 
 :   m_bin(bin){
     m_complete_path = (char*)malloc(sizeof(char)*(strlen(path)+strlen(name)+1)+1);
     sprintf(m_complete_path, "%s/%s",path,name);

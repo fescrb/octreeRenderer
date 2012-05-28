@@ -1,8 +1,6 @@
 #define STACK_SIZE 5
 
-struct renderinfo{    
-    int2  viewportSize;
-
+struct renderinfo{
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
 	float eyePlaneDist, fov;
 

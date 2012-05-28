@@ -13,8 +13,7 @@
 
 struct cl_renderinfo {
 					 cl_renderinfo(){}
-	explicit 		 cl_renderinfo(								   cl_int2 viewport,
-								   cl_float3 eye,
+	explicit 		 cl_renderinfo(cl_float3 eye,
 								   cl_float3 dir,
 								   cl_float3 upV,
 								   cl_float3 viewportS,
@@ -24,8 +23,7 @@ struct cl_renderinfo {
                                    cl_float3 light_pos,
                                    cl_float light_brightness
                                   )
-	: 	viewportSize(viewport), 
-		eyePos(eye), 
+	: 	eyePos(eye), 
 		viewDir(dir), 
 		up(upV), 
 		viewPortStart(viewportS), 
@@ -34,12 +32,7 @@ struct cl_renderinfo {
 		fov(fovR),
 		lightPos(light_pos),
 		lightBrightness(light_brightness){}
-	
-	cl_int   maxOctreeDepth;
-    
-    cl_int2  viewportSize;
 
-	
 	cl_float3 eyePos, viewDir, up, viewPortStart, viewStep;
 	cl_float eyePlaneDist, fov; 
     

@@ -5,7 +5,7 @@
 
 class BinWriter {
     public:
-        explicit             BinWriter(Bin bin, char* path, char* name);
+        explicit             BinWriter(Bin bin, char* path, const char* name);
         
         void                 writeAll();
         

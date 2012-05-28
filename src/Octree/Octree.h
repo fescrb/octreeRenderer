@@ -9,24 +9,17 @@ class OctreeSegment;
 #include "Bin.h"
 
 class Octree {
-	public:
-		explicit 				 Octree();
-		
-		static Octree 			*getSimpleOctree();
+    public:
+        explicit 				 Octree();
+        
+        virtual renderinfo       getInitialRenderInfo();
+        
+        
+        virtual Bin              getHeader() = 0;
+        virtual Bin              getRoot() = 0;
 
-		unsigned int			 getDepth();
-        unsigned int             getAttributeSize();
-		unsigned int			 getNumberOfNodes();
-        
-        renderinfo               getInitialRenderInfo();
-        
-        
-        Bin                      getHeader();
-		Bin			             flatten();
-
-	private:
-        OctreeHeader            *m_pHeader;
-		OctreeNode				*m_pRootNode;
+    protected:
+        renderinfo               m_initial_renderinfo;
 };
 
 #endif //_OCTREE_H

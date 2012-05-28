@@ -10,6 +10,8 @@ public:
     explicit 		 vector4(t value): m_x(value), m_y(value), m_z(value), m_w(value){}
     explicit 		 vector4(t x, t y, t z, t w): m_x(x), m_y(y), m_z(z), m_w(w){}
     explicit         vector4(vector3<t> v, t w): m_x(v.getX()), m_y(v.getY()), m_z(v.getZ()), m_w(w){}
+    template<class t2>
+    explicit         vector4(vector4<t2> v): m_x(v.getX()), m_y(v.getY()), m_z(v.getZ()), m_w(v.getW()) {}
                      vector4(const vector4 &vector): m_x(vector.m_x), m_y(vector.m_y), m_z(vector.m_z), m_w(vector.m_w){}
     
     inline vector4 & operator=(const vector4 &rhs){

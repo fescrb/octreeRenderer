@@ -11,7 +11,7 @@ class Device;
 
 class DataManager {
 	public:
-		explicit 				 DataManager();
+		explicit 				 DataManager(Octree* octree);
 								~DataManager();
 
 		Octree 				 	*getOctree();

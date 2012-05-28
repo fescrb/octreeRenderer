@@ -1,13 +1,13 @@
 #include "OctreeHeader.h"
 
-#include "Octree.h"
+#include "ConcreteOctree.h"
 
 #include <cstdlib>
 
 OctreeHeader::OctreeHeader() {
 }
 
-OctreeHeader::OctreeHeader(Octree* octree) {
+OctreeHeader::OctreeHeader(ConcreteOctree* octree) {
     setAttributeSize(octree->getAttributeSize());
     setOctreeDepth(octree->getDepth());
 }

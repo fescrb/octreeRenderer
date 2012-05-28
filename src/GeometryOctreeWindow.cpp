@@ -1,12 +1,14 @@
 #include "GeometryOctreeWindow.h"
 
 #include "OctreeCreator.h"
+#include "OctreeWriter.h"
 
 #include <cstdio>
 
-GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator)
+GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator, OctreeWriter *octreeWriter)
 :   Window(argc, argv, dimensions),
-    m_octreeCreator(octreeCreator){
+    m_octreeCreator(octreeCreator),
+    m_octreeWriter(octreeWriter){
 
     setRenderWindow(this);
 
@@ -64,12 +66,15 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
 void GeometryOctreeWindow::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
-    m_octreeCreator->convert();
     m_octreeCreator->render();
     
     glutSwapBuffers();
 }
 
 void GeometryOctreeWindow::idle() {
-    
+    if(!m_octreeCreator->isConverted()) {
+        m_octreeCreator->convert();
+        m_octreeWriter->write();
+    }
+    render();
 }
