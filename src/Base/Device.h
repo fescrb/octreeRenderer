@@ -29,7 +29,7 @@ class Device {
          * We clear the framebuffer if we needen't generate it
          * @param The dimensions of the required framebuffer.
          */
-        virtual void                 makeFrameBuffer(int2 size) = 0;
+        virtual void                 makeFrameBuffer(int2 size);
         virtual void                 sendData(Bin bin) = 0;
         virtual void                 sendHeader(Bin bin) = 0;
         virtual void                 renderTask(int index, renderinfo *info) = 0;
@@ -59,8 +59,12 @@ class Device {
     protected:
 
         DeviceInfo                  *m_pDeviceInfo;
+        
+        char*                        m_pFrame;
+        int2                         m_frameBufferResolution;
 
         std::vector<rect>            m_tasks;
+        rect                         m_tasksWindow;
 };
 
 #endif // _DEVICE_H

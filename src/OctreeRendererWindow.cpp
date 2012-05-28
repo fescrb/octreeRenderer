@@ -13,12 +13,6 @@
 
 #include <vector>
 
-GLfloat square[] = {0.0f, 0.0f,
-                    1.0f, 0.0f,
-                    1.0f, 1.0f,
-                    0.0f, 1.0f
-};
-
 OctreeRendererWindow::OctreeRendererWindow(int argc, char** argv, int2 dimensions, ProgramState* state)
 :   Window(argc, argv, dimensions, false),
     m_pProgramState(state){
@@ -40,11 +34,6 @@ void OctreeRendererWindow::initGL() {
     GLint status;
     glGetProgramiv(m_programObject, GL_ACTIVE_ATTRIBUTES, &numAtts);
     glGetProgramiv(m_programObject, GL_ACTIVE_UNIFORMS, &numUni);
-
-    m_vertAttr = glGetAttribLocation(m_programObject, "vertex");
-
-    glVertexAttribPointer(m_vertAttr, 2, GL_FLOAT, GL_FALSE, 0, square);
-    glEnableVertexAttribArray(m_vertAttr);
 
     m_textUniform = glGetUniformLocation(m_programObject, "myTexture");
     GLenum error = glGetError();
@@ -80,12 +69,7 @@ void OctreeRendererWindow::render() {
 
     glUseProgram(m_programObject);
 
-    //glEnableVertexAttribArray(m_vertAttr);
-
     for(int i = 0; i < fb_windows.size(); i++) {
-        //glUseProgram(m_programObject);
-
-        //glEnableVertexAttribArray(m_vertAttr);
 
         glActiveTexture(GL_TEXTURE0);
         glUniform1i(m_textUniform, 0);

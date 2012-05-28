@@ -2,8 +2,10 @@
 
 #include "DeviceInfo.h"
 
-Device::Device() {
+Device::Device()
+:   m_pFrame(0) {
     m_tasks = std::vector<rect>();
+    m_frameBufferResolution = int2();
 }
 
 Device::~Device() {
@@ -14,12 +16,33 @@ char* Device::getName() {
 	return m_pDeviceInfo->getName();
 }
 
+void Device::makeFrameBuffer(int2 size) {
+    // Generate frame buffer if non-existant or not the same size;
+    if (size != m_frameBufferResolution) {
+        if(m_pFrame)
+            free(m_pFrame);
+        m_pFrame = (char*)malloc(4*size[0]*size[1]);
+        m_frameBufferResolution = size;
+    }
+
+    // Clear.
+    int i = 0;
+    int bufferSize = 4*m_frameBufferResolution[0]*m_frameBufferResolution[1];
+    while ( i < bufferSize) {
+        m_pFrame[i]=0;
+        i++;
+    }
+}
+
 void Device::clearTasks() {
     m_tasks.clear();
 }
 
 void Device::addTask(rect task) {
     m_tasks.push_back(task); 
+    // Add task to the maximum task window.
+    // TODO
+    m_tasksWindow = task;
 }
 
 rect* Device::getTask(int index) {
@@ -35,9 +58,5 @@ int Device::getTaskCount() {
 }
 
 rect Device::getTotalTaskWindow() {
-    rect window = m_tasks[0];
-    for(int i = 1; i < getTaskCount(); i++) {
-        //TODO
-    }
-    return window;
+    return m_tasksWindow;
 }

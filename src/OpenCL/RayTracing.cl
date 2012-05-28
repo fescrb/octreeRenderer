@@ -203,10 +203,10 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 kernel void ray_trace(global char* octree,
                       global char* header,
                       struct renderinfo info,
-                      int widthOfFramebuffer,
-                      global unsigned char* frameBuff) {
-    int x = get_global_id(0);
-	int y = get_global_id(1);
+                      int2 origin,
+                      write_only image2d_t frameBuff) {
+    int x = origin.x + get_global_id(0);
+	int y = origin.y + get_global_id(1);
 
 	float3 o = info.viewPortStart + (info.viewStep * x) + (info.up * y);
     float3 d = o-info.eyePos; 
@@ -215,8 +215,6 @@ kernel void ray_trace(global char* octree,
 
 	if(col.node_pointer) {
 		global char* attr = get_attributes(col.node_pointer);
-
-		int pixel_index = (x*3)+(y*widthOfFramebuffer*3);
 
         unsigned char red = attr[0];
         unsigned char green = attr[1];
@@ -239,8 +237,8 @@ kernel void ray_trace(global char* octree,
             blue*=diffuse_coefficient;
         }
 
-		frameBuff[pixel_index + 0] = red;
-		frameBuff[pixel_index + 1] = green;
-		frameBuff[pixel_index + 2] = blue;
-	}
+        uint4 color = (uint4)(red, green, blue, 255);
+
+        write_imageui ( frameBuff, (int2)(x, y), color);
+    }
 }

@@ -55,8 +55,8 @@ char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
 }
 
 SerialDevice::SerialDevice()
-:	m_pOctreeData(0),
- 	m_pFrame(0),
+:	Device(),
+    m_pOctreeData(0),
     m_texture(0){
 	m_pDeviceInfo = new SerialDeviceInfo();
 }
@@ -68,24 +68,6 @@ SerialDevice::~SerialDevice() {
 
 void SerialDevice::printInfo() {
 	m_pDeviceInfo->printInfo();
-}
-
-void SerialDevice::makeFrameBuffer(int2 size) {
-    // Generate frame buffer if non-existant or not the same size;
-    if (size != m_frameBufferResolution) {
-        if(m_pFrame)
-            free(m_pFrame);
-        m_pFrame = (char*)malloc(3*size[0]*size[1]);
-        m_frameBufferResolution = size;
-    }
-
-    // Clear.
-    int i = 0;
-    int bufferSize = 3*m_frameBufferResolution[0]*m_frameBufferResolution[1];
-    while ( i < bufferSize) {
-        m_pFrame[i]=0;
-        i++;
-    }
 }
 
 void SerialDevice::sendData(Bin bin) {
@@ -260,7 +242,7 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
 
 	for(int y = start[1]; y < end[1]; y++) {
 		for(int x = start[0]; x < end[0]; x++) {
-			traceRay(start[0]+x, start[1]+y, info);
+			traceRay(x, y, info);
 		}
 	}
 
@@ -287,10 +269,10 @@ framebuffer_window SerialDevice::getFrameBuffer() {
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
-                 m_frameBufferResolution[0],
-                 m_frameBufferResolution[1],
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
                  0,
-                 GL_RGB,
+                 GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  m_pFrame);
     m_transferEnd.reset();
@@ -307,11 +289,12 @@ char* SerialDevice::getFrame() {
 }
 
 void SerialDevice::setFramePixel(int x, int y, char red, char green, char blue) {
-	char* pixelPtr = &m_pFrame[(y*m_frameBufferResolution[0]*3)+(x*3)];
+	char* pixelPtr = &m_pFrame[(y*getTotalTaskWindow().getWidth()*4)+(x*4)];
 
 	pixelPtr[0] = red;
 	pixelPtr[1] = green;
 	pixelPtr[2] = blue;
+    pixelPtr[3] = 255;
 }
 
 high_res_timer SerialDevice::getRenderTime() {

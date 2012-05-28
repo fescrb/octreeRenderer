@@ -30,9 +30,6 @@ class OctreeRendererWindow
         
         Program                  m_programObject;
         
-        GLint                    m_vertAttr;
-        GLint                    m_textAttr;
-        
         GLint                    m_textUniform;
 };
 

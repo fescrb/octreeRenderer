@@ -15,7 +15,8 @@ void CL_CALLBACK staticOnRenderingFinished(cl_event event, cl_int event_command_
 }
 
 OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
-:	m_DeviceID(device_id),
+:   Device(),
+    m_DeviceID(device_id),
     m_context(context),
     m_frameBufferResolution(int2(0)),
     m_texture(0) {
@@ -52,6 +53,7 @@ void OpenCLDevice::printInfo() {
 }
 
 void OpenCLDevice::makeFrameBuffer(int2 size) {
+    Device::makeFrameBuffer(size);
     if(size != m_frameBufferResolution) {
 		cl_int error;
 		if(m_frameBufferResolution[0]) {
@@ -60,7 +62,19 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 				clPrintError(error);
 			}
 		}
-		m_frameBuff = clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
+		// Image format
+		cl_image_format image_format = {CL_RGBA, CL_UNSIGNED_INT8};
+        // Only needed in OpenCL 1.2
+        //cl_image_desc image_descriptor = { /*width*/size[0],
+        //                                   /*height*/size[1],
+        //                                   /*depth*/ 1,
+        //                                   /*image array size*/ 1,
+        //                                   /*row pitch*/ 0,
+        //                                   /*slice pitch*/ 0,
+        //                                   /*mip level*/ 0, /*num samples*/ 0,
+        //                                   /*buffer*/NULL};
+		m_frameBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+		//clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
 		if(clIsError(error)){
 			clPrintError(error);
 		}
@@ -69,6 +83,12 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 		if(clIsError(error)){
 			clPrintError(error); exit(1);
 		}
+		size_t origin[3] = {0, 0, 0}; 
+        size_t region[3] = {size[0], size[1], 1}; 
+        error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
+		if(clIsError(error)){
+            clPrintError(error);
+        }
     }
 }
 
@@ -111,8 +131,8 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    int frameBufferWidth = m_frameBufferResolution[0];
-	error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_int), &frameBufferWidth);
+    cl_int2 origin = { window.getX(), window.getY()};
+	error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_int2), &origin);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -154,14 +174,12 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
-                 m_frameBufferResolution[0],
-                 m_frameBufferResolution[1],
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
                  0,
-                 GL_RGB,
+                 GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  frameBuffer);
-
-	free(frameBuffer);
 
     m_transferEnd.reset();
 
@@ -173,11 +191,13 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
 }
 
 char* OpenCLDevice::getFrame() {
-	int size = m_frameBufferResolution[0]*m_frameBufferResolution[1]*3;
-	char* frameBuffer = (char*) malloc(size+1);
+    size_t origin[3] = {getTotalTaskWindow().getX(), getTotalTaskWindow().getY(), 0};
+    size_t region[3] = {getTotalTaskWindow().getWidth(), getTotalTaskWindow().getHeight(), 1};
+    int size = getTotalTaskWindow().getWidth()*getTotalTaskWindow().getHeight()*4;
 
     cl_int error;
-    error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) frameBuffer, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
+    //error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
+    error = clEnqueueReadImage ( m_commandQueue, m_frameBuff, GL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){
         clPrintError(error);
     }
@@ -186,7 +206,7 @@ char* OpenCLDevice::getFrame() {
 	if(clIsError(error)){
         clPrintError(error);
     }
-    return frameBuffer;
+    return m_pFrame;
 }
 
 void OpenCLDevice::onRenderingFinished() {

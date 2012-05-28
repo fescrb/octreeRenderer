@@ -15,6 +15,8 @@ aabox::aabox(const mesh& meshToBound) {
     float z_max = max_min[4].getPosition().getZ();
     float z_min = max_min[5].getPosition().getZ();
     
+    printf("x_min %f x_max %f y_min %f y_max %f z_min %f z_max %f\n", x_min, x_max, y_min, y_max, z_min, z_max);
+    
     m_corner = position(float3(x_min, y_min, z_min));
     m_sizes = float3(x_max-x_min, y_max-y_min, z_max-z_min);
 }
