@@ -31,6 +31,11 @@ struct aabox {
         inline float3   getSizes() const {
             return m_sizes;
         }
+        
+        inline float    getLongestSize() const {
+            float max = m_sizes.getX() > m_sizes.getY() ? m_sizes.getX() : m_sizes.getY();
+            return max > m_sizes.getZ() ? max : m_sizes.getZ();
+        }
 
         inline float4   getCorner() const {
             return m_corner;

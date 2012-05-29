@@ -49,6 +49,9 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
         }
     }*/
     
+    float3 sizes = float3(m_aabox.getLongestSize());
+    m_aabox = aabox(m_aabox.getCentre() - (direction(sizes)/2.0f), sizes);
+    
     renderinfo initial;
     
     float3 total_octree_volume = float3(OCTREE_ROOT_HALF_SIZE*2.0f,OCTREE_ROOT_HALF_SIZE*2.0f,OCTREE_ROOT_HALF_SIZE*2.0f);
