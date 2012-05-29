@@ -62,7 +62,7 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     initial.viewDir = normalize(float3() - initial.eyePos);
     initial.eyePlaneDist = center_distance_to_camera/2.0f;
 
-    initial.lightPos = float3(m_aabox.getSizes()[0] * 2.0f, 0.0f, 0.0f);
+    initial.lightPos = float3(512.0f, 0.0f, 0.0f);
     initial.lightBrightness = 255.0f;
     
     setInitialRenderInfo(initial);
