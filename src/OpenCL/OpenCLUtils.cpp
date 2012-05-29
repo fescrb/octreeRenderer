@@ -140,3 +140,73 @@ const char* clProgramBuildStatusToCString(cl_build_status build_status) {
 			return "Build status invalid or unknown";
 	}
 }
+
+const char* clGetChannelOrderString(cl_channel_order channel_order) {
+    switch(channel_order){
+        case CL_R:
+            return "CL_R";
+        case CL_Rx:
+            return "CL_Rx";
+        case CL_A:
+            return "CL_A";
+        case CL_INTENSITY:
+            return "CL_INTENSITY";
+        case CL_LUMINANCE:
+            return "CL_LUMINANCE";
+        case CL_RG:
+            return "CL_RG";
+        case CL_RGx:
+            return "CL_RGx";
+        case CL_RA:
+            return "CL_RA";
+        case CL_RGB:
+            return "CL_RGB";
+        case CL_RGBx:
+            return "CL_RGBx";
+        case CL_RGBA:
+            return "CL_RGBA";
+        case CL_ARGB:
+            return "CL_ARGB";
+        case CL_BGRA:
+            return "CL_BGRA";
+        default:
+            return "Channel order invalid or unknown";
+    }
+}
+
+const char* clGetImageChannelTypeString(cl_channel_type channel_type) {
+    switch(channel_type){
+        case CL_SNORM_INT8:
+            return "CL_SNORM_INT8";
+        case CL_SNORM_INT16:
+            return "CL_SNORM_INT16";
+        case CL_UNORM_INT8:
+            return "CL_UNORM_INT8";
+        case CL_UNORM_INT16:
+            return "CL_UNORM_INT16";
+        case CL_UNORM_SHORT_565:
+            return "CL_UNORM_SHORT_565";
+        case CL_UNORM_SHORT_555:
+            return "CL_UNORM_SHORT_555";
+        case CL_UNORM_INT_101010:
+            return "CL_UNORM_INT_101010";
+        case CL_SIGNED_INT8:
+            return "CL_SIGNED_INT8";
+        case CL_SIGNED_INT16:
+            return "CL_SIGNED_INT16";
+        case CL_SIGNED_INT32:
+            return "CL_SIGNED_INT32";
+        case CL_UNSIGNED_INT8:
+            return "CL_UNSIGNED_INT8";
+        case CL_UNSIGNED_INT16:
+            return "CL_UNSIGNED_INT16";
+        case CL_UNSIGNED_INT32:
+            return "CL_UNSIGNED_INT32";
+        case CL_HALF_FLOAT:
+            return "CL_HALF_FLOAT";
+        case CL_FLOAT:
+            return "CL_FLOAT";
+        default:
+            return "Channel order invalid or unknown";
+    }
+}

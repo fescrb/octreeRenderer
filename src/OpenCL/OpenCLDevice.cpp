@@ -20,7 +20,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_context(context),
     m_frameBufferResolution(int2(0)),
     m_texture(0) {
-	m_pDeviceInfo = new OpenCLDeviceInfo(device_id);
+	m_pDeviceInfo = new OpenCLDeviceInfo(device_id, context);
 
     cl_int err = 0;
 
@@ -55,15 +55,27 @@ void OpenCLDevice::printInfo() {
 void OpenCLDevice::makeFrameBuffer(int2 size) {
     Device::makeFrameBuffer(size);
     if(size != m_frameBufferResolution) {
-		cl_int error;
-		if(m_frameBufferResolution[0]) {
-			error = clReleaseMemObject(m_frameBuff);
-			if(clIsError(error)){
-				clPrintError(error);
-			}
-		}
-		// Image format
-		cl_image_format image_format = {CL_RGBA, CL_UNSIGNED_INT8};
+        cl_int error;
+        if(m_frameBufferResolution[0]) {
+            error = clReleaseMemObject(m_frameBuff);
+            if(clIsError(error)){
+                clPrintError(error);
+            }
+            error = clReleaseMemObject(m_depthBuff);
+            if(clIsError(error)){
+                clPrintError(error);
+            }
+            error = clReleaseMemObject(m_iterationsBuff);
+            if(clIsError(error)){
+                clPrintError(error);
+            }
+            error = clReleaseMemObject(m_octreeDepthBuff);
+            if(clIsError(error)){
+                clPrintError(error);
+            }
+        }
+        // Image format
+        cl_image_format image_format = {CL_RGBA, CL_UNSIGNED_INT8};
         // Only needed in OpenCL 1.2
         //cl_image_desc image_descriptor = { /*width*/size[0],
         //                                   /*height*/size[1],
@@ -73,20 +85,35 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         //                                   /*slice pitch*/ 0,
         //                                   /*mip level*/ 0, /*num samples*/ 0,
         //                                   /*buffer*/NULL};
-		m_frameBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
-		//clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
-		if(clIsError(error)){
-			clPrintError(error);
-		}
-		m_frameBufferResolution = size;
-		error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
-		if(clIsError(error)){
-			clPrintError(error); exit(1);
-		}
-		size_t origin[3] = {0, 0, 0}; 
+        //clCreateBuffer ( m_context, CL_MEM_WRITE_ONLY, size[1]*size[0]*3, NULL, &error);
+        m_frameBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+        if(clIsError(error)){
+            clPrintError(error);
+        }
+        image_format.image_channel_order = CL_R;
+        image_format.image_channel_order = CL_FLOAT;
+        m_depthBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &image_format, size[0], size[1], 0, NULL, &error);
+        if(clIsError(error)){
+            clPrintError(error);
+        }
+        image_format.image_channel_order = CL_UNSIGNED_INT8;
+        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+        if(clIsError(error)){
+            clPrintError(error);
+        }
+        m_octreeDepthBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+        if(clIsError(error)){
+            clPrintError(error);
+        }
+        m_frameBufferResolution = size;
+        error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        size_t origin[3] = {0, 0, 0}; 
         size_t region[3] = {size[0], size[1], 1}; 
         error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
-		if(clIsError(error)){
+        if(clIsError(error)){
             clPrintError(error);
         }
     }

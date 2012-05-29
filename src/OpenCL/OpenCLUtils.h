@@ -39,4 +39,8 @@ const char* clDeviceTypeToCString(cl_device_type device_type);
 
 const char* clProgramBuildStatusToCString(cl_build_status build_status);
 
+const char* clGetChannelOrderString(cl_channel_order channel_order);
+
+const char* clGetImageChannelTypeString(cl_channel_type channel_type);
+
 #endif //_OPENCL_UTILS_H

@@ -1,4 +1,7 @@
-#define STACK_SIZE 5
+#define STACK_SIZE 10
+
+#define F32_EPSILON 1E-5
+#define OCTREE_ROOT_HALF_SIZE 1.0f
 
 struct renderinfo{
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
@@ -39,26 +42,35 @@ bool no_children(__global char* address) {
     return !address[7];
 }
 
-char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
-	float3 flagVector = rayPos - nodeCentre;
-	char flag = 0;
+char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction) {
+    float3 flagVector = rayPos - nodeCentre;
+    char flag = 0;
 
-	if(flagVector.x >= 0.0f)
-		flag |= 1;
-	if(flagVector.y >= 0.0f)
-		flag |= 2;
-	if(flagVector.z >= 0.0f)
-		flag |= 4;
-	
-	return flag;
+    if(flagVector.x > F32_EPSILON)
+        flag |= 1;
+    else if(flagVector.x <= F32_EPSILON && flagVector.x >= -F32_EPSILON)
+        if(direction.x >= 0.0f)
+            flag |= 1;
+    if(flagVector.y > F32_EPSILON)
+        flag |= 2;
+    else if(flagVector.y <= F32_EPSILON && flagVector.y >= -F32_EPSILON)
+        if(direction.y >= 0.0f)
+            flag |= 2;
+    if(flagVector.z > F32_EPSILON)
+        flag |= 4;
+    else if(flagVector.z <= F32_EPSILON && flagVector.z >= -F32_EPSILON)
+        if(direction.z >= 0.0f)
+            flag |= 4;
+
+    return flag;
 }
 
-bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, global char* node) {
-	return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));  
+bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, global char* node, float3 direction) {
+	return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre, direction));  
 }
 
-global char* getChild(float3 rayPos, float3 nodeCentre, global char* node) {
-    char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
+global char* getChild(float3 rayPos, float3 nodeCentre, global char* node, float3 direction) {
+    char xyz_flag = makeXYZFlag(rayPos, nodeCentre, direction);
     global int *node_int = (global int*)node;
     int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
     node_int+=(pos+2);
@@ -89,7 +101,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 
 struct collission find_collission(global char* octree, float3 origin, float3 direction, float t) {
 
-	float half_size = 256.0f;
+	float half_size = OCTREE_ROOT_HALF_SIZE;
 
 	float3 corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
 								 direction.y >= 0 ? half_size : -half_size,
@@ -131,7 +143,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
             if(t_min <= t && t < t_max) {
                 rayPos = origin + (direction * t);
                 
-                char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
+                char xyz_flag = makeXYZFlag(rayPos, voxelCentre, direction);
                 float nodeHalfSize = fabs((corner_far-voxelCentre).x)/2.0f;
                 
                 float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
@@ -144,12 +156,12 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                 
                 float tmp_max = min_component((tmp_corner_far - origin) / direction);
                 
-                if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
+                if(nodeHasChildAt(rayPos, voxelCentre, curr_address, direction)) {
                     /* If the voxel we are at is not empty, go down. */
                     
                     curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
                     
-                    curr_address = getChild(rayPos,voxelCentre,curr_address);
+                    curr_address = getChild(rayPos,voxelCentre,curr_address, direction);
                     
                     corner_far = tmp_corner_far;
                     voxelCentre = tmpNodeCentre;
@@ -177,7 +189,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                     /* Since we are using a short stack, we restart from the root node. */
 					curr_index = 0;
                     curr_address = octree;
-                    collission = true;
+                    //collission = true;
 					corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
 										  direction.y >= 0 ? half_size : -half_size,
 										  direction.z >= 0 ? half_size : -half_size);

@@ -3,8 +3,9 @@
 #include "OpenCLUtils.h"
 
 #include <cstdio>
+#include <cstdlib>
 
-OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
+OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device, cl_context context){
 	// To get the device name, first we get the length.
 	size_t stringSize;
 	cl_int err = clGetDeviceInfo(device, CL_DEVICE_NAME, 0, NULL, &stringSize);
@@ -79,6 +80,16 @@ OpenCLDeviceInfo::OpenCLDeviceInfo(cl_device_id device){
 		clPrintError(err); return;
 	}
 	m_globalMemorySize = globalMemSize;
+    
+    err = clGetSupportedImageFormats(context, CL_MEM_READ_WRITE, CL_MEM_OBJECT_IMAGE2D, 0, NULL, &m_format_count);
+    if(clIsError(err)){
+        clPrintError(err); return;
+    }
+    m_image_formats = (cl_image_format*) malloc (sizeof(cl_image_format)*m_format_count + 1);
+    err = clGetSupportedImageFormats(context, CL_MEM_READ_WRITE, CL_MEM_OBJECT_IMAGE2D, 10, m_image_formats, NULL);
+    if(clIsError(err)){
+        clPrintError(err); return;
+    }
 }
 
 OpenCLDeviceInfo::~OpenCLDeviceInfo(){
@@ -94,6 +105,13 @@ void OpenCLDeviceInfo::printInfo(){
 	printf("Maximum Compute Units:          %d\n", m_maxComputeUnits);
 	printf("Maximum Compute Unit Frequency: %d\n", m_maxComputeUnitFrequency);
 	printf("Global Memory Size:             %lu bytes\n", m_globalMemorySize);
+    printf("2D Image formats allowed:       ");
+    for(int i = 0; i < m_format_count; i++) {
+        printf("%s,%s\n                                ", 
+               clGetChannelOrderString(m_image_formats[i].image_channel_order),
+               clGetImageChannelTypeString(m_image_formats[i].image_channel_data_type));
+    }
+    printf("\n");
 }
 
 char* OpenCLDeviceInfo::getName() {

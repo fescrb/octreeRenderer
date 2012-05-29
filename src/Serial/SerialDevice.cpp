@@ -100,7 +100,9 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float half_size = OCTREE_ROOT_HALF_SIZE;
-
+    char depth_in_octree = 0;
+    short it = 0;
+    
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
@@ -115,6 +117,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
     float t_min = max((corner_close - o) / d);
     float t_max = min((corner_far - o) / d);
+    float t_out = t_max;
 
     // If we are out
     if(t < t_min)
@@ -137,8 +140,12 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
     // Traversal.
     while(!collission) {
+        ++it;
 
-        if(noChildren(curr_address)){
+        if(t >= t_out) {
+            collission = true;
+            curr_address = 0;
+        } else if(noChildren(curr_address)){
             collission = true;
         } else {
             // If we are inside the node
@@ -171,6 +178,8 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                                            d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
                     t_max = tmp_max;
                     t_min = max((corner_close - rayPos) / d);
+                    
+                    ++depth_in_octree;
 
                 } else {
                     // If the child is empty, we step the ray.
@@ -180,6 +189,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                 // We are outside the node. Pop the stack
                 curr_index--;
                 if(curr_index>=0) {
+                    --depth_in_octree;
                     // Pop that stack!
                     corner_far = stack[curr_index].far_corner;
                     curr_address = stack[curr_index].address;
@@ -235,6 +245,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
         }
 
         setFramePixel(x, y, red, green, blue);
+        setInfoPixels(x, y, fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
     }
 }
 
@@ -275,6 +286,37 @@ framebuffer_window SerialDevice::getFrameBuffer() {
 	} else
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
 
+    //Octree Depth
+    /*glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_LUMINANCE,
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
+                 0,
+                 GL_LUMINANCE,
+                 GL_UNSIGNED_BYTE,
+                 m_pOctreeDepth);*/
+    //Iterations
+    /*glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_LUMINANCE,
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
+                 0,
+                 GL_LUMINANCE,
+                 GL_UNSIGNED_BYTE,
+                 m_pIterations);*/
+    //Depth
+    /*glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_LUMINANCE,
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
+                 0,
+                 GL_LUMINANCE,
+                 GL_FLOAT,
+                 m_pDepthBuffer);*/
+    // Color
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
@@ -304,6 +346,14 @@ void SerialDevice::setFramePixel(int x, int y, char red, char green, char blue) 
 	pixelPtr[1] = green;
 	pixelPtr[2] = blue;
     pixelPtr[3] = 255;
+}
+
+void SerialDevice::setInfoPixels(int x, int y, float depth, unsigned char iterations, unsigned char depth_in_octree) {
+    printf("depth is %f\n",depth);
+    int index = (getTotalTaskWindow().getWidth()*y) + x;
+    m_pDepthBuffer[index] = depth;
+    m_pIterations[index] = iterations;
+    m_pOctreeDepth[index] = depth_in_octree;
 }
 
 high_res_timer SerialDevice::getRenderTime() {

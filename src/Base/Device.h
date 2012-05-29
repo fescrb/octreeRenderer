@@ -60,7 +60,11 @@ class Device {
 
         DeviceInfo                  *m_pDeviceInfo;
         
-        char*                        m_pFrame;
+        char                        *m_pFrame;
+        float                       *m_pDepthBuffer;
+        unsigned char               *m_pIterations;
+        unsigned char               *m_pOctreeDepth;
+        
         int2                         m_frameBufferResolution;
 
         std::vector<rect>            m_tasks;

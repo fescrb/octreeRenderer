@@ -56,6 +56,10 @@ class OpenCLDevice:
 
         cl_mem               m_frameBuff;
         int2                 m_frameBufferResolution;
+        
+        cl_mem               m_depthBuff;
+        cl_mem               m_iterationsBuff;
+        cl_mem               m_octreeDepthBuff;
 
         high_res_timer       m_renderStart;
         high_res_timer       m_renderEnd;

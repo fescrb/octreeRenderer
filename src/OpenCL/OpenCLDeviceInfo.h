@@ -3,18 +3,12 @@
 
 #include "DeviceInfo.h"
 
-#ifdef _LINUX
-    #include <CL/cl.h>
-#endif //_LINUX
-
-#ifdef _OSX
-    #include <OpenCL/cl.h>
-#endif //_OSX
+#include "CLIncludes.h"
 
 class OpenCLDeviceInfo
 :	public DeviceInfo {
 	public:
-					 	 OpenCLDeviceInfo(cl_device_id device);
+					 	 OpenCLDeviceInfo(cl_device_id device, cl_context context);
 		virtual 		~OpenCLDeviceInfo();
 
 		void	 	 	 printInfo();
@@ -31,6 +25,8 @@ class OpenCLDeviceInfo
 		unsigned int 	 m_maxComputeUnits;
 		unsigned int 	 m_maxComputeUnitFrequency;
 		unsigned long	 m_globalMemorySize;
+        cl_image_format *m_image_formats;
+        cl_uint          m_format_count;
 };
 
 #endif //_OPENCL_DEVICE_INFO_H
