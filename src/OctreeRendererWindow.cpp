@@ -136,7 +136,8 @@ void OctreeRendererWindow::recalculateViewportVectors() {
     
     float aspec_ratio = (float)m_size[0] / (float)m_size[1];
 
-    float stepMagnitude = ((info->eyePlaneDist * tan((info->fov*aspec_ratio)/2.0f))*2.0f)/(float)m_size[0];
+    float stepMagnitude = ((info->eyePlaneDist * tan(info->fov/2.0f))/(float)m_size[1]);
+    
     viewportStep = viewportStep * stepMagnitude;
 
     up = normalize(up) * stepMagnitude;

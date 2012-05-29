@@ -51,10 +51,11 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     
     renderinfo initial;
     
-    float center_distance_to_camera = mag(m_aabox.getSizes());
+    float3 total_octree_volume = float3(512.0f,512.0f,512.0f);
+    float center_distance_to_camera = mag(total_octree_volume);
     
     initial.fov = 30.0f;
-    initial.up = float3(0.0f,1.0f,0.0f);
+    initial.up = normalize(float3(-1.0f,1.0f,-1.0f));
     initial.eyePos = float3(1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera);
     initial.viewPortStart = float3();
     initial.viewStep = float3();
