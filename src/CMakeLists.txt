@@ -33,11 +33,13 @@ endif(USE_SERIAL_IMPLEMENTATION)
 
 include(CMakeSources.cmake)
 
-add_executable(octreeRenderer octreeRenderer.cpp ${sources})
-target_link_libraries(octreeRenderer ${Device_LIBRARIES})
+add_library(Octree ${sources})
 
-add_executable(geometryToOctree geometryToOctree.cpp ${sources})
-target_link_libraries(geometryToOctree ${Device_LIBRARIES})
+add_executable(octreeRenderer octreeRenderer.cpp)
+target_link_libraries(octreeRenderer Octree ${Device_LIBRARIES})
+
+add_executable(geometryToOctree geometryToOctree.cpp)
+target_link_libraries(geometryToOctree Octree ${Device_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     target_link_libraries(octreeRenderer rt)
