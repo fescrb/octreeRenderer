@@ -7,10 +7,12 @@ if(DONT_USE_OPENCL)
 endif(DONT_USE_OPENCL)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-	if(DONT_USE_OPENMP)
-		set(USE_OPENMP "Yes")
-    endif(DONT_USE_OPENMP)
+	set(USE_OPENMP "Yes")
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+if(DONT_USE_OPENMP)
+	set(USE_OPENMP "No")
+endif(DONT_USE_OPENMP)
 
 cmake_minimum_required(VERSION 2.6)
 
