@@ -96,11 +96,14 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float half_size = 256.0f;
+    
+    //if(x == 577)
+      //  printf("this be the one\n");
 
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
-    normalize(d);
+    d = normalize(d);
     float t = 0.0f;
 
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
@@ -243,6 +246,7 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
 	for(int y = start[1]; y < end[1]; y++) {
 		for(int x = start[0]; x < end[0]; x++) {
 			traceRay(x, y, info);
+            //printf("done %d %d\n", x, y);
 		}
 	}
 
