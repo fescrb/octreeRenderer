@@ -18,6 +18,8 @@ class Window {
     
 		virtual void			 resize(GLint width, GLint height);
         int2                     getSize();
+        
+        virtual void             mouse(int button, int state, int x, int y);
     
         void                     run();
     

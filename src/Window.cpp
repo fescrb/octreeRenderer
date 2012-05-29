@@ -29,6 +29,10 @@ void staticResize(GLint width, GLint height) {
     renderWindow->resize(width, height);
 }
 
+void staticMouse(int button, int state, int x, int y) {
+    renderWindow->mouse(button, state, x, y);
+}
+
 Window::Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer)
 :	m_size(dimensions){
 	glutInit(&argc, argv);
@@ -44,6 +48,8 @@ Window::Window(int argc, char** argv, int2 dimensions, bool useDepthBuffer)
     glutDisplayFunc(staticRender);
 
     glutIdleFunc(staticIdle);
+    
+    glutMouseFunc(staticMouse);
 }
 
 void Window::resize(GLint width, GLint height) {
@@ -56,4 +62,8 @@ int2 Window::getSize() {
 
 void Window::run() {
     glutMainLoop();
+}
+
+void Window::mouse(int button, int state, int x, int y) {
+    
 }

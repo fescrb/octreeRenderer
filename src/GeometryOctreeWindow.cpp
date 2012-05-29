@@ -13,6 +13,11 @@ GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimension
     setRenderWindow(this);
 
     initGL();
+    
+    m_near_plane = 0.01f;
+    m_far_plane =  mag(m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes());
+    m_eye_position = float4(1.0f * m_far_plane, 1.0f * m_far_plane, 1.0f * m_far_plane, 1.0f);
+    m_far_plane*=2.0f;
 }
 
 void GeometryOctreeWindow::initGL() {
@@ -25,19 +30,8 @@ void GeometryOctreeWindow::initGL() {
 
 void GeometryOctreeWindow::resize(GLint width, GLint height) {
     Window::resize(width, height);
-
-    aabox mesh_bounding_box = m_octreeCreator->getMeshAxisAlignedBoundingBox();
     
-    float4 centre = mesh_bounding_box.getCentre();
-    float3 size = mesh_bounding_box.getSizes();
-    printf("centre (%f %f %f %f) size (%f %f %f)\n", centre[0], centre[1], centre[2], centre[3], size[0], size[1], size[2]);
-    
-    float end_to_end_distance = mag(mesh_bounding_box.getSizes());
-    float half_end_to_end_distance = end_to_end_distance/2.0f;
-    float center_distance_to_camera = end_to_end_distance;
-    float near_distance = center_distance_to_camera-half_end_to_end_distance;
-    
-    float light_pos[] ={ mesh_bounding_box.getSizes()[0] * 2.0f, 0.0f, 0.0f} ;
+    float light_pos[] ={ m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes()[0] * 2.0f, 0.0f, 0.0f} ;
     float color[] = {1.0f, 1.0f, 1.0f, 1.0f};
     float ambient[] = {0.2f, 0.2f, 0.2f, 1.0f};
     glLightfv(GL_LIGHT0, GL_POSITION, &(light_pos[0]));
@@ -50,15 +44,15 @@ void GeometryOctreeWindow::resize(GLint width, GLint height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    float far_plane = near_distance + center_distance_to_camera*2.0f;
+    
     //gluPerspective( fov, aspect, zNear, zFar);
-    gluPerspective(30.0f, (double)width/(double)height, near_distance, far_plane );
+    gluPerspective(30.0f, (double)width/(double)height, m_near_plane, m_far_plane );
     //float4 eye_pos = normalize(mesh_bounding_box.getCorner()) * center_distance_to_camera ;
-    float4 eye_pos = float4(1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f * center_distance_to_camera, 1.0f);
+    
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     //gluLookAt( eye_pos, center, up)
-    gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2],
+    gluLookAt(m_eye_position[0], m_eye_position[1], m_eye_position[2],
               0.0f, 0.0f, 0.0f,
               0.0f, 1.0f, 0.0f);
 }
@@ -77,4 +71,23 @@ void GeometryOctreeWindow::idle() {
         m_octreeWriter->write();
     }
     render();
+}
+
+void GeometryOctreeWindow::mouse(int button, int state, int x, int y) {
+    printf("mouse b %d s %d u %d d %d\n",button, state, GLUT_UP, GLUT_DOWN);
+    if((button == 3) || (button == 4)) { //Scroll wheel event
+        if(button == 3) { //UP
+            if(state == GLUT_DOWN) {
+                m_eye_position=m_eye_position+direction(m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes().neg()/20.0f);
+                resize(m_size[0], m_size[1]);
+                render();
+            }
+        } else { //DOWN
+            if(state == GLUT_DOWN) {
+                m_eye_position=m_eye_position-direction(m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes().neg()/20.0f);
+                resize(m_size[0], m_size[1]);
+                render();
+            }
+        }
+    }
 }

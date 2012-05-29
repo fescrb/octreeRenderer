@@ -3,6 +3,8 @@
 
 #include "Window.h"
 
+#include "Vector4.h"
+
 class OctreeCreator;
 class OctreeWriter;
 
@@ -17,11 +19,17 @@ class GeometryOctreeWindow
 
         void                     render();
         void                     idle();
+        
+        void                     mouse(int button, int state, int x, int y);
 
     private:
 
         OctreeCreator           *m_octreeCreator;
         OctreeWriter            *m_octreeWriter;
+        
+        float4                   m_eye_position;
+        float                    m_near_plane;
+        float                    m_far_plane;
 };
 
 #endif //_GEOMETRY_OCTREE_WINDOW_H
