@@ -1,6 +1,8 @@
 #ifndef _OCTREE_H
 #define _OCTREE_H
 
+#define OCTREE_ROOT_HALF_SIZE 1.0f
+
 class OctreeHeader;
 class OctreeNode;
 class OctreeSegment;

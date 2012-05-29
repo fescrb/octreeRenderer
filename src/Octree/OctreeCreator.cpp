@@ -51,7 +51,7 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     
     renderinfo initial;
     
-    float3 total_octree_volume = float3(512.0f,512.0f,512.0f);
+    float3 total_octree_volume = float3(OCTREE_ROOT_HALF_SIZE*2.0f,OCTREE_ROOT_HALF_SIZE*2.0f,OCTREE_ROOT_HALF_SIZE*2.0f);
     float center_distance_to_camera = mag(total_octree_volume);
     
     initial.fov = 30.0f;
@@ -62,8 +62,8 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     initial.viewDir = normalize(float3() - initial.eyePos);
     initial.eyePlaneDist = center_distance_to_camera/2.0f;
 
-    initial.lightPos = float3(512.0f, 0.0f, 0.0f);
-    initial.lightBrightness = 255.0f;
+    initial.lightPos = float3(OCTREE_ROOT_HALF_SIZE*2.0f, 0.0f, 0.0f);
+    initial.lightBrightness = OCTREE_ROOT_HALF_SIZE;
     
     setInitialRenderInfo(initial);
 }

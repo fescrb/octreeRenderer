@@ -1,7 +1,8 @@
 #include "SerialDevice.h"
 
 #include "SerialDeviceInfo.h"
-#include "OctreeSegment.h"
+
+#include "Octree.h"
 
 #include "RenderInfo.h"
 #include "MathUtil.h"
@@ -31,22 +32,25 @@ bool noChildren(char* node) {
     return !node[7];
 }
 
-char makeXYZFlag(float3 rayPos, float3 nodeCentre) {
+char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction ) {
 	float3 flagVector = rayPos - nodeCentre;
 	char flag = 0;
 	for(int i = 0; i < 3; i++)
-		if(flagVector[i] >= 0.0f)
-			flag |= (1 << i);
+        if(flagVector[i] > F32_EPSILON) 
+            flag |= (1 << i);
+        else if (flagVector[i] <= F32_EPSILON && flagVector[i] >= -F32_EPSILON) 
+            if(direction[i] >= 0.0f)
+                flag |= (1 << i);
 
 	return flag;
 }
 
-bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node) {
-    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre));
+bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node, float3 direction) {
+    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre, direction));
 }
 
-char* getChild(float3 rayPos, float3 nodeCentre, char* node) {
-	char xyz_flag = makeXYZFlag(rayPos, nodeCentre);
+char* getChild(float3 rayPos, float3 nodeCentre, char* node, float3 direction) {
+	char xyz_flag = makeXYZFlag(rayPos, nodeCentre, direction);
     int *node_int = (int*)node;
     int pos = (node_int[0] >> (xyz_flag * 3)) & 7;
     node_int+=(pos+2);
@@ -95,10 +99,7 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 }
 
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
-    float half_size = 256.0f;
-    
-    //if(x == 577)
-      //  printf("this be the one\n");
+    float half_size = OCTREE_ROOT_HALF_SIZE;
 
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
@@ -144,7 +145,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             if(t_min <= t && t < t_max) {
                 rayPos = o + (d * t);
 
-                char xyz_flag = makeXYZFlag(rayPos, voxelCentre);
+                char xyz_flag = makeXYZFlag(rayPos, voxelCentre, d);
                 float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
 
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
@@ -157,11 +158,11 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
                 float tmp_max = min((tmp_corner_far - o) / d);
 
-                if(nodeHasChildAt(rayPos, voxelCentre, curr_address)) {
+                if(nodeHasChildAt(rayPos, voxelCentre, curr_address, d)) {
                     // If the voxel we are at is not empty, go down.
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 
-                    curr_address = getChild(rayPos,voxelCentre,curr_address);
+                    curr_address = getChild(rayPos,voxelCentre,curr_address, d);
 
                     corner_far = tmp_corner_far;
                     voxelCentre = tmpNodeCentre;
@@ -181,6 +182,10 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                 if(curr_index>=0) {
                     // Pop that stack!
                     corner_far = stack[curr_index].far_corner;
+                    curr_address = stack[curr_index].address;
+                    voxelCentre = stack[curr_index].node_centre;
+                    t_max = stack[curr_index].t_max;
+                    t_min = stack[curr_index].t_min;
                 } else {
                     // We are outside the volume.
                     curr_address = 0;
@@ -209,7 +214,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             // K_diff is always 1, for now
             float diffuse_coefficient = dot(direction_towards_light,normal);
             if(diffuse_coefficient<0)
-                diffuse_coefficient*=-1.0f;
+                diffuse_coefficient=0.0f;
             /*printf("rayPos %f %f %f dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
                    rayPos[0],
                    rayPos[1],
@@ -241,14 +246,14 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
     rect window = m_tasks[index];
     int2 start = window.getOrigin();
     int2 size = window.getSize();
-	int2 end = start+size;
+    int2 end = start+size;
 
-	for(int y = start[1]; y < end[1]; y++) {
-		for(int x = start[0]; x < end[0]; x++) {
-			traceRay(x, y, info);
+    for(int y = start[1]; y < end[1]; y++) {
+        for(int x = start[0]; x < end[0]; x++) {
+            traceRay(x, y, info);
             //printf("done %d %d\n", x, y);
-		}
-	}
+        }
+    }
 
     m_renderEnd.reset();
 }
