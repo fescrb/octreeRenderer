@@ -1,8 +1,12 @@
 #include "OBJFileReader.h"
 
+#include "MTLFileReader.h"
+
 #include <cstring>
 #include <fstream>
 #include <cmath>
+
+#include <map>
 
 OBJFileReader::OBJFileReader(const char* filename) {
     m_filename = (char*)malloc(strlen(filename)+1);
@@ -21,12 +25,25 @@ mesh OBJFileReader::getMesh() {
     
     int normalCounter = 0;
     
+    std::map<std::string,float4> materials;
+    std::string mtl_filename = std::string(m_filename);
+    size_t backslash_loc = mtl_filename.rfind("/");
+    if(backslash_loc == mtl_filename.npos)
+        backslash_loc = -1;
+    
+    MTLFileReader *mtl_reader;
+    
+    std::string mtl_in_use;
+    
+    float4 diffuse = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    
     while(!in.eof()) {
         char line[1024];
 
         in.getline(line, 1024);
         
         float4 tmp;
+        char* filename;
         
         switch(getLineType(line)){
             case TYPE_VERTEX_DECLARATION:
@@ -37,7 +54,23 @@ mesh OBJFileReader::getMesh() {
                 tmp.setW(0.0f);
                 data->normalList.push_back(tmp);
                 break;
-            case TYPE_FACE_DECLARATION:objMesh.appendTriangles(getFacesFromLine(line,data));
+            case TYPE_FACE_DECLARATION:
+                objMesh.appendTriangles(getFacesFromLine(line,data,diffuse));
+                break;
+            case TYPE_MTLLIB_REF:
+                strtok(line," ");
+                filename = strtok(NULL," \n\0");
+                mtl_filename.replace(backslash_loc+1, strlen(filename), filename);
+                printf("%s\n",mtl_filename.c_str());
+                mtl_reader = new MTLFileReader(mtl_filename.c_str());
+                materials = mtl_reader->getMaterials();
+                break;
+            case TYPE_USEMTL:
+                strtok(line," ");
+                filename = strtok(NULL," \n\0");
+                mtl_in_use = std::string(filename);
+                diffuse = materials[mtl_in_use];
+                break;
             default:
                 ; // We do nothing.
         }
@@ -57,6 +90,12 @@ OBJFileReader::LineType OBJFileReader::getLineType(const char* line) {
                 return TYPE_NORMAL_DECLARATION;
         case 'f':
             return TYPE_FACE_DECLARATION;
+        case 'm':
+            if(line[1] == 't' && line[2] == 'l' && line[3] == 'l' && line[4] == 'i' && line[5] == 'b')
+                return TYPE_MTLLIB_REF;
+        case 'u':
+            if(line[1] == 's' && line[2] == 'e' && line[3] == 'm' && line[4] == 't' && line[5] == 'l')
+                return TYPE_USEMTL;
         default:
             return TYPE_UNKOWN;
     }
@@ -70,7 +109,7 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     return float4(atof(x),atof(y),atof(z),1.0f);
 }
 
-std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileData* data) {
+std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileData* data, float4 diffuse) {
     std::vector<triangle> triangles;
     
     int vertex_count = countCharacter(' ', line);
@@ -117,6 +156,10 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
         vertex first(data->vertexList[vertex_indices[0]]);
         vertex secnd(data->vertexList[vertex_indices[1]]);
         vertex third(data->vertexList[vertex_indices[2]]);
+        
+        first.setColour(diffuse);
+        secnd.setColour(diffuse);
+        third.setColour(diffuse);
         
         triangle new_triangle(first, secnd, third);
         

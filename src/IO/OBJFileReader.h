@@ -12,6 +12,8 @@ class OBJFileReader {
             TYPE_VERTEX_DECLARATION,
             TYPE_NORMAL_DECLARATION,
             TYPE_FACE_DECLARATION,
+            TYPE_MTLLIB_REF,
+            TYPE_USEMTL,
             TYPE_UNKOWN
         };
         
@@ -34,7 +36,7 @@ class OBJFileReader {
          * @param data A pointer to the current obj file status.
          * @return A list of all the triangles defined in the line.
          */
-        std::vector<triangle>    getFacesFromLine(char* line, const OBJFileData* data);
+        std::vector<triangle>    getFacesFromLine(char* line, const OBJFileData* data, float4 diffuse);
         
         int                      countCharacter(char character, const char* line);
         
