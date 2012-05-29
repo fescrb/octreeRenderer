@@ -77,7 +77,7 @@ void OctreeRendererWindow::render() {
 
         GLint val;
         glGetUniformiv(m_programObject, m_textUniform, &val);
-        printf("Value is %d texture is %d\n", val, fb_windows[i].texture);
+        //printf("Value is %d texture is %d\n", val, fb_windows[i].texture);
 
         //glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
@@ -86,7 +86,7 @@ void OctreeRendererWindow::render() {
         float y_start = fb_windows[i].window.getY();
         float y_end = fb_windows[i].window.getY() + fb_windows[i].window.getHeight();
 
-        printf("x start %f end %f y start %f y end %f\n",x_start,x_end,y_start,y_end);
+        //printf("x start %f end %f y start %f y end %f\n",x_start,x_end,y_start,y_end);
 
         glBegin(GL_TRIANGLE_FAN);
         glTexCoord2f(0.0f,0.0f);
@@ -123,23 +123,33 @@ void OctreeRendererWindow::resize(GLint width, GLint height) {
 
 void OctreeRendererWindow::recalculateViewportVectors() {
     renderinfo *info = m_pProgramState->getrenderinfo();
+    
+    /*renderinfo render_info = info[0];
+    
+    printf("---------\n");
+    printf("Before changing\n");
+    printf("renderinfo\neyePos %f %f %f\n", render_info.eyePos[0], render_info.eyePos[1], render_info.eyePos[2]);
+    printf("viewDir %f %f %f\n", render_info.viewDir[0], render_info.viewDir[1], render_info.viewDir[2]);
+    printf("up %f %f %f\n", render_info.up[0], render_info.up[1], render_info.up[2]);
+    printf("viewPortStart %f %f %f\n", render_info.viewPortStart[0], render_info.viewPortStart[1], render_info.viewPortStart[2]);
+    printf("viewStep %f %f %f\n", render_info.viewStep[0], render_info.viewStep[1], render_info.viewStep[2]);
+    printf("eyePlaneDist %f\n", render_info.eyePlaneDist);
+    printf("fov %f\n", render_info.fov);
+    printf("lightPos %f %f %f\n", render_info.lightPos[0], render_info.lightPos[1], render_info.lightPos[2]);
+    printf("lightBrightness %f\n", render_info.lightBrightness);
+    printf("---------\n");*/
 
     float4 eyepos = position(info->eyePos);
     float4 up = direction(info->up);
     float4 viewDir = direction(info->viewDir);
 
     up = normalize(up);
+    float4 viewportStep = cross(viewDir, up);
 
-    float4 viewportStep = float4x4::rotationAroundVector( up, _PI/2.0f) * viewDir;
-
-    //printf("%f %f %f %f\n", viewportStep[0], viewportStep[1], viewportStep[2], viewportStep[3]);
+    float stepMagnitude = fabs((info->eyePlaneDist * tan(info->fov/2.0f))/(float)m_size[1]);
     
-    float aspec_ratio = (float)m_size[0] / (float)m_size[1];
-
-    float stepMagnitude = ((info->eyePlaneDist * tan(info->fov/2.0f))/(float)m_size[1]);
+    viewportStep = normalize(viewportStep) * stepMagnitude;
     
-    viewportStep = viewportStep * stepMagnitude;
-
     up = normalize(up) * stepMagnitude;
     float4 viewportStart(( (eyepos + (viewDir*info->eyePlaneDist)) - (viewportStep*((float)m_size[0]/2.0f)) ) - (up*((float)m_size[1]/2.0f)) );
 

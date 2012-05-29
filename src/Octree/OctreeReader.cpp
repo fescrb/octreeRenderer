@@ -25,15 +25,6 @@ OctreeReader::OctreeReader(char* name) {
     RenderInfoReader renderinfo_reader = RenderInfoReader(m_sPath);
     m_initial_renderinfo = renderinfo_reader.read();
     
-    /*printf("renderinfo\neyePos %f %f %f\n", m_initial_renderinfo.eyePos[0], m_initial_renderinfo.eyePos[1], m_initial_renderinfo.eyePos[2]);
-    printf("viewDir %f %f %f\n", m_initial_renderinfo.viewDir[0], m_initial_renderinfo.viewDir[1], m_initial_renderinfo.viewDir[2]);
-    printf("up %f %f %f\n", m_initial_renderinfo.up[0], m_initial_renderinfo.up[1], m_initial_renderinfo.up[2]);
-    printf("viewPortStart %f %f %f\n", m_initial_renderinfo.viewPortStart[0], m_initial_renderinfo.viewPortStart[1], m_initial_renderinfo.viewPortStart[2]);
-    printf("viewStep %f %f %f\n", m_initial_renderinfo.viewStep[0], m_initial_renderinfo.viewStep[1], m_initial_renderinfo.viewStep[2]);
-    printf("eyePlaneDist %f\n", m_initial_renderinfo.eyePlaneDist);
-    printf("fov %f\n", m_initial_renderinfo.fov);
-    printf("lightPos %f %f %f\n", m_initial_renderinfo.lightPos[0], m_initial_renderinfo.lightPos[1], m_initial_renderinfo.lightPos[2]);
-    printf("lightBrightness %f\n", m_initial_renderinfo.lightBrightness);*/
     //exit(0);
 }
         

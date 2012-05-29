@@ -212,7 +212,7 @@ vector4<t> cross(const vector4<t> &lhs, const vector4<t> &rhs) {
     return vector4<t>((lhs.getY()*rhs.getZ()) - (lhs.getZ()*rhs.getY()),
                     -((lhs.getX()*rhs.getZ()) - (lhs.getZ()*rhs.getX())),
                       (lhs.getX()*rhs.getY()) - (lhs.getY()*rhs.getX()),
-                      lhs.getZ()*rhs.getZ()
+                      lhs.getW()*rhs.getW()
                      );
 }
 
