@@ -163,14 +163,57 @@ void OctreeRendererWindow::mouseEvent(int button, int state, int x, int y) {
         renderinfo *info = m_pProgramState->getrenderinfo();
         if(button == 3) { //UP
             if(state == GLUT_DOWN) {
-                info->eyePos = info->eyePos+(info->viewDir/5.f);
+                info->eyePos = info->eyePos+(info->viewDir/5.0f);
                 recalculateViewportVectors();
             }
         } else { //DOWN
             if(state == GLUT_DOWN) {
-                info->eyePos = info->eyePos-(info->viewDir/5.f);
+                info->eyePos = info->eyePos-(info->viewDir/5.0f);
                 recalculateViewportVectors();
             }
         }
+    }
+}
+
+void OctreeRendererWindow::mouseDragEvent(int x_displacement, int y_displacement) {
+    renderinfo *info = m_pProgramState->getrenderinfo();
+    float scale = 4.0f;
+    float conversor = (info->fov*scale)/(float)m_size[1];
+    float x_angle_change = (float)x_displacement*conversor;
+    float y_angle_change = (float)y_displacement*conversor;
+    
+    printf("angle changes x %f y %f\n", x_angle_change, y_angle_change);
+    
+    if(x_angle_change!=0.0f) {
+        info->viewDir = info->viewDir + (info->viewStep * x_angle_change);
+        info->viewDir = normalize(info->viewDir);
+        recalculateViewportVectors();
+    }
+    
+    if(y_angle_change!=0.0f) {
+        info->viewDir = info->viewDir + (info->up * y_angle_change);
+        info->viewDir = normalize(info->viewDir);;
+        info->up = cross(info->viewStep, info->viewDir) * mag(info->up);
+        recalculateViewportVectors();
+    }
+}
+
+void OctreeRendererWindow::keyPressEvent(unsigned char key) {
+    renderinfo *info = m_pProgramState->getrenderinfo();
+    if(key == 'w' || key == 'W') {
+        info->eyePos = info->eyePos + (normalize(info->up)/20.0f);
+        recalculateViewportVectors();
+    }
+    if(key == 's' || key == 'S') {
+        info->eyePos = info->eyePos - (normalize(info->up)/20.0f);
+        recalculateViewportVectors();
+    }
+    if(key == 'd' || key == 'd') {
+        info->eyePos = info->eyePos + (cross(info->viewDir,normalize(info->up))/20.0f);
+        recalculateViewportVectors();
+    }
+    if(key == 'a' || key == 'A') {
+        info->eyePos = info->eyePos - (cross(info->viewDir,normalize(info->up))/20.0f);
+        recalculateViewportVectors();
     }
 }

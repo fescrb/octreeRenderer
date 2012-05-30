@@ -106,7 +106,7 @@ void GeometryOctreeWindow::mouseDragEvent(int x_displacement, int y_displacement
     float x_angle_change = (float)x_displacement*conversor;
     float y_angle_change = (float)y_displacement*conversor;
     
-    printf("angle changes x %f y %f\n", x_angle_change, y_angle_change);
+    //printf("angle changes x %f y %f\n", x_angle_change, y_angle_change);
     
     float viewDirMag = mag(m_viewDir);
     float degree_step_mag = (viewDirMag * tan(m_fov/2.0f))/(m_fov/2.0f);
@@ -116,16 +116,16 @@ void GeometryOctreeWindow::mouseDragEvent(int x_displacement, int y_displacement
         
         m_viewDir = m_viewDir + (camera_x_axis * x_angle_change * degree_step_mag);
         m_viewDir = normalize(m_viewDir) * viewDirMag;
-        printf("new viewDir %f %f %f\n", m_viewDir.getX(), m_viewDir.getY(), m_viewDir.getZ());
+        //printf("new viewDir %f %f %f\n", m_viewDir.getX(), m_viewDir.getY(), m_viewDir.getZ());
         resize(m_size[0], m_size[1]);
     }
     
     if(y_angle_change!=0.0f) {
-        m_viewDir = m_viewDir + (m_up * x_angle_change * degree_step_mag);
+        m_viewDir = m_viewDir + (m_up * y_angle_change * degree_step_mag);
         m_viewDir = normalize(m_viewDir) * viewDirMag;
         m_up = cross(m_viewDir/viewDirMag,camera_x_axis);
-        printf("new viewDir %f %f %f\n", m_viewDir.getX(), m_viewDir.getY(), m_viewDir.getZ());
-        printf("new up %f %f %f\n", m_up.getX(), m_up.getY(), m_up.getZ());
+        //printf("new viewDir %f %f %f\n", m_viewDir.getX(), m_viewDir.getY(), m_viewDir.getZ());
+        //printf("new up %f %f %f\n", m_up.getX(), m_up.getY(), m_up.getZ());
         resize(m_size[0], m_size[1]);
     }
 }

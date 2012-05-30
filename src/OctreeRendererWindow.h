@@ -22,6 +22,8 @@ class OctreeRendererWindow
         void                     recalculateViewportVectors();
         
         void                     mouseEvent(int button, int state, int x, int y);
+        void                     mouseDragEvent(int x_displacement, int y_displacement);
+        void                     keyPressEvent(unsigned char key);
     
     private:
     
