@@ -21,7 +21,7 @@ class OctreeRendererWindow
     
         void                     recalculateViewportVectors();
         
-        void                     mouse(int button, int state, int x, int y);
+        void                     mouseEvent(int button, int state, int x, int y);
     
     private:
     

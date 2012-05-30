@@ -20,7 +20,9 @@ class GeometryOctreeWindow
         void                     render();
         void                     idle();
         
-        void                     mouse(int button, int state, int x, int y);
+        void                     mouseEvent(int button, int state, int x, int y);
+        void                     mouseDragEvent(int x_displacement, int y_displacement);
+        void                     keyPressEvent(unsigned char key);
 
     private:
 
@@ -28,8 +30,12 @@ class GeometryOctreeWindow
         OctreeWriter            *m_octreeWriter;
         
         float4                   m_eye_position;
+        //! Note: not normalized
+        float4                   m_viewDir;
+        float4                   m_up;
         float                    m_near_plane;
         float                    m_far_plane;
+        float                    m_fov;
 };
 
 #endif //_GEOMETRY_OCTREE_WINDOW_H

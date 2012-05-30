@@ -158,7 +158,7 @@ void OctreeRendererWindow::recalculateViewportVectors() {
     info->viewStep = viewportStep;
 }
 
-void OctreeRendererWindow::mouse(int button, int state, int x, int y) {
+void OctreeRendererWindow::mouseEvent(int button, int state, int x, int y) {
     if((button == 3) || (button == 4)) { //Scroll wheel event
         renderinfo *info = m_pProgramState->getrenderinfo();
         if(button == 3) { //UP

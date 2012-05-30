@@ -153,6 +153,8 @@ struct matrix4x4 {
             vector2<t> twoComponenVector(vector[0], vector[1]);
             vector2<t> twoComponenYAxis(0.0f, 1.0f);
 
+            twoComponenVector = normalize(twoComponenVector);
+            
             float alpha = acos(dot(twoComponenVector, twoComponenYAxis));
 
             matrix4x4<t> rotateAroundZ = rotationAroundZ(alpha);

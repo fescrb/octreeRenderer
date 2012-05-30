@@ -141,7 +141,12 @@ inline F32 dot(const vector2<t> &lhs, const vector2<t> &rhs){
 
 template <class t>
 inline t mag(const vector2<t> &vector){
-	return sqrt(fabs(cross(vector,vector)));
+	return sqrt(fabs(dot(vector,vector)));
+}
+
+template <class t>
+inline vector2<t> normalize(const vector2<t> &vector){
+    return vector/mag(vector);
 }
 
 #endif //_VECTOR_2_H
