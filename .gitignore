@@ -13,3 +13,4 @@ octreeRenderer.layout
 *.kdev4
 *xcodeproj*
 *.trace
+*.voct
