@@ -32,8 +32,8 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 	}
 
     // Create octree memory in the object, the host will only write, not read. And the device will only read.
-    // We make it 512 bytes only for now.
-    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 512, NULL, &err);
+    // We make it 64MB for now
+    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 64*1024*1024, NULL, &err);
 
     if(clIsError(err)){
         clPrintError(err); return;
@@ -90,7 +90,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error);
         }
-        image_format.image_channel_order = CL_R;
+        /*image_format.image_channel_order = CL_R;
         image_format.image_channel_order = CL_FLOAT;
         m_depthBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
@@ -104,7 +104,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         m_octreeDepthBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
-        }
+        }*/
         m_frameBufferResolution = size;
         error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
         if(clIsError(error)){

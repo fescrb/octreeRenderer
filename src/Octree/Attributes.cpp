@@ -27,7 +27,7 @@ void Attributes::setColour(float4 colour) {
         float_to_8_bit_unsigned_fixed_point(colour[2]),
         float_to_8_bit_unsigned_fixed_point(colour[3])
     );
-    printf("colors %d\n",m_red);
+    //printf("colors %d\n",m_red);
 }
         
 float4 Attributes::getColour() {

@@ -157,3 +157,20 @@ void OctreeRendererWindow::recalculateViewportVectors() {
     info->viewPortStart = viewportStart;
     info->viewStep = viewportStep;
 }
+
+void OctreeRendererWindow::mouse(int button, int state, int x, int y) {
+    if((button == 3) || (button == 4)) { //Scroll wheel event
+        renderinfo *info = m_pProgramState->getrenderinfo();
+        if(button == 3) { //UP
+            if(state == GLUT_DOWN) {
+                info->eyePos = info->eyePos+(info->viewDir/5.f);
+                recalculateViewportVectors();
+            }
+        } else { //DOWN
+            if(state == GLUT_DOWN) {
+                info->eyePos = info->eyePos-(info->viewDir/5.f);
+                recalculateViewportVectors();
+            }
+        }
+    }
+}

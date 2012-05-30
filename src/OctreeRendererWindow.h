@@ -20,6 +20,8 @@ class OctreeRendererWindow
         void                     resize(GLint width, GLint height);
     
         void                     recalculateViewportVectors();
+        
+        void                     mouse(int button, int state, int x, int y);
     
     private:
     

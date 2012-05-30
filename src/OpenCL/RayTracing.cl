@@ -223,6 +223,8 @@ kernel void ray_trace(global char* octree,
 
 	struct collission col = find_collission(octree, o, d, 1.0f);
 
+    float ambient = 0.2f;
+
 	if(col.node_pointer) {
 		global char* attr = get_attributes(col.node_pointer);
 
@@ -242,9 +244,9 @@ kernel void ray_trace(global char* octree,
             float diffuse_coefficient = dot(direction_towards_light,normal);
             if(diffuse_coefficient<0)
                 diffuse_coefficient*=-1.0f;
-            red*=diffuse_coefficient;
-            green*=diffuse_coefficient;
-            blue*=diffuse_coefficient;
+            red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
+            green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
+            blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
         }
 
         uint4 color = (uint4)(red, green, blue, 255);

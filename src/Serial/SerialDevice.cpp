@@ -205,6 +205,8 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
         }
     }
 
+    float ambient = 0.2f;
+    
     // If there was a collission.
     if(curr_address) {
         char* attributes = getAttributes(curr_address);
@@ -238,9 +240,9 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                    normal[2],
                    normal[3],
                    diffuse_coefficient);*/
-            red*=diffuse_coefficient;
-            green*=diffuse_coefficient;
-            blue*=diffuse_coefficient;
+            red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
+            green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
+            blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
         }
 
@@ -349,7 +351,7 @@ void SerialDevice::setFramePixel(int x, int y, char red, char green, char blue) 
 }
 
 void SerialDevice::setInfoPixels(int x, int y, float depth, unsigned char iterations, unsigned char depth_in_octree) {
-    printf("depth is %f\n",depth);
+    //printf("depth is %f\n",depth);
     int index = (getTotalTaskWindow().getWidth()*y) + x;
     m_pDepthBuffer[index] = depth;
     m_pIterations[index] = iterations;

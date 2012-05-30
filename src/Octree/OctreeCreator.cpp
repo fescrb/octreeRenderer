@@ -176,22 +176,22 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bb
                     bboxes->addChildToFlagAt(i);
                     has_children = true;
                     colour+=child_node->getAttributes().getColour();
-                    printf("child_colour %f %f %f %f\n",
+                    /*printf("child_colour %f %f %f %f\n",
                            child_node->getAttributes().getColour()[0],
                            child_node->getAttributes().getColour()[1],
                            child_node->getAttributes().getColour()[2],
                            child_node->getAttributes().getColour()[3]
-                    );
+                    );*/
                     normal+=child_node->getAttributes().getNormal();
-                    printf("child normal %f %f %f\n",
+                    /*printf("child normal %f %f %f\n",
                            child_node->getAttributes().getNormal()[0],
                            child_node->getAttributes().getNormal()[1],
                            child_node->getAttributes().getNormal()[2]
-                    );
+                    );*/
                     this_node->addChild(child_node, i);
                     children++;
                 }
-                printf("----------------\n");
+                //printf("----------------\n");
             }
             
             if(has_children) {
@@ -221,7 +221,7 @@ OctreeNode* OctreeCreator::createSubtree(octree<mesh*>* pNode, octree<aabox>* bb
             normal/=total_area;
             normal=normalize(normal);
             
-            printf("this col %f %f %f %f nor %f %f %f\n-----------\n",colour[0],colour[1],colour[2],colour[3],normal[0],normal[1],normal[2]);
+            //printf("this col %f %f %f %f nor %f %f %f\n-----------\n",colour[0],colour[1],colour[2],colour[3],normal[0],normal[1],normal[2]);
             
             Attributes atts;
             atts.setColour(colour);
