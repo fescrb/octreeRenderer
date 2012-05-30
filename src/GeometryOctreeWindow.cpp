@@ -148,4 +148,7 @@ void GeometryOctreeWindow::keyPressEvent(unsigned char key) {
         m_eye_position = m_eye_position - (cross(m_viewDir/viewDirMag,m_up)*viewDirMag/20.0f);
         resize(m_size[0], m_size[1]);
     }
+    if(key == 'v' || key == 'V') {
+        m_octreeCreator->toggleRenderMode();
+    }
 }

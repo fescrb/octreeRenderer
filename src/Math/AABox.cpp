@@ -150,3 +150,103 @@ void aabox::render() const {
     glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
     glEnd();
 }
+
+void aabox::renderVoxel(float4 color, float4 normal) const {  
+    glColor4f(color.getX(), color.getY(), color.getZ(), 1.0f);
+    glNormal3f(normal.getX(), normal.getY(), normal.getZ());
+    
+    // FRONT
+    glBegin(GL_QUADS);
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()               , m_corner.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ(), m_corner.getW());
+    glEnd();
+
+    // LEFT
+    glBegin(GL_QUADS);
+    
+    
+    glVertex4f(m_corner.getX(), m_corner.getY()               , m_corner.getZ()               , m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    glEnd();
+    
+    // RIGHT
+    glBegin(GL_QUADS);
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()               , m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    glEnd();
+    
+    // BACK
+    glBegin(GL_QUADS);
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()               , m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glEnd();
+    
+    // TOP
+    glBegin(GL_QUADS);
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY()+m_sizes.getY(), m_corner.getZ()               , m_corner.getW());
+    glEnd();
+    
+    // BOTTOM
+    glBegin(GL_QUADS);
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY(), m_corner.getZ()               , m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY(), m_corner.getZ()               , m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()+m_sizes.getX(), m_corner.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    
+    
+    glVertex4f(m_corner.getX()               , m_corner.getY(), m_corner.getZ()+m_sizes.getZ(), m_corner.getW());
+    glEnd();
+}

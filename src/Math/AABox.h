@@ -54,6 +54,8 @@ struct aabox {
         }
         
         void            render() const;
+        
+        void            renderVoxel(float4 color, float4 normal) const;
 
     private:
         float4          m_corner;

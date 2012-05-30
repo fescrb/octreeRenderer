@@ -19,6 +19,8 @@ class OctreeCreator
         bool                     isConverted();
 
         aabox                    getMeshAxisAlignedBoundingBox();
+        
+        void                     toggleRenderMode();
 
     private:
         /**
@@ -26,9 +28,11 @@ class OctreeCreator
          */
         OctreeNode              *createSubtree(octree<mesh*>* pNode, octree<aabox>* bboxes, mesh m, aabox box, int depth);
         
-        void                     renderBBoxSubtree(octree<aabox> subtree);
+        void                     renderBBoxSubtree(octree<aabox> subtree, OctreeNode *node);
         
         bool                     m_converted;
+        
+        bool                     m_renderVoxels;
         
         mesh                     m_mesh;
         aabox                    m_aabox;

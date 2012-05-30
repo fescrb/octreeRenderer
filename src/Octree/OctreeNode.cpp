@@ -14,6 +14,10 @@ void OctreeNode::addChild(OctreeNode* node, unsigned int position_flag) {
 	numberOfChildren++;
 }
 
+OctreeNode* OctreeNode::getChildAt(int index) {
+    return m_vChildren[index];
+}
+
 void OctreeNode::cleanChildrenPointers() {
 	for(int i = 0; i < 8; i++) {
 		m_vChildren[i] = 0;

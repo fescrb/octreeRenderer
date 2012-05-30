@@ -16,7 +16,8 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
     m_mesh(meshToConvert),
     m_aabox(meshToConvert),
     m_depth(depth),
-    m_bboxes(0){
+    m_bboxes(0),
+    m_renderVoxels(false){
     
     // We need to centre the mesh at the origin.
     float4 off_centre_difference = float4(0.0f,0.0f,0.0f,2.0f) - m_aabox.getCentre();
@@ -72,21 +73,30 @@ OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
 }
 
 void OctreeCreator::render() {
-    m_mesh.render();
+    if(!m_renderVoxels)
+        m_mesh.render();
     if(m_bboxes) {
-        renderBBoxSubtree(*m_bboxes);
+        renderBBoxSubtree(*m_bboxes, m_pRootNode);
     }
 }
 
-void OctreeCreator::renderBBoxSubtree(octree<aabox> subtree) {
+void OctreeCreator::renderBBoxSubtree(octree<aabox> subtree, OctreeNode *node) {
     if(!subtree.hasChildren()) {
-        subtree.m_node.render();
+        if( m_renderVoxels ) {
+            Attributes att = node->getAttributes();
+            subtree.m_node.renderVoxel(att.getColour(), att.getNormal());
+        } else 
+            subtree.m_node.render();
     } else {
         for (int i = 0; i < 8; i++) {
             if(subtree.hasChildAt(i))
-                renderBBoxSubtree(subtree.m_children[i]);
+                renderBBoxSubtree(subtree.m_children[i], node->getChildAt(i));
         }
     }
+}
+
+void OctreeCreator::toggleRenderMode() {
+    m_renderVoxels = !m_renderVoxels;
 }
 
 bool OctreeCreator::isConverted() {

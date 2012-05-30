@@ -16,6 +16,7 @@ class OctreeNode {
 		};
 
 		void					 addChild(OctreeNode* node, unsigned int position_flag);
+        OctreeNode              *getChildAt(int index);
 		void					 cleanChildrenPointers();
 
 		void					 setAttributes(Attributes att);
