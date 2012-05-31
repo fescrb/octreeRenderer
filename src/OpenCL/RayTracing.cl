@@ -14,6 +14,7 @@ struct renderinfo{
 struct collission {
     global char* node_pointer;
     float3 ray_position;
+    unsigned char iterations;
 };
 
 struct stack{
@@ -43,6 +44,18 @@ bool no_children(__global char* address) {
 }
 
 char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction) {
+    /*float3 flagVector = rayPos - nodeCentre;
+    char flag = 0;
+ 
+    if(flagVector.x >= 0.0f)
+        flag |= 1;
+    if(flagVector.y >= 0.0f)
+        flag |= 2;
+    if(flagVector.z >= 0.0f)
+        flag |= 4;
+    
+    return flag;*/
+
     float3 flagVector = rayPos - nodeCentre;
     char flag = 0;
 
@@ -100,6 +113,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 }
 
 struct collission find_collission(global char* octree, float3 origin, float3 direction, float t) {
+    unsigned char it = 0;
 
 	float half_size = OCTREE_ROOT_HALF_SIZE;
 
@@ -131,8 +145,8 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
     float3 rayPos = origin;
 
-	while(!collission) {
-
+	while(!collission && it < 255) {
+        it++;
 		if(t >= t_out) {
 			collission = true;
 			curr_address = 0;
@@ -203,11 +217,19 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
         }
 	}
 
+    //if(it == 255)
+    //    curr_address = 0;
+
     struct collission col;
     col.node_pointer = curr_address;
     col.ray_position = rayPos;
+    col.iterations = it;
 
 	return col;
+}
+
+kernel void clear_framebuffer(write_only image2d_t frameBuff) {
+    write_imageui ( frameBuff, (int2)(get_global_id(0), get_global_id(1)), (uint4)(0, 0, 0, 0));
 }
 
 kernel void ray_trace(global char* octree,
@@ -250,6 +272,7 @@ kernel void ray_trace(global char* octree,
         }
 
         uint4 color = (uint4)(red, green, blue, 255);
+        //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
 
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
