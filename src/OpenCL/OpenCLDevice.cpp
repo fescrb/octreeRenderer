@@ -42,6 +42,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
 
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
+    m_clearFrameBuffKernel = m_pProgram->getOpenCLKernel("clear_framebuffer");
 }
 
 OpenCLDevice::~OpenCLDevice(){
@@ -53,9 +54,9 @@ void OpenCLDevice::printInfo() {
 }
 
 void OpenCLDevice::makeFrameBuffer(int2 size) {
+    cl_int error;
     Device::makeFrameBuffer(size);
     if(size != m_frameBufferResolution) {
-        cl_int error;
         if(m_frameBufferResolution[0]) {
             error = clReleaseMemObject(m_frameBuff);
             if(clIsError(error)){
@@ -110,12 +111,21 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        size_t origin[3] = {0, 0, 0}; 
-        size_t region[3] = {size[0], size[1], 1}; 
-        error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
+        error = clSetKernelArg( m_clearFrameBuffKernel, 0, sizeof(cl_mem), &m_frameBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        
+        /*error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
         if(clIsError(error)){
             clPrintError(error);
-        }
+        }*/
+    }
+    size_t origin[2] = {0, 0}; 
+    size_t region[2] = {size[0], size[1]}; 
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearFrameBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
     }
 }
 
@@ -163,7 +173,8 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-
+    
+    // TODO Lookout for possible future offset problems
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
