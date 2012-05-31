@@ -98,6 +98,10 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
+void SerialDevice::traceBeam(int x, int y, int width, renderinfo* info) {
+    
+}
+
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float half_size = OCTREE_ROOT_HALF_SIZE;
     char depth_in_octree = 0;
@@ -301,7 +305,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
 
     //Octree Depth
-    glTexImage2D(GL_TEXTURE_2D,
+    /*glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
                  getTotalTaskWindow().getWidth(),
@@ -309,7 +313,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
-                 m_pOctreeDepth);
+                 m_pOctreeDepth);*/
     //Iterations
     /*glTexImage2D(GL_TEXTURE_2D,
                  0,
@@ -331,7 +335,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_FLOAT,
                  m_pDepthBuffer);*/
     // Color
-    /*glTexImage2D(GL_TEXTURE_2D,
+    glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
                  getTotalTaskWindow().getWidth(),
@@ -339,7 +343,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 m_pFrame);*/
+                 m_pFrame);
     m_transferEnd.reset();
 
     framebuffer_window fb_window;
