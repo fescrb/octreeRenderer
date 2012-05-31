@@ -32,7 +32,7 @@ class SerialDevice
         GLuint               m_texture;
 
         void			     setFramePixel(int x, int y,
-                                           char red, char green, char blue);
+                                           unsigned char red, unsigned char green, unsigned char blue);
         
         void                 setInfoPixels(int x, int y,
                                            float depth, unsigned char iterations, unsigned char depth_in_octree);
