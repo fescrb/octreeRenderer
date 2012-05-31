@@ -13,8 +13,9 @@ struct renderinfo{
 
 struct collission {
     global char* node_pointer;
-    float3 ray_position;
+    float t;
     unsigned char iterations;
+    unsigned char depth_in_octree;
 };
 
 struct stack{
@@ -112,8 +113,9 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	return curr_index;
 }
 
-struct collission find_collission(global char* octree, float3 origin, float3 direction, float t) {
+struct collission find_collission(global char* octree, float3 origin, float3 direction, float t, float pixel_half_size) {
     unsigned char it = 0;
+    unsigned char depth_in_octree = 0;
 
 	float half_size = OCTREE_ROOT_HALF_SIZE;
 
@@ -172,6 +174,12 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                 
                 if(nodeHasChildAt(rayPos, voxelCentre, curr_address, direction)) {
                     /* If the voxel we are at is not empty, go down. */
+
+                    // We check for LOD.
+                    if(nodeHalfSize*2.0f < pixel_half_size*t) {
+                        collission = true;
+                        break;
+                    }
                     
                     curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
                     
@@ -184,6 +192,8 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                                              direction.z >= 0 ? voxelCentre.z - nodeHalfSize : voxelCentre.z + nodeHalfSize);
                     t_max = tmp_max;
                     t_min = max_component((corner_close - origin) / direction);
+
+                    depth_in_octree++;
                     
                 } else {
                     /* If the child is empty, we step the ray. */
@@ -199,6 +209,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 					curr_address = short_stack[curr_index].address;
 					t_min = short_stack[curr_index].t_min;
 					t_max = short_stack[curr_index].t_max;
+                    depth_in_octree--;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
 					curr_index = 0;
@@ -212,6 +223,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
 					t_min = max_component((corner_close - origin) / direction); 
 					t_max = min_component((corner_far - origin) / direction);
+                    depth_in_octree = 0;
                 }
             }
         }
@@ -222,8 +234,9 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
     struct collission col;
     col.node_pointer = curr_address;
-    col.ray_position = rayPos;
+    col.t = t;
     col.iterations = it;
+    col.depth_in_octree = depth_in_octree;
 
 	return col;
 }
@@ -241,9 +254,14 @@ kernel void ray_trace(global char* octree,
 	int y = origin.y + get_global_id(1);
 
 	float3 o = info.viewPortStart + (info.viewStep * x) + (info.up * y);
-    float3 d = normalize(o-info.eyePos); 
+    float3 d = o-info.eyePos;
+    o = info.eyePos;
 
-	struct collission col = find_collission(octree, o, d, 1.0f);
+    float pixel_half_size = distance((float3)(0.0f, 0.0f, 0.0f),info.viewStep);
+
+	struct collission col = find_collission(octree, o, d, 1.0f, pixel_half_size);
+
+    float3 rayPos = o + (d * col.t);
 
     float ambient = 0.2f;
 
@@ -257,7 +275,7 @@ kernel void ray_trace(global char* octree,
         // If attributes contains a normal
         if(((global int*)header)[1] > 4) {
             //Fixed direction light coming from (1, 1, 1);
-            float4 direction_towards_light = normalize((float4)(info.lightPos - col.ray_position,0.0f));
+            float4 direction_towards_light = normalize((float4)(info.lightPos - rayPos,0.0f));
             float4 normal = (float4)(fixed_point_8bit_to_float(attr[4]),
                                      fixed_point_8bit_to_float(attr[5]),
                                      fixed_point_8bit_to_float(attr[6]),
@@ -265,7 +283,7 @@ kernel void ray_trace(global char* octree,
             // K_diff is always 1, for now
             float diffuse_coefficient = dot(direction_towards_light,normal);
             if(diffuse_coefficient<0)
-                diffuse_coefficient*=-1.0f;
+                diffuse_coefficient=0.0f;
             red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
             green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
             blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
@@ -273,6 +291,8 @@ kernel void ray_trace(global char* octree,
 
         uint4 color = (uint4)(red, green, blue, 255);
         //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
+        //char color_per_level = 255/((global int*)header)[0];
+        //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
 
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
