@@ -34,17 +34,18 @@ class DeviceManager {
         void                             distributeHeaderAndOctreeRoot();
 		std::vector<framebuffer_window>  renderFrame(renderinfo *info, int2 resolution);
 
-	private:
-        struct device_tasks {
-                                         device_tasks() : tasks() {}
-            rect                         total_window;
-            std::vector<rect>            tasks;
+	private:        
+        struct device_characteristics {
+            float                        pixels_per_second;
         };
 
         void                             setPerDeviceTasks(int2 domain_resolution);
-
+        void                             getFrameTimeResults(int2 domain_resolution);
 
 		std::vector<Context*>	         m_vContext;
+        std::vector<Device*>             m_vDeviceList;
+        std::vector<device_characteristics>
+                                         m_vDeviceCharacteristics;
 
 		DataManager				        *m_pDataManager;
 

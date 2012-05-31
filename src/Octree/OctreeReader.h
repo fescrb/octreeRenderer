@@ -13,6 +13,11 @@ class OctreeReader
         
     private:
         char                    *m_sPath;
+        
+        bool                     m_header_loaded;
+        Bin                      m_header;
+        bool                     m_root_loaded;
+        Bin                      m_root;
 };
 
 #endif //_OCTREE_READER_H

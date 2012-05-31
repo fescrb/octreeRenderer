@@ -7,7 +7,9 @@
 #include <cstring>
 #include <cstdio>
 
-OctreeReader::OctreeReader(char* name) {
+OctreeReader::OctreeReader(char* name)
+:   m_header_loaded(false),
+    m_root_loaded(false) {
     bool name_contains_file_extension = !strcmp(&name[strlen(name) - 5],".voct");
     int size = strlen(name);
     if(!name_contains_file_extension)
@@ -29,11 +31,19 @@ OctreeReader::OctreeReader(char* name) {
 }
         
 Bin OctreeReader::getHeader() {
-    BinReader reader = BinReader(m_sPath, "header");
-    return reader.readAll();
+    if(!m_header_loaded) {
+        BinReader reader = BinReader(m_sPath, "header");
+        m_header = reader.readAll();
+        m_header_loaded = true;
+    }
+    return m_header;
 }
 
 Bin OctreeReader::getRoot() {
-    BinReader reader = BinReader(m_sPath, "0");
-    return reader.readAll();
+    if(!m_root_loaded) {
+        BinReader reader = BinReader(m_sPath, "0");
+        m_root = reader.readAll();
+        m_root_loaded = true;
+    }
+    return m_root;
 }

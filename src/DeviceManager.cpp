@@ -37,6 +37,8 @@ void DeviceManager::detectDevices() {
 	#endif //USE_OPENMP
 
 	printDeviceInfo();
+    
+    m_vDeviceList = getDeviceList();
 }
 
 DeviceManager::~DeviceManager(){
@@ -89,25 +91,61 @@ void DeviceManager::distributeHeaderAndOctreeRoot() {
 
 void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
     int device_count = getNumDevices();
-    printf("count %d\n", device_count);
-
-    int start = 0;
-
-    for (int i = 0; i < device_count; i++) {
-        getDevice(i)->clearTasks();
-
-        int2 origin = int2(start, 0);
-        int2 size = int2(domain_resolution.getX()/device_count,domain_resolution[1]);
-
-        if(!i) {
-            size.setX(size.getX()+(domain_resolution.getX()%device_count));
+    if(m_vDeviceCharacteristics.size() != device_count) {
+        for (int i = 0; i < device_count; i++) {
+            getDevice(i)->clearTasks();
         }
 
-        start+=size.getX();
+        int2 origin = int2(0,0);
+        int2 size = int2(domain_resolution.getX(),domain_resolution[1]);
+        m_vDeviceList[m_vDeviceCharacteristics.size()]->addTask(rect(origin,size));
+    } else {
 
-        rect window = rect(origin, size);
+        int start = 0;
+        
+        float total_pps = 0.0f;
+        for (int i = 0; i < device_count; i++) {
+            total_pps+=m_vDeviceCharacteristics[i].pixels_per_second;
+        }
 
-        getDevice(i)->addTask(window);
+        for (int i = 0; i < device_count; i++) {
+            getDevice(i)->clearTasks();
+
+            int2 origin = int2(start, 0);
+            int2 size = int2(domain_resolution.getX()*m_vDeviceCharacteristics[i].pixels_per_second/total_pps,domain_resolution[1]);
+
+            printf("Device %d pps %f total_pps %f origin %d %d size %d %d\n", i, m_vDeviceCharacteristics[i].pixels_per_second, total_pps,
+                                                                            origin.getX(), origin.getY(), size.getX(), size.getY()
+            );
+            
+            //if(!i) {
+            //    size.setX(size.getX()+(domain_resolution.getX()%device_count));
+            //}
+
+            start+=size.getX();
+
+            rect window = rect(origin, size);
+
+            getDevice(i)->addTask(window);
+        }
+    }
+}
+
+void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
+    if(m_vDeviceCharacteristics.size() != m_vDeviceList.size()) {
+        float total_pixels = domain_resolution.getX() * domain_resolution.getY();
+        device_characteristics dev_c;
+        dev_c.pixels_per_second = total_pixels/((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getRenderTime());
+        
+        
+        printf("New Device pps %f render time %f transfer time %f\n", dev_c.pixels_per_second, 
+                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getRenderTime()), 
+                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));
+        m_vDeviceCharacteristics.push_back(dev_c);
+    } else {
+        for(int i = 0; i < m_vDeviceList.size(); i++)
+            printf("Device %d render time %f transfer time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
+                                                                     ((double)m_vDeviceList[i]->getBufferToTextureTime()));
     }
 }
 
@@ -131,9 +169,7 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 	for(int i = 0; i < devices; i++)
 		fb_windows.push_back(device_list[i]->getFrameBuffer());
 
-    for(int i = 0; i < devices; i++) {
-        printf("%d %f %f\n", i, (double)device_list[i]->getRenderTime(), (double)device_list[i]->getBufferToTextureTime());
-    }
+    getFrameTimeResults(resolution);
     //exit(0);
 
 		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());

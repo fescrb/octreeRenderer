@@ -19,7 +19,7 @@ Bin BinReader::readAll() {
     stat(m_complete_path, &st);
     int size = st.st_size;
     
-    printf("size %d\n", size);
+    //printf("size %d\n", size);
     
     char* data = (char*)malloc(size+1);
 
@@ -33,7 +33,7 @@ Bin BinReader::readAll() {
 
     int size_to_go = size;
     while(size_to_go) {
-        printf("still reading %d\n",size_to_go);
+        //printf("still reading %d\n",size_to_go);
         int res =read(fd, &(bin.getDataPointer()[size-size_to_go]),size_to_go);
         if(isIOError(res)) {
             printIOError();
