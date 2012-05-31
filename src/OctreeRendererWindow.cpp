@@ -156,6 +156,7 @@ void OctreeRendererWindow::recalculateViewportVectors() {
     info->up = up;
     info->viewPortStart = viewportStart;
     info->viewStep = viewportStep;
+    info->pixel_half_size = mag(info->viewStep)/2.0f;
 }
 
 void OctreeRendererWindow::mouseEvent(int button, int state, int x, int y) {

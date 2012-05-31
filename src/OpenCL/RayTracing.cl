@@ -5,7 +5,7 @@
 
 struct renderinfo{
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
-	float eyePlaneDist, fov;
+	float eyePlaneDist, fov, pixel_half_size;
 
     float3 lightPos;
     float lightBrightness;
@@ -257,9 +257,7 @@ kernel void ray_trace(global char* octree,
     float3 d = o-info.eyePos;
     o = info.eyePos;
 
-    float pixel_half_size = distance((float3)(0.0f, 0.0f, 0.0f),info.viewStep);
-
-	struct collission col = find_collission(octree, o, d, 1.0f, pixel_half_size);
+	struct collission col = find_collission(octree, o, d, 1.0f, info.pixel_half_size);
 
     float3 rayPos = o + (d * col.t);
 

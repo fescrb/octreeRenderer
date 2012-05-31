@@ -103,6 +103,8 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     char depth_in_octree = 0;
     short it = 0;
     
+    float pixel_half_size = info->pixel_half_size;
+    
     if(x == 288 && y == 374)
         printf("yep\n");
     
@@ -170,6 +172,13 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
                 if(nodeHasChildAt(rayPos, voxelCentre, curr_address, d)) {
                     // If the voxel we are at is not empty, go down.
+                    
+                    // We check for LOD.
+                    if(nodeHalfSize*2.0f < pixel_half_size*t) {
+                        collission = true;
+                        break;
+                    }
+                    
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 
                     curr_address = getChild(rayPos,voxelCentre,curr_address, d);
@@ -292,7 +301,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
 
     //Octree Depth
-    /*glTexImage2D(GL_TEXTURE_2D,
+    glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
                  getTotalTaskWindow().getWidth(),
@@ -300,7 +309,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
-                 m_pOctreeDepth);*/
+                 m_pOctreeDepth);
     //Iterations
     /*glTexImage2D(GL_TEXTURE_2D,
                  0,
@@ -322,7 +331,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_FLOAT,
                  m_pDepthBuffer);*/
     // Color
-    glTexImage2D(GL_TEXTURE_2D,
+    /*glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
                  getTotalTaskWindow().getWidth(),
@@ -330,7 +339,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 m_pFrame);
+                 m_pFrame);*/
     m_transferEnd.reset();
 
     framebuffer_window fb_window;
@@ -356,9 +365,10 @@ void SerialDevice::setFramePixel(int x, int y, unsigned char red, unsigned char 
 void SerialDevice::setInfoPixels(int x, int y, float depth, unsigned char iterations, unsigned char depth_in_octree) {
     //printf("depth is %f\n",depth);
     int index = (getTotalTaskWindow().getWidth()*y) + x;
+    char color_per_level = 255/((int*)m_pHeader)[0];
     m_pDepthBuffer[index] = depth;
     m_pIterations[index] = iterations;
-    m_pOctreeDepth[index] = depth_in_octree;
+    m_pOctreeDepth[index] = depth_in_octree*color_per_level;
 }
 
 high_res_timer SerialDevice::getRenderTime() {

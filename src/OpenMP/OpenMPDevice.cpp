@@ -13,7 +13,7 @@ void OpenMPDevice::renderTask(int index, renderinfo *info) {
     
 	int2 end = start+size;
     
-    printf("start %d %d end %d %d\n", start.getX(), start.getY(), end.getX(), end.getY());
+    //printf("start %d %d end %d %d\n", start.getX(), start.getY(), end.getX(), end.getY());
 
 	#pragma omp parallel for
 	for(int y = start[1]; y < end[1]; y++) {
