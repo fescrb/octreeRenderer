@@ -1,6 +1,6 @@
 #define STACK_SIZE 10
 
-#define F32_EPSILON 1E-5
+#define F32_EPSILON 1E-6
 #define OCTREE_ROOT_HALF_SIZE 1.0f
 
 struct renderinfo{
@@ -20,7 +20,7 @@ struct collission {
 
 struct stack{
 	global char* address;
-	float3 far_corner, node_centre;
+	float3 far_corner, node_centre, corner_close;
 	float t_min, t_max;
 };
 
@@ -44,47 +44,41 @@ bool no_children(__global char* address) {
     return !address[7];
 }
 
-char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction) {
-    /*float3 flagVector = rayPos - nodeCentre;
-    char flag = 0;
- 
-    if(flagVector.x >= 0.0f)
-        flag |= 1;
-    if(flagVector.y >= 0.0f)
-        flag |= 2;
-    if(flagVector.z >= 0.0f)
-        flag |= 4;
-    
-    return flag;*/
-
-    float3 flagVector = rayPos - nodeCentre;
+char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     char flag = 0;
 
-    if(flagVector.x > F32_EPSILON)
-        flag |= 1;
-    else if(flagVector.x <= F32_EPSILON && flagVector.x >= -F32_EPSILON)
+    if( t >= t_centre_vector.x ) {
         if(direction.x >= 0.0f)
-            flag |= 1;
-    if(flagVector.y > F32_EPSILON)
-        flag |= 2;
-    else if(flagVector.y <= F32_EPSILON && flagVector.y >= -F32_EPSILON)
+            flag |= 1; 
+    } else {
+        if(direction.x < 0.0f)
+            flag |= 1; 
+    }
+
+    if( t >= t_centre_vector.y ) {
         if(direction.y >= 0.0f)
-            flag |= 2;
-    if(flagVector.z > F32_EPSILON)
-        flag |= 4;
-    else if(flagVector.z <= F32_EPSILON && flagVector.z >= -F32_EPSILON)
+            flag |= 2; 
+    } else {
+        if(direction.y < 0.0f)
+            flag |= 2; 
+    }
+
+    if( t >= t_centre_vector.z ) {
         if(direction.z >= 0.0f)
-            flag |= 4;
+            flag |= 4; 
+    } else {
+        if(direction.z < 0.0f)
+            flag |= 4; 
+    }
 
     return flag;
 }
 
-bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, global char* node, float3 direction) {
-	return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre, direction));  
+bool nodeHasChildAt(global char* node, char xyz_flag) {
+	return node[7] & (1 << xyz_flag);  
 }
 
-global char* getChild(float3 rayPos, float3 nodeCentre, global char* node, float3 direction) {
-    char xyz_flag = makeXYZFlag(rayPos, nodeCentre, direction);
+global char* getChild(global char* node, char xyz_flag) {
     global int *node_int = (global int*)node;
     int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
     node_int+=(pos+2);
@@ -97,7 +91,7 @@ global char* get_attributes(global char* node) {
     return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
-int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float t_min, float t_max) {
+int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float3 corner_close, float t_min, float t_max) {
 	if(curr_index >= STACK_SIZE) {
 		curr_index = STACK_SIZE - 1;
 		for(int i = 1; i < STACK_SIZE; i++) 
@@ -109,6 +103,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	short_stack[curr_index].node_centre = voxelCentre;
 	short_stack[curr_index].t_min = t_min;
 	short_stack[curr_index].t_max = t_max;
+    short_stack[curr_index].corner_close = corner_close;
 	curr_index++;
 	return curr_index;
 }
@@ -147,7 +142,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
     float3 rayPos = origin;
 
-	while(!collission && it < 255) {
+	while(!collission) {
         it++;
 		if(t >= t_out) {
 			collission = true;
@@ -159,7 +154,9 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
             if(t_min <= t && t < t_max) {
                 rayPos = origin + (direction * t);
                 
-                char xyz_flag = makeXYZFlag(rayPos, voxelCentre, direction);
+                float3 t_centre_vector = (voxelCentre - origin) / direction;
+
+                char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
                 float nodeHalfSize = fabs((corner_far-voxelCentre).x)/2.0f;
                 
                 float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
@@ -172,7 +169,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                 
                 float tmp_max = min_component((tmp_corner_far - origin) / direction);
                 
-                if(nodeHasChildAt(rayPos, voxelCentre, curr_address, direction)) {
+                if(nodeHasChildAt(curr_address, xyz_flag)) {
                     /* If the voxel we are at is not empty, go down. */
 
                     // We check for LOD.
@@ -181,9 +178,9 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                         break;
                     }
                     
-                    curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
+                    curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, corner_close, t_min, t_max);
                     
-                    curr_address = getChild(rayPos,voxelCentre,curr_address, direction);
+                    curr_address = getChild(curr_address, xyz_flag);
                     
                     corner_far = tmp_corner_far;
                     voxelCentre = tmpNodeCentre;
@@ -191,6 +188,11 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                                              direction.y >= 0 ? voxelCentre.y - nodeHalfSize : voxelCentre.y + nodeHalfSize,
                                              direction.z >= 0 ? voxelCentre.z - nodeHalfSize : voxelCentre.z + nodeHalfSize);
                     t_max = tmp_max;
+                    /*float t_min_x = (corner_close.x - origin.x) / direction.x;
+                    float t_min_y = (corner_close.y - origin.y) / direction.y;
+                    float t_min_z = (corner_close.z - origin.z) / direction.z;
+                    t_min = t_min_x > t_min_y? t_min_x : t_min_y;
+                    t_min = t_min > t_min_z? t_min : t_min_z;*/
                     t_min = max_component((corner_close - origin) / direction);
 
                     depth_in_octree++;
@@ -209,6 +211,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 					curr_address = short_stack[curr_index].address;
 					t_min = short_stack[curr_index].t_min;
 					t_max = short_stack[curr_index].t_max;
+                    corner_close = short_stack[curr_index].corner_close;
                     depth_in_octree--;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
@@ -249,7 +252,8 @@ kernel void ray_trace(global char* octree,
                       global char* header,
                       struct renderinfo info,
                       int2 origin,
-                      write_only image2d_t frameBuff) {
+                      write_only image2d_t frameBuff,
+                      write_only image2d_t depthBuff) {
     int x = origin.x + get_global_id(0);
 	int y = origin.y + get_global_id(1);
 
@@ -294,4 +298,5 @@ kernel void ray_trace(global char* octree,
 
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
+    write_imagef ( depthBuff, (int2)(x, y), (float4)(/*(float)col.depth_in_octree*/col.t));
 }

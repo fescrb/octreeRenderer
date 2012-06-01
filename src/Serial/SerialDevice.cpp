@@ -353,7 +353,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
     return fb_window;
 }
 
-char* SerialDevice::getFrame() {
+unsigned char* SerialDevice::getFrame() {
 	return m_pFrame;
 }
 

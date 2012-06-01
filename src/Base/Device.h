@@ -40,7 +40,7 @@ class Device {
          * @return The OpenGL texture id containing the framebuffer.
          */
         virtual framebuffer_window   getFrameBuffer() = 0;
-        virtual char                *getFrame() = 0;
+        virtual unsigned char       *getFrame() = 0;
 
         virtual high_res_timer       getRenderTime() = 0;
         virtual high_res_timer       getBufferToTextureTime() = 0;
@@ -60,7 +60,7 @@ class Device {
 
         DeviceInfo                  *m_pDeviceInfo;
         
-        char                        *m_pFrame;
+        unsigned char               *m_pFrame;
         float                       *m_pDepthBuffer;
         unsigned char               *m_pIterations;
         unsigned char               *m_pOctreeDepth;

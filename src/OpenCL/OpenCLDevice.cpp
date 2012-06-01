@@ -32,8 +32,8 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 	}
 
     // Create octree memory in the object, the host will only write, not read. And the device will only read.
-    // We make it 64MB for now
-    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 64*1024*1024, NULL, &err);
+    // We make it 128MB for now
+    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 128*1024*1024, NULL, &err);
 
     if(clIsError(err)){
         clPrintError(err); return;
@@ -91,13 +91,12 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error);
         }
-        /*image_format.image_channel_order = CL_R;
-        image_format.image_channel_order = CL_FLOAT;
-        m_depthBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &image_format, size[0], size[1], 0, NULL, &error);
+        cl_image_format single_channel_image_format = {CL_INTENSITY, CL_FLOAT};
+        m_depthBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &single_channel_image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
         }
-        image_format.image_channel_order = CL_UNSIGNED_INT8;
+        /*image_format.image_channel_order = CL_UNSIGNED_INT8;
         m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
@@ -108,6 +107,10 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         }*/
         m_frameBufferResolution = size;
         error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        error = clSetKernelArg( m_rayTraceKernel, 5, sizeof(cl_mem), &m_depthBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
@@ -205,7 +208,7 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
 		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 	} else
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
-    char* frameBuffer = getFrame();
+    unsigned char* frameBuffer = getFrame();
 
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
@@ -228,27 +231,47 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
     return fb_window;
 }
 
-char* OpenCLDevice::getFrame() {
+unsigned char* OpenCLDevice::getFrame() {
     size_t origin[3] = {getTotalTaskWindow().getX(), getTotalTaskWindow().getY(), 0};
     size_t region[3] = {getTotalTaskWindow().getWidth(), getTotalTaskWindow().getHeight(), 1};
     int size = getTotalTaskWindow().getWidth()*getTotalTaskWindow().getHeight()*4;
 
     cl_int error;
+    
+    // Read the depth buffer, not always necessary
+    error = clEnqueueReadImage( m_commandQueue, m_depthBuff, GL_FALSE, origin, region, region[0]*4, 0, m_pDepthBuffer, 1, &m_eventRenderingFinished, NULL);
+    if(clIsError(error)){
+        clPrintError(error);
+    }
+    
     //error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     error = clEnqueueReadImage ( m_commandQueue, m_frameBuff, GL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){
         clPrintError(error);
     }
+    
     cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
     error = clWaitForEvents(2, events);
 	if(clIsError(error)){
         clPrintError(error);
     }
+    
+    /*printf("--------------\n");
+    for(int y = 0; y < getTotalTaskWindow().getHeight(); y++) 
+        for(int x = 0; x < getTotalTaskWindow().getWidth(); x++) {     
+            int index = (x*4)+(y*4*getTotalTaskWindow().getWidth());
+            if(m_pFrame[index] > 244){
+                printf("x %d y %d\n", x, y); 
+                printf("depthbuffer value %f\n", m_pDepthBuffer[(x)+(y*getTotalTaskWindow().getWidth())]);
+            }
+        }
+    printf("--------------\n");*/
+    
     return m_pFrame;
 }
 
 void OpenCLDevice::onRenderingFinished() {
-    printf("render end\n");
+    //printf("render end\n");
 	m_renderEnd.reset();
     m_transferStart.reset();
 }

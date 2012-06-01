@@ -28,7 +28,7 @@ class OpenCLDevice:
         void                 sendHeader(Bin bin);
 		void                 renderTask(int index, renderinfo *info);
 		framebuffer_window   getFrameBuffer();
-		char    			*getFrame();
+		unsigned char       *getFrame();
 
 		cl_context			 getOpenCLContext();
 		cl_device_id		 getOpenCLDeviceID();

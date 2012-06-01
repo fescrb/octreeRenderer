@@ -27,7 +27,7 @@ void Device::makeFrameBuffer(int2 size) {
             free(m_pIterations);
             free(m_pOctreeDepth);
         }
-        m_pFrame = (char*)malloc(4*size[0]*size[1]);
+        m_pFrame = (unsigned char*)malloc(4*size[0]*size[1]);
         m_pDepthBuffer = (float*)malloc(sizeof(float)*size[0]*size[1]);
         m_pIterations = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);
         m_pOctreeDepth = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);

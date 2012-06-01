@@ -16,7 +16,7 @@ class SerialDevice
         void                 traceRay(int x, int y, renderinfo* info);
         virtual void	     renderTask(int index, renderinfo *info);
         framebuffer_window   getFrameBuffer();
-        char    		    *getFrame();
+        unsigned char       *getFrame();
 
         high_res_timer       getRenderTime();
         high_res_timer       getBufferToTextureTime();
