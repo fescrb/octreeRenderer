@@ -26,7 +26,7 @@ class OctreeCreator
         /**
          * @ret true if it contains triangles, false otherwise
          */
-        OctreeNode              *createSubtree(octree<mesh*>* pNode, octree<aabox>* bboxes, mesh m, aabox box, int depth);
+        OctreeNode              *createSubtree(octree<aabox>* bboxes, mesh m, aabox box, int depth);
         
         void                     renderBBoxSubtree(octree<aabox> subtree, OctreeNode *node);
         
