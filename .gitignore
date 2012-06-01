@@ -14,3 +14,4 @@ octreeRenderer.layout
 *xcodeproj*
 *.trace
 *.voct
+Debug/*
