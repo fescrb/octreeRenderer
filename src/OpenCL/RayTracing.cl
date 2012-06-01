@@ -261,7 +261,7 @@ kernel void ray_trace(global char* octree,
     float3 d = o-info.eyePos;
     o = info.eyePos;
 
-	struct collission col = find_collission(octree, o, d, 1.0f, info.pixel_half_size);
+	struct collission col = find_collission(octree, o, d, 0.0f, info.pixel_half_size);
 
     float3 rayPos = o + (d * col.t);
 

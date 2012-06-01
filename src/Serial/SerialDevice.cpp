@@ -130,6 +130,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
+    o = info->eyePos;
     //d = normalize(d);
     float t = 0.0f;
 
@@ -375,7 +376,7 @@ unsigned char* SerialDevice::getFrame() {
 }
 
 void SerialDevice::setFramePixel(int x, int y, unsigned char red, unsigned char green, unsigned char blue) {
-	unsigned char* pixelPtr = &m_pFrame[(y*getTotalTaskWindow().getWidth()*4)+(x*4)];
+	unsigned char* pixelPtr = &m_pFrame[((y - getTotalTaskWindow().getY() )*getTotalTaskWindow().getWidth()*4)+((x-getTotalTaskWindow().getX())*4)];
 
 	pixelPtr[0] = red;
 	pixelPtr[1] = green;
