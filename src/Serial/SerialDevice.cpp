@@ -45,12 +45,27 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction ) {
 	return flag;
 }
 
-bool nodeHasChildAt(float3 rayPos, float3 nodeCentre, char* node, float3 direction) {
-    return node[7] & (1 << makeXYZFlag(rayPos, nodeCentre, direction));
+char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
+    char flag = 0;
+
+    for(int i = 0; i < 3; i++) {
+        if( t >= t_centre_vector[i] ) {
+            if(direction[i] >= 0.0f)
+                flag |= (1 << i); 
+        } else {
+            if(direction[i] < 0.0f)
+                flag |= (1 << i); 
+        }
+    }
+
+    return flag;
 }
 
-char* getChild(float3 rayPos, float3 nodeCentre, char* node, float3 direction) {
-	char xyz_flag = makeXYZFlag(rayPos, nodeCentre, direction);
+bool nodeHasChildAt(char* node, char xyz_flag) {
+    return node[7] & (1 << xyz_flag);
+}
+
+char* getChild(char* node, char xyz_flag) {
     int *node_int = (int*)node;
     int pos = (node_int[0] >> (xyz_flag * 3)) & 7;
     node_int+=(pos+2);
@@ -89,7 +104,7 @@ struct Stack {
 };
 
 // Returns new index.
-int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_centre, int t_min, int t_max){
+int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_centre, float t_min, float t_max){
 	stack[index].address = node;
 	stack[index].far_corner = far_corner;
 	stack[index].node_centre = node_centre;
@@ -109,13 +124,13 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     
     float pixel_half_size = info->pixel_half_size;
     
-    if(x == 288 && y == 374)
-        printf("yep\n");
+    //if(x == 292 && y == 322)
+        //printf("yep\n");
     
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
-    d = normalize(d);
+    //d = normalize(d);
     float t = 0.0f;
 
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
@@ -160,8 +175,10 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 rayPos = o + (d * t);
+                
+                float3 t_centre_vector = (voxelCentre - o) / d;
 
-                char xyz_flag = makeXYZFlag(rayPos, voxelCentre, d);
+                char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
                 float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
 
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
@@ -174,7 +191,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
                 float tmp_max = min((tmp_corner_far - o) / d);
 
-                if(nodeHasChildAt(rayPos, voxelCentre, curr_address, d)) {
+                if(nodeHasChildAt(curr_address, xyz_flag)) {
                     // If the voxel we are at is not empty, go down.
                     
                     // We check for LOD.
@@ -185,7 +202,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                     
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 
-                    curr_address = getChild(rayPos,voxelCentre,curr_address, d);
+                    curr_address = getChild(curr_address, xyz_flag);
 
                     corner_far = tmp_corner_far;
                     voxelCentre = tmpNodeCentre;
@@ -193,7 +210,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                                            d[1] >= 0 ? voxelCentre[1] - nodeHalfSize : voxelCentre[1] + nodeHalfSize,
                                            d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
                     t_max = tmp_max;
-                    t_min = max((corner_close - rayPos) / d);
+                    t_min = max((corner_close - o) / d);
                     
                     ++depth_in_octree;
 
@@ -358,7 +375,7 @@ unsigned char* SerialDevice::getFrame() {
 }
 
 void SerialDevice::setFramePixel(int x, int y, unsigned char red, unsigned char green, unsigned char blue) {
-	char* pixelPtr = &m_pFrame[(y*getTotalTaskWindow().getWidth()*4)+(x*4)];
+	unsigned char* pixelPtr = &m_pFrame[(y*getTotalTaskWindow().getWidth()*4)+(x*4)];
 
 	pixelPtr[0] = red;
 	pixelPtr[1] = green;
