@@ -37,6 +37,7 @@ class SerialDevice
         
         void                 setInfoPixels(int x, int y,
                                            float depth, unsigned char iterations, unsigned char depth_in_octree);
+        float                getDepthBufferValue(int x, int y);
 };
 
 #endif // _SERIAL_DEVICE_H

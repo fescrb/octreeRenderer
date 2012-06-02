@@ -114,7 +114,168 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 }
 
 void SerialDevice::traceBeam(int x, int y, int width, renderinfo* info) {
+    float3 o(info->eyePos);
+    float3 from_centre_to_start = -(info->viewStep/2.0f) - (info->up/2.0f);
+    float3 d_lower_left((info->viewPortStart + (info->viewStep * (x*width)) + (info->up * (y*width)))-o);
+    d_lower_left+=(info->viewStep/2.0f);
+    float3 d_upper_left((info->viewPortStart + (info->viewStep * (x*width)) + (info->up * ((y+1)*width)))-o);
+    d_upper_left+=(info->viewStep/2.0f);
+    float3 d_lower_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * (y*width)))-o);
+    d_lower_right+=(info->viewStep/2.0f);
+    float3 d_upper_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
+    d_upper_right+=(info->viewStep/2.0f);
     
+    float3 d((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
+    d+=(info->viewStep/2.0f);
+    
+    float t = 0.0f;
+    
+    float half_size = OCTREE_ROOT_HALF_SIZE;
+    
+    float3 corner_far(d[0] >= 0 ? half_size : -half_size,
+                      d[1] >= 0 ? half_size : -half_size,
+                      d[2] >= 0 ? half_size : -half_size);
+
+    float3 corner_close(corner_far.neg());
+
+    float t_min = max((corner_close - o) / d);
+    float t_max = min((corner_far - o) / d);
+    float t_out = t_max;
+
+    // If we are out
+    if(t < t_min)
+        t = t_min;
+
+    char* curr_address = m_pOctreeData;
+    float3 voxelCentre(0.0f, 0.0f, 0.0f);
+    bool collission = false;
+    int curr_index = 0;
+    Stack stack[((int*)m_pHeader)[0] - 1];
+
+    // We are out of the volume and we will never get to it.
+
+    if(t > t_max) {
+        collission = true;
+        curr_address = 0; // Set to null.
+    }
+
+    float3 rayPos = o;
+
+    // Traversal.
+    while(!collission) {
+        if(t >= t_out) {
+            collission = true;
+            curr_address = 0;
+        } else if(noChildren(curr_address)){
+            collission = true;
+        } else {
+            // If we are inside the node
+            if(t_min <= t && t < t_max) {
+                rayPos = o + (d * t);
+                
+                float3 t_centre_vector = (voxelCentre - o) / d;
+
+                char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
+                float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
+
+                float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
+                                      xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
+                                      xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
+
+                float3 tmp_corner_far(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
+                                      d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
+                                      d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
+
+                float tmp_max = min((tmp_corner_far - o) / d);
+
+                if(nodeHasChildAt(curr_address, xyz_flag)) {
+                    // If the voxel we are at is not empty, go down.
+                    
+                    // We check for LOD.
+                    if(nodeHalfSize*2.0f < pixel_half_size*t) {
+                        collission = true;
+                        break;
+                    }
+                    
+                    curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
+
+                    curr_address = getChild(curr_address, xyz_flag);
+
+                    corner_far = tmp_corner_far;
+                    voxelCentre = tmpNodeCentre;
+                    corner_close =  float3(d[0] >= 0 ? voxelCentre[0] - nodeHalfSize : voxelCentre[0] + nodeHalfSize,
+                                           d[1] >= 0 ? voxelCentre[1] - nodeHalfSize : voxelCentre[1] + nodeHalfSize,
+                                           d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
+                    t_max = tmp_max;
+                    t_min = max((corner_close - o) / d);
+
+                } else {
+                    // If the child is empty, we step the ray.
+                    t = tmp_max;
+                }
+            } else {
+                // We are outside the node. Pop the stack
+                curr_index--;
+                if(curr_index>=0) {
+                    // Pop that stack!
+                    corner_far = stack[curr_index].far_corner;
+                    curr_address = stack[curr_index].address;
+                    voxelCentre = stack[curr_index].node_centre;
+                    t_max = stack[curr_index].t_max;
+                    t_min = stack[curr_index].t_min;
+                } else {
+                    // We are outside the volume.
+                    curr_address = 0;
+                    collission = true;
+                }
+            }
+        }
+    }
+
+    float ambient = 0.2f;
+    
+    // If there was a collission.
+    if(curr_address) {
+        char* attributes = getAttributes(curr_address);
+
+        unsigned char red = attributes[0];
+        unsigned char green = attributes[1];
+        unsigned char blue = attributes[2];
+
+        // If attributes contains a normal
+        if(((int*)m_pHeader)[1] > 4) {
+            //Fixed direction light coming from (1, 1, 1);
+            float4 direction_towards_light = normalize(float4(info->lightPos-rayPos, 0.0f));
+            float4 normal = float4(fixed_point_8bit_to_float(attributes[4]),
+                                   fixed_point_8bit_to_float(attributes[5]),
+                                   fixed_point_8bit_to_float(attributes[6]),
+                                   fixed_point_8bit_to_float(attributes[7]));
+            // K_diff is always 1, for now
+            float diffuse_coefficient = dot(direction_towards_light,normal);
+            if(diffuse_coefficient<0)
+                diffuse_coefficient=0.0f;
+            /*printf("rayPos %f %f %f dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
+                   rayPos[0],
+                   rayPos[1],
+                   rayPos[2],
+                   direction_towards_light[0],
+                   direction_towards_light[1],
+                   direction_towards_light[2],
+                   direction_towards_light[3],
+                   normal[0],
+                   normal[1],
+                   normal[2],
+                   normal[3],
+                   diffuse_coefficient);*/
+            red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
+            green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
+            blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
+
+        }
+
+        setFramePixel(x, y, red, green, blue);   
+    }
+    setInfoPixels(x, y, fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
 }
 
 void SerialDevice::traceRay(int x, int y, renderinfo* info) {
@@ -132,7 +293,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float3 d(o-info->eyePos); //Perspective projection now.
     o = info->eyePos;
     //d = normalize(d);
-    float t = 0.0f;
+    float t = getDepthBufferValue(x,y);
 
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,
@@ -391,6 +552,11 @@ void SerialDevice::setInfoPixels(int x, int y, float depth, unsigned char iterat
     m_pDepthBuffer[index] = depth;
     m_pIterations[index] = iterations;
     m_pOctreeDepth[index] = depth_in_octree*color_per_level;
+}
+
+float SerialDevice::getDepthBufferValue(int x, int y) {
+   int index = (getTotalTaskWindow().getWidth()*y) + x;
+   return m_pDepthBuffer[index];
 }
 
 high_res_timer SerialDevice::getRenderTime() {
