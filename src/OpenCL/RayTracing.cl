@@ -251,11 +251,10 @@ kernel void clear_framebuffer(write_only image2d_t frameBuff) {
 kernel void ray_trace(global char* octree,
                       global char* header,
                       struct renderinfo info,
-                      int2 origin,
                       write_only image2d_t frameBuff,
                       write_only image2d_t depthBuff) {
-    int x = origin.x + get_global_id(0);
-	int y = origin.y + get_global_id(1);
+    int x = get_global_id(0);
+	int y = get_global_id(1);
 
 	float3 o = info.viewPortStart + (info.viewStep * x) + (info.up * y);
     float3 d = o-info.eyePos;

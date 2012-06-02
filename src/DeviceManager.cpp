@@ -112,7 +112,7 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             getDevice(i)->clearTasks();
 
             int2 origin = int2(start, 0);
-            int2 size = int2(domain_resolution.getX()*m_vDeviceCharacteristics[i].pixels_per_second/total_pps,domain_resolution[1]);
+            int2 size = int2(domain_resolution.getX()*(m_vDeviceCharacteristics[i].pixels_per_second/total_pps),domain_resolution[1]);
 
             printf("Device %d pps %f total_pps %f origin %d %d size %d %d\n", i, m_vDeviceCharacteristics[i].pixels_per_second, total_pps,
                                                                             origin.getX(), origin.getY(), size.getX(), size.getY()

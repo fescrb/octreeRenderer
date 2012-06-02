@@ -106,11 +106,11 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
             clPrintError(error);
         }*/
         m_frameBufferResolution = size;
-        error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_frameBuff);
+        error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_mem), &m_frameBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        error = clSetKernelArg( m_rayTraceKernel, 5, sizeof(cl_mem), &m_depthBuff);
+        error = clSetKernelArg( m_rayTraceKernel, 4, sizeof(cl_mem), &m_depthBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
@@ -153,6 +153,8 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     m_renderStart.reset();
 
     rect window = m_tasks[index];
+    if(window.getWidth() == 0 || window.getHeight() == 0)
+        return;
 
     printf("start %d %d size %d %d\n", window.getX(), window.getY(), window.getWidth(), window.getHeight());
 
@@ -168,11 +170,6 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
 
     cl_renderinfo cl_info= convert(*info);
     error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
- 	if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-    cl_int2 origin = { window.getX(), window.getY()};
-	error = clSetKernelArg( m_rayTraceKernel, 3, sizeof(cl_int2), &origin);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -194,6 +191,13 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
 }
 
 framebuffer_window OpenCLDevice::getFrameBuffer() {
+    framebuffer_window fb_window;
+    fb_window.window = getTotalTaskWindow();
+    fb_window.texture = 0;
+    
+    if(fb_window.window.getWidth() == 0 || fb_window.window.getHeight() == 0)
+        return fb_window;
+    
 	if (!m_texture) {
         glGenTextures(1, &m_texture);
 
@@ -224,8 +228,6 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
 
     m_transferEnd.reset();
 
-    framebuffer_window fb_window;
-    fb_window.window = getTotalTaskWindow();
     fb_window.texture = m_texture;
 
     return fb_window;
@@ -238,14 +240,16 @@ unsigned char* OpenCLDevice::getFrame() {
 
     cl_int error;
     
+    printf("device %d origin %d %d region %d %d\n", this, origin[0], origin[1], region[0], region[1]);
+    
     // Read the depth buffer, not always necessary
-    error = clEnqueueReadImage( m_commandQueue, m_depthBuff, GL_FALSE, origin, region, region[0]*4, 0, m_pDepthBuffer, 1, &m_eventRenderingFinished, NULL);
+    error = clEnqueueReadImage( m_commandQueue, m_depthBuff, GL_FALSE, origin, region, 0, 0, m_pDepthBuffer, 1, &m_eventRenderingFinished, NULL);
     if(clIsError(error)){
         clPrintError(error);
     }
     
     //error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
-    error = clEnqueueReadImage ( m_commandQueue, m_frameBuff, GL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
+    error = clEnqueueReadImage ( m_commandQueue, m_frameBuff, GL_FALSE, origin, region, 0, 0, m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){
         clPrintError(error);
     }

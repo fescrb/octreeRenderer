@@ -40,6 +40,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
         }
         
         m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
+        //m_vpDevices.insert(m_vpDevices.begin(), new OpenCLDevice(aDevice_ids[i], context));
 	}
 }
 

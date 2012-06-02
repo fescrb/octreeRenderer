@@ -34,13 +34,13 @@ OpenCLContext::OpenCLContext() {
 	for(int i = 0; i < num_of_platforms; i++) {
 		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i]));
         
-        #ifdef _LINUX
+        /*#ifdef _LINUX
             std::string name(m_vpPlatforms[m_vpPlatforms.size()-1]->getInfo()->getName());
             if(name.find("Intel")!=name.npos) {
                 delete m_vpPlatforms[i];
                 m_vpPlatforms.pop_back();
             }
-        #endif
+        #endif*/
 	}
 }
 
