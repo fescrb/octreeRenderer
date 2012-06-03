@@ -4,7 +4,7 @@ set(this_sources 	${this_sources}
                     OctreeCreator.cpp
                     OctreeReader.cpp
                     OctreeHeader.cpp
-                    OctreeNode.cpp
+                    ConcreteOctreeNode.cpp
                     OctreeSegment.cpp
                     OctreeWriter.cpp
                     Attributes.cpp )
@@ -16,6 +16,7 @@ set(this_headers 	${this_headers}
                     OctreeReader.h
                     OctreeHeader.h
                     OctreeNode.h
+                    ConcreteOctreeNode.h
                     OctreeSegment.h
                     OctreeWriter.h
                     Attributes.h )

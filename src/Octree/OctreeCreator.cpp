@@ -2,6 +2,7 @@
 
 #include "Octree.h"
 #include "OctreeNode.h"
+#include "ConcreteOctreeNode.h"
 #include "OctreeHeader.h"
 
 #include "AABox.h"
@@ -11,13 +12,14 @@
 
 #include <cstdio>
 
-OctreeCreator::OctreeCreator(mesh meshToConvert, int depth)
+OctreeCreator::OctreeCreator(mesh meshToConvert, int depth, bool keep_aaboxes)
 :   m_converted(false),
     m_mesh(meshToConvert),
     m_aabox(meshToConvert),
     m_depth(depth),
     m_bboxes(0),
-    m_renderVoxels(false){
+    m_renderVoxels(false),
+    m_keep_aaboxes(keep_aaboxes){
     
     // We need to centre the mesh at the origin.
     float4 off_centre_difference = float4(0.0f,0.0f,0.0f,2.0f) - m_aabox.getCentre();
@@ -83,8 +85,7 @@ void OctreeCreator::render() {
 void OctreeCreator::renderBBoxSubtree(octree<aabox> subtree, OctreeNode *node) {
     if(!subtree.hasChildren()) {
         if( m_renderVoxels ) {
-            Attributes att = node->getAttributes();
-            subtree.m_node.renderVoxel(att.getColour(), att.getNormal());
+            subtree.m_node.renderVoxel(node->getColour(), node->getNormal());
         } else 
             subtree.m_node.render();
     } else {
@@ -104,8 +105,10 @@ bool OctreeCreator::isConverted() {
 }
 
 void OctreeCreator::convert() {
-    m_bboxes = (octree<aabox>*) malloc(sizeof(octree<aabox>));
-    m_bboxes[0] = octree<aabox>();
+    if(m_keep_aaboxes) {
+        m_bboxes = (octree<aabox>*) malloc(sizeof(octree<aabox>));
+        m_bboxes[0] = octree<aabox>();
+    }
     float3 half_size = m_aabox.getSizes()/2.0f;
     float4 centre = m_aabox.getCentre();
     float4 corner = m_aabox.getCorner();
@@ -148,12 +151,13 @@ aabox OctreeCreator::getMeshAxisAlignedBoundingBox() {
 
 OctreeNode* OctreeCreator::createSubtree(octree<aabox>* bboxes, mesh m, aabox box, int depth) {
     mesh* this_m = new mesh(box.cull(m));
-    bboxes->m_node = box;
+    if(bboxes)
+        bboxes->m_node = box;
     
     if(this_m->getTriangleCount()) {
         depth--;
         
-        OctreeNode *this_node = new OctreeNode();
+        ConcreteOctreeNode *this_node = new ConcreteOctreeNode();
         bool has_children = false;
         int children = 0;
         
@@ -162,7 +166,8 @@ OctreeNode* OctreeCreator::createSubtree(octree<aabox>* bboxes, mesh m, aabox bo
             float4 centre = box.getCentre();
             float4 corner = box.getCorner();
             
-            bboxes->allocateChildren();
+            if(bboxes)
+                bboxes->allocateChildren();
             
             float4 colour = float4();
             float4 normal = float4();
@@ -174,19 +179,23 @@ OctreeNode* OctreeCreator::createSubtree(octree<aabox>* bboxes, mesh m, aabox bo
                 i & octree<mesh>::Y ? new_corner.setY(centre[1]): new_corner.setY(corner[1]);
                 i & octree<mesh>::Z ? new_corner.setZ(centre[2]): new_corner.setZ(corner[2]);
                 
-                OctreeNode* child_node = createSubtree(&(bboxes->m_children[i]), *(this_m), aabox(new_corner, half_size), depth);
+                octree<aabox>* child_box = 0;
+                if(bboxes)
+                    child_box = &(bboxes->m_children[i]);
+                OctreeNode* child_node = createSubtree(child_box, *(this_m), aabox(new_corner, half_size), depth);
                 
                 if(child_node) {
-                    bboxes->addChildToFlagAt(i);
+                    if(bboxes)
+                        bboxes->addChildToFlagAt(i);
                     has_children = true;
-                    colour+=child_node->getAttributes().getColour();
+                    colour+=child_node->getColour();
                     /*printf("child_colour %f %f %f %f\n",
                            child_node->getAttributes().getColour()[0],
                            child_node->getAttributes().getColour()[1],
                            child_node->getAttributes().getColour()[2],
                            child_node->getAttributes().getColour()[3]
                     );*/
-                    normal+=child_node->getAttributes().getNormal();
+                    normal+=child_node->getNormal();
                     /*printf("child normal %f %f %f\n",
                            child_node->getAttributes().getNormal()[0],
                            child_node->getAttributes().getNormal()[1],

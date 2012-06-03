@@ -1,37 +1,20 @@
 #ifndef _OCTREE_NODE_H
 #define _OCTREE_NODE_H
 
-#include "Attributes.h"
+#include "Vector.h"
 
 class OctreeNode {
-
 	public:
-		explicit 				 OctreeNode();
-		explicit 				 OctreeNode(Attributes att);
+        virtual OctreeNode      *getChildAt(int index) = 0;
+        
+		virtual char            *flatten(char* buffer) = 0;
 
-		enum PositionFlags {
-			X = 1,
-			Y = 2,
-			Z = 4
-		};
-
-		void					 addChild(OctreeNode* node, unsigned int position_flag);
-        OctreeNode              *getChildAt(int index);
-		void					 cleanChildrenPointers();
-
-		void					 setAttributes(Attributes att);
-        Attributes               getAttributes();
-
-		char 					*flatten(char* buffer);
-
-		unsigned int			 getDepth();
-		unsigned int			 getNumberOfNodes();
-
-	private:
-		OctreeNode				*m_vChildren[8];
-		unsigned int			 numberOfChildren;
-
-		Attributes 				 m_attributes;
+		virtual unsigned int     getDepth() = 0;
+		virtual unsigned int     getNumberOfNodes() = 0;
+		virtual unsigned int     getAttributeSize() = 0;
+        
+        virtual float4           getColour() = 0;
+        virtual float4           getNormal() = 0;
 };
 
 #endif //_OCTREE_NODE_H

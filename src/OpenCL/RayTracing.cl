@@ -248,11 +248,15 @@ kernel void clear_framebuffer(write_only image2d_t frameBuff) {
     write_imageui ( frameBuff, (int2)(get_global_id(0), get_global_id(1)), (uint4)(0, 0, 0, 0));
 }
 
+kernel void clear_depthbuffer(write_only image2d_t depthBuff) {
+    write_imagef ( depthBuff, (int2)(get_global_id(0), get_global_id(1)), (float4)(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
 kernel void ray_trace(global char* octree,
                       global char* header,
                       struct renderinfo info,
                       write_only image2d_t frameBuff,
-                      write_only image2d_t depthBuff) {
+                      read_only  image2d_t depthBuff) {
     int x = get_global_id(0);
 	int y = get_global_id(1);
 
@@ -260,7 +264,10 @@ kernel void ray_trace(global char* octree,
     float3 d = o-info.eyePos;
     o = info.eyePos;
 
-	struct collission col = find_collission(octree, o, d, 0.0f, info.pixel_half_size);
+    sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_LINEAR;
+    float4 t_start = read_imagef(depthBuff, sampler, (int2)(x,y));
+
+	struct collission col = find_collission(octree, o, d, t_start.x, info.pixel_half_size);
 
     float3 rayPos = o + (d * col.t);
 
@@ -297,5 +304,4 @@ kernel void ray_trace(global char* octree,
 
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
-    write_imagef ( depthBuff, (int2)(x, y), (float4)(/*(float)col.depth_in_octree*/col.t));
 }

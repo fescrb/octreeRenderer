@@ -4,6 +4,7 @@
 
 #include "OctreeHeader.h"
 #include "OctreeNode.h"
+#include "ConcreteOctreeNode.h"
 #include "OctreeSegment.h"
 
 #include <cstdlib>
@@ -20,37 +21,37 @@ Octree* ConcreteOctree::getSimpleOctree() {
     Attributes rootAtts;
     rootAtts.setColour(128, 128, 128, 128);
     rootAtts.setNormal(0.0f, 0.0f, -1.0f);
-    OctreeNode *root = new OctreeNode(rootAtts);
+    ConcreteOctreeNode *root = new ConcreteOctreeNode(rootAtts);
     
     // Create topleft node + atts
     Attributes topleftAtts;
     topleftAtts.setColour(255, 255, 255, 255);
     topleftAtts.setNormal(-0.57445626f, 0.57445626f, -0.57445626f);
-    OctreeNode *topleft = new OctreeNode(topleftAtts);
+    ConcreteOctreeNode *topleft = new ConcreteOctreeNode(topleftAtts);
     
     // Create topright node + atts
     Attributes toprightAtts;
     toprightAtts.setColour(255, 0, 0, 255);
     toprightAtts.setNormal(0.57445626f, 0.57445626f, -0.57445626f);
-    OctreeNode *topright = new OctreeNode(toprightAtts);
+    ConcreteOctreeNode *topright = new ConcreteOctreeNode(toprightAtts);
     
     // Create bottomleft node + atts
     Attributes bottomleftAtts;
     bottomleftAtts.setColour(0, 255, 0, 255);
     bottomleftAtts.setNormal(-0.57445626f, -0.57445626f, -0.57445626f);
-    OctreeNode *bottomleft = new OctreeNode(bottomleftAtts);
+    ConcreteOctreeNode *bottomleft = new ConcreteOctreeNode(bottomleftAtts);
     
     // Create bottomright node + atts
     Attributes bottomrightAtts;
     bottomrightAtts.setColour(0, 0, 255, 255);
     bottomrightAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
-    OctreeNode *bottomright = new OctreeNode(bottomrightAtts);
+    ConcreteOctreeNode *bottomright = new ConcreteOctreeNode(bottomrightAtts);
     
     octree->m_pRootNode = root;
-    root->addChild(topleft, OctreeNode::Y | OctreeNode::Z );
-    root->addChild(topright, OctreeNode::X | OctreeNode::Y | OctreeNode::Z);
-    root->addChild(bottomleft, OctreeNode::Z);
-    root->addChild(bottomright, OctreeNode::X | OctreeNode::Z);
+    root->addChild(topleft, ConcreteOctreeNode::Y | ConcreteOctreeNode::Z );
+    root->addChild(topright, ConcreteOctreeNode::X | ConcreteOctreeNode::Y | ConcreteOctreeNode::Z);
+    root->addChild(bottomleft, ConcreteOctreeNode::Z);
+    root->addChild(bottomright, ConcreteOctreeNode::X | ConcreteOctreeNode::Z);
     
     octree->m_pHeader = new OctreeHeader(octree);
     
@@ -84,7 +85,7 @@ unsigned int ConcreteOctree::getDepth() {
 }
 
 unsigned int ConcreteOctree::getAttributeSize() {
-    return m_pRootNode->getAttributes().getSize();
+    return m_pRootNode->getAttributeSize();
 }
 
 unsigned int ConcreteOctree::getNumberOfNodes() {

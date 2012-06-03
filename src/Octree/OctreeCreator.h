@@ -11,7 +11,7 @@ class OctreeNode;
 class OctreeCreator 
 :   public ConcreteOctree {
     public:
-        explicit                 OctreeCreator(mesh meshToConvert, int depth = 3);
+        explicit                 OctreeCreator(mesh meshToConvert, int depth, bool keep_aaboxes);
 
         void                     render();
         void                     convert();
@@ -37,6 +37,8 @@ class OctreeCreator
         mesh                     m_mesh;
         aabox                    m_aabox;
         int                      m_depth;
+        
+        bool                     m_keep_aaboxes;
         octree<aabox>           *m_bboxes;
 };
 

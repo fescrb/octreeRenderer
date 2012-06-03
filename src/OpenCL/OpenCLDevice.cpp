@@ -43,6 +43,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
     m_clearFrameBuffKernel = m_pProgram->getOpenCLKernel("clear_framebuffer");
+    m_clearDepthBuffKernel = m_pProgram->getOpenCLKernel("clear_depthbuffer");
 }
 
 OpenCLDevice::~OpenCLDevice(){
@@ -115,6 +116,17 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
             clPrintError(error); exit(1);
         }
         error = clSetKernelArg( m_clearFrameBuffKernel, 0, sizeof(cl_mem), &m_frameBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        
+        error = clSetKernelArg( m_clearDepthBuffKernel, 0, sizeof(cl_mem), &m_depthBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        size_t origin[2] = {0, 0}; 
+        size_t region[2] = {size[0], size[1]}; 
+        error = clEnqueueNDRangeKernel( m_commandQueue, m_clearDepthBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }

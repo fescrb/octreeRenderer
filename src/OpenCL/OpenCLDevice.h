@@ -49,6 +49,7 @@ class OpenCLDevice:
 		OpenCLProgram 		*m_pProgram;
         cl_kernel            m_rayTraceKernel;
         cl_kernel            m_clearFrameBuffKernel;
+        cl_kernel            m_clearDepthBuffKernel;
 
         GLuint               m_texture;
 

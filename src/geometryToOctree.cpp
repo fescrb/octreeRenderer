@@ -26,9 +26,15 @@ int main(int argc, char** argv) {
     }
     
     int depth = 1;
+    bool show = false;
     
-    if(argc == 4) {
+    if(argc >= 4) {
         depth = atoi(argv[3]);
+    }
+    
+    if(argc == 5) {
+        if(!strcmp("show", argv[4]))
+            show = true;
     }
 
     if(!strcmp(argv[1], "-help")) {
@@ -39,14 +45,19 @@ int main(int argc, char** argv) {
 
     OBJFileReader* objFile = new OBJFileReader(argv[1]);
 
-    OctreeCreator* octreeCreator = new OctreeCreator(objFile->getMesh(), depth);
+    OctreeCreator* octreeCreator = new OctreeCreator(objFile->getMesh(), depth, show);
     OctreeWriter* octreeWriter = new OctreeWriter(octreeCreator, argv[2]);
 
-    int2 dim(800, 600);
+    if(show) {
+        int2 dim(800, 600);
 
-    GeometryOctreeWindow* window = new GeometryOctreeWindow(argc, argv, dim, octreeCreator, octreeWriter);
-    
-    window->run();
+        GeometryOctreeWindow* window = new GeometryOctreeWindow(argc, argv, dim, octreeCreator, octreeWriter);
+        
+        window->run();
+    } else {
+        octreeCreator->convert();
+        octreeWriter->write();
+    }
 
     return 0;
 }
