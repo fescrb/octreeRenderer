@@ -10,9 +10,11 @@ class DataManager;
 class DeviceManager;
 class renderinfo;
 
+#include "Vector.h"
+
 class ProgramState {
     public:
-        explicit                 ProgramState(int argc, char** argv);
+        explicit                 ProgramState(int argc, char** argv, int2 resolution);
                                 ~ProgramState();
         
         renderinfo              *getrenderinfo();

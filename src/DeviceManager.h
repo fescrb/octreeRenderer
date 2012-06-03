@@ -10,6 +10,8 @@
 
 #include "Rect.h"
 
+#define WINDOW_SIZE 64
+
 class Device;
 class Context;
 class DataManager;
@@ -17,7 +19,7 @@ class renderinfo;
 
 class DeviceManager {
 	public:
-		explicit 				         DeviceManager(DataManager *dataManager);
+		explicit 				         DeviceManager(DataManager *dataManager, int2 resolution);
 		virtual					        ~DeviceManager();
 
         void                             initialise();
@@ -38,6 +40,10 @@ class DeviceManager {
         struct device_characteristics {
             float                        pixels_per_second;
         };
+        
+        struct division_window {
+            rect                         window;
+        };
 
         void                             setPerDeviceTasks(int2 domain_resolution);
         void                             getFrameTimeResults(int2 domain_resolution);
@@ -47,6 +53,11 @@ class DeviceManager {
         std::vector<device_characteristics>
                                          m_vDeviceCharacteristics;
 
+        division_window                **m_division_windows;
+        int2                             m_division_window_count;
+
+        void                             createDivisionWindows(int2 domain_resolution);
+        
 		DataManager				        *m_pDataManager;
 
 };

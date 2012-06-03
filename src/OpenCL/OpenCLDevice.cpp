@@ -168,7 +168,7 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
 
-    printf("start %d %d size %d %d\n", window.getX(), window.getY(), window.getWidth(), window.getHeight());
+    //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
 
 	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
@@ -252,7 +252,7 @@ unsigned char* OpenCLDevice::getFrame() {
 
     cl_int error;
     
-    printf("device %d origin %d %d region %d %d\n", this, origin[0], origin[1], region[0], region[1]);
+    //printf("device %d origin %d %d region %d %d\n", this, origin[0], origin[1], region[0], region[1]);
     
     // Read the depth buffer, not always necessary
     error = clEnqueueReadImage( m_commandQueue, m_depthBuff, GL_FALSE, origin, region, 0, 0, m_pDepthBuffer, 1, &m_eventRenderingFinished, NULL);

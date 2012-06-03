@@ -7,7 +7,7 @@
 #include "ConcreteOctree.h"
 #include "OctreeReader.h"
 
-ProgramState::ProgramState(int argc, char** argv) {
+ProgramState::ProgramState(int argc, char** argv, int2 resolution) {
     
     Octree *octree;
     
@@ -19,7 +19,7 @@ ProgramState::ProgramState(int argc, char** argv) {
     
     m_pDataManager = new DataManager(octree);
     
-    m_pDeviceManager = new DeviceManager(m_pDataManager);
+    m_pDeviceManager = new DeviceManager(m_pDataManager, resolution);
     
     // Setup the render info.
     m_prenderinfo = new renderinfo;

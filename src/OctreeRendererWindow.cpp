@@ -23,6 +23,12 @@ OctreeRendererWindow::OctreeRendererWindow(int argc, char** argv, int2 dimension
 
 void OctreeRendererWindow::initGL() {
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    glEnable(GL_BLEND);
+    
+    glBlendEquation(GL_MAX);
+    checkGLerror();
+    glBlendFunc(GL_ONE,GL_ONE);
+    
     glEnable(GL_TEXTURE_2D);
 
     m_vertexShader = Shader(GL_VERTEX_SHADER, "NoTransform.vert");
@@ -54,10 +60,6 @@ void OctreeRendererWindow::initGL() {
     if(!status) {
         printf("Error Invalid Program\n");
     }
-
-    glBlendEquation(GL_MAX);
-    checkGLerror();
-    glBlendFunc(GL_ONE,GL_ONE);
 
     resize(m_size[0],m_size[1]);
 }

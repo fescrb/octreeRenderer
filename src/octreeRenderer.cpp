@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 		}
 	}
     
-    ProgramState *state = new ProgramState(argc, argv);
+    ProgramState *state = new ProgramState(argc, argv, resolution);
     OctreeRendererWindow *window = new OctreeRendererWindow(argc, argv, resolution, state);
 	
 	state->getDeviceManager()->initialise();
