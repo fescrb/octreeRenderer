@@ -305,3 +305,169 @@ kernel void ray_trace(global char* octree,
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
 }
+
+kernel void trace_bundle(global char* octree,
+                         global char* header,
+                         struct renderinfo info,
+                         int width,
+                         write_only  image2d_t depthBuff) {
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+
+    float3 origin = info.eyePos;
+    float3 from_centre_to_start = -(info.viewStep/2.0f) - (info.up/2.0f);
+    float3 d_lower_left = ((info.viewPortStart + (info.viewStep * (x*width)) + (info.up * (y*width)))-origin);
+    d_lower_left+=(info.viewStep/2.0f);
+    float3 d_upper_left = ((info.viewPortStart + (info.viewStep * (x*width)) + (info.up * ((y+1)*width)))-origin);
+    d_upper_left+=(info.viewStep/2.0f);
+    float3 d_lower_right = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * (y*width)))-origin);
+    d_lower_right+=(info.viewStep/2.0f);
+    float3 d_upper_right = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * ((y+1)*width)))-origin);
+    d_upper_right+=(info.viewStep/2.0f);
+    
+    float3 direction = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * ((y+1)*width)))-origin);
+    direction+=(info.viewStep/2.0f);
+    
+    float t = 0.0f;
+    float t_prev = t;
+
+    float half_size = OCTREE_ROOT_HALF_SIZE;
+
+    float pixel_half_size = info.pixel_half_size * width;
+
+    float3 corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
+                                 direction.y >= 0 ? half_size : -half_size,
+                                 direction.z >= 0 ? half_size : -half_size);
+
+    float3 corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
+
+    float t_min = max_component((corner_close - origin) / direction);
+    float t_max = min_component((corner_far - origin) / direction);
+    float t_out = t_max;
+            
+    /* If we are out */
+    if(t < t_min)
+        t = t_min;
+            
+    global char* curr_address = octree;
+    float3 voxelCentre = (float3)(0.0f);
+    bool collission = false;    
+    int curr_index = 0;
+    struct stack short_stack[STACK_SIZE];
+            
+    /* We are out of the volume and we will never get to it. */
+    if(t >= t_max) {
+        collission = true;
+        curr_address = 0; 
+    }
+
+    float3 rayPos = origin;
+
+    while(!collission) {
+        if(t >= t_out) {
+            collission = true;
+            curr_address = 0;
+        } else if(no_children(curr_address)) {
+            collission = true;
+        } else {
+            /*If we are inside the node*/
+            if(t_min <= t && t < t_max) {
+                 // We check if all rays fit
+                if(t >= min_component((corner_far - origin) / d_lower_left)) 
+                    collission = true;
+                
+                if(t >= min_component((corner_far - origin) / d_lower_right)) 
+                    collission = true;
+                
+                if(t >= min_component((corner_far - origin) / d_upper_left)) 
+                    collission = true;
+                
+                if(t >= min_component((corner_far - origin) / d_upper_right)) 
+                    collission = true;
+                
+                if(collission) {
+                    t = t_prev;
+                    break;
+                }
+
+                rayPos = origin + (direction * t);
+                
+                float3 t_centre_vector = (voxelCentre - origin) / direction;
+
+                char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
+                float nodeHalfSize = fabs((corner_far-voxelCentre).x)/2.0f;
+                
+                float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
+                                                 xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
+                                                 xyz_flag & 4 ? voxelCentre.z + nodeHalfSize : voxelCentre.z - nodeHalfSize);
+                
+                float3 tmp_corner_far = (float3)(direction.x >= 0 ? tmpNodeCentre.x + nodeHalfSize : tmpNodeCentre.x - nodeHalfSize,
+                                                 direction.y >= 0 ? tmpNodeCentre.y + nodeHalfSize : tmpNodeCentre.y - nodeHalfSize,
+                                                 direction.z >= 0 ? tmpNodeCentre.z + nodeHalfSize : tmpNodeCentre.z - nodeHalfSize);
+                
+                float tmp_max = min_component((tmp_corner_far - origin) / direction);
+                
+                if(nodeHasChildAt(curr_address, xyz_flag)) {
+                    /* If the voxel we are at is not empty, go down. */
+
+                    // We check for LOD.
+                    if(nodeHalfSize < pixel_half_size*t) {
+                        collission = true;
+                        break;
+                    }
+                    
+                    curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, corner_close, t_min, t_max);
+                    
+                    curr_address = getChild(curr_address, xyz_flag);
+                    
+                    corner_far = tmp_corner_far;
+                    voxelCentre = tmpNodeCentre;
+                    corner_close =  (float3)(direction.x >= 0 ? voxelCentre.x - nodeHalfSize : voxelCentre.x + nodeHalfSize,
+                                             direction.y >= 0 ? voxelCentre.y - nodeHalfSize : voxelCentre.y + nodeHalfSize,
+                                             direction.z >= 0 ? voxelCentre.z - nodeHalfSize : voxelCentre.z + nodeHalfSize);
+                    t_max = tmp_max;
+                    /*float t_min_x = (corner_close.x - origin.x) / direction.x;
+                    float t_min_y = (corner_close.y - origin.y) / direction.y;
+                    float t_min_z = (corner_close.z - origin.z) / direction.z;
+                    t_min = t_min_x > t_min_y? t_min_x : t_min_y;
+                    t_min = t_min > t_min_z? t_min : t_min_z;*/
+                    t_min = max_component((corner_close - origin) / direction);
+                    
+                } else {
+                    /* If the child is empty, we step the ray. */
+                    t = tmp_max;
+                }
+            } else {
+                /* We are outside the node. Pop the stack */
+                curr_index--;
+                if(curr_index>=0) {
+                    /* Pop that stack! */
+                    corner_far = short_stack[curr_index].far_corner;
+                    voxelCentre = short_stack[curr_index].node_centre;
+                    curr_address = short_stack[curr_index].address;
+                    t_min = short_stack[curr_index].t_min;
+                    t_max = short_stack[curr_index].t_max;
+                    corner_close = short_stack[curr_index].corner_close;
+                } else {
+                    /* Since we are using a short stack, we restart from the root node. */
+                    curr_index = 0;
+                    curr_address = octree;
+                    //collission = true;
+                    corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
+                                          direction.y >= 0 ? half_size : -half_size,
+                                          direction.z >= 0 ? half_size : -half_size);
+
+                    corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
+
+                    t_min = max_component((corner_close - origin) / direction); 
+                    t_max = min_component((corner_far - origin) / direction);
+                }
+            }
+        }
+    }
+    for(x = get_global_id(0)*width; x < (get_global_id(0)+1)*width; x++) {
+        for(y = get_global_id(1)*width; y < (get_global_id(1)+1)*width; y++) {
+            write_imagef ( depthBuff, (int2)(x, y), (float4)(t/5.0f));
+        }
+    }
+}

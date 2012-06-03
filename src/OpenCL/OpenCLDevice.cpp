@@ -42,6 +42,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
 
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
+    m_rayBundleTraceKernel = m_pProgram->getOpenCLKernel("trace_bundle");
     m_clearFrameBuffKernel = m_pProgram->getOpenCLKernel("clear_framebuffer");
     m_clearDepthBuffKernel = m_pProgram->getOpenCLKernel("clear_depthbuffer");
 }
@@ -115,6 +116,10 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
+        error = clSetKernelArg( m_rayBundleTraceKernel, 4, sizeof(cl_mem), &m_depthBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
         error = clSetKernelArg( m_clearFrameBuffKernel, 0, sizeof(cl_mem), &m_frameBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
@@ -167,10 +172,51 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
+    
+    rect bundle_window = rect(window.getOrigin()/RAY_BUNDLE_WINDOW_SIZE, window.getSize()/RAY_BUNDLE_WINDOW_SIZE);
+    
+    cl_int bundle_window_size = RAY_BUNDLE_WINDOW_SIZE;
+    
+    cl_renderinfo cl_info= convert(*info);
 
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
 
-	cl_int error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
+    /*
+     * We first trace the ray bundles 
+     */
+    
+    cl_int error = clSetKernelArg( m_rayBundleTraceKernel, 0, sizeof(cl_mem), &m_memory);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+
+    error = clSetKernelArg( m_rayBundleTraceKernel, 1, sizeof(cl_mem), &m_header);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    error = clSetKernelArg( m_rayBundleTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    error = clSetKernelArg( m_rayBundleTraceKernel, 3, sizeof(cl_int), &bundle_window_size);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    size_t bundle_offset[2] = {bundle_window.getOrigin()[0], bundle_window.getOrigin()[1]};
+    size_t bundle_dimensions[2] = {bundle_window.getSize()[0], bundle_window.getSize()[1]};
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayBundleTraceKernel, 2, bundle_offset, bundle_dimensions, NULL, 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    /*
+     * We now trace the rays
+     */ 
+    
+	error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -180,13 +226,11 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
         clPrintError(error); exit(1);
     }
 
-    cl_renderinfo cl_info= convert(*info);
     error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
     
-    // TODO Lookout for possible future offset problems
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
@@ -228,7 +272,7 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
 
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
-    glTexImage2D(GL_TEXTURE_2D,
+    /*glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
                  getTotalTaskWindow().getWidth(),
@@ -236,7 +280,17 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 frameBuffer);
+                 frameBuffer);*/
+    
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_LUMINANCE,
+                 getTotalTaskWindow().getWidth(),
+                 getTotalTaskWindow().getHeight(),
+                 0,
+                 GL_LUMINANCE,
+                 GL_FLOAT,
+                 m_pDepthBuffer);
 
     m_transferEnd.reset();
 

@@ -188,7 +188,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                     collission = true;
                 
                 if(collission) {
-                    t == t_prev;
+                    t = t_prev;
                     break;
                 }
                 
@@ -213,7 +213,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                     // If the voxel we are at is not empty, go down.
                     
                     // We check for LOD.
-                    if(nodeHalfSize*2.0f < pixel_half_size*t) {
+                    if(nodeHalfSize < pixel_half_size*t) {
                         collission = true;
                         break;
                     }
@@ -485,7 +485,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_UNSIGNED_BYTE,
                  m_pOctreeDepth);*/
     //Iterations
-    glTexImage2D(GL_TEXTURE_2D,
+    /*glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_LUMINANCE,
                  getTotalTaskWindow().getWidth(),
@@ -493,7 +493,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
-                 m_pIterations);
+                 m_pIterations);*/
     //Depth
     /*glTexImage2D(GL_TEXTURE_2D,
                  0,
@@ -505,7 +505,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_FLOAT,
                  m_pDepthBuffer);*/
     // Color
-    /*glTexImage2D(GL_TEXTURE_2D,
+    glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
                  getTotalTaskWindow().getWidth(),
@@ -513,7 +513,7 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 m_pFrame);*/
+                 m_pFrame);
     m_transferEnd.reset();
 
     framebuffer_window fb_window;

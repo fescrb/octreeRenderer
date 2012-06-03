@@ -12,6 +12,8 @@
 
 #include <vector>
 
+#define RAY_BUNDLE_WINDOW_SIZE 8
+
 class DeviceInfo;
 class OctreeSegment;
 class renderinfo;
