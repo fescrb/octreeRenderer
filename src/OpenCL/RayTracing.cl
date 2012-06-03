@@ -173,7 +173,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                     /* If the voxel we are at is not empty, go down. */
 
                     // We check for LOD.
-                    if(nodeHalfSize*2.0f < pixel_half_size*t) {
+                    if(nodeHalfSize < pixel_half_size*t) {
                         collission = true;
                         break;
                     }

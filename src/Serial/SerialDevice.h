@@ -12,7 +12,7 @@ class SerialDevice
         void			     printInfo();
         void 			     sendData(Bin bin);
         void                 sendHeader(Bin bin);
-        void                 traceBeam(int x, int y, int width, renderinfo* info);
+        void                 traceRayBundle(int x, int y, int width, renderinfo* info);
         void                 traceRay(int x, int y, renderinfo* info);
         virtual void	     renderTask(int index, renderinfo *info);
         framebuffer_window   getFrameBuffer();
@@ -38,6 +38,7 @@ class SerialDevice
         void                 setInfoPixels(int x, int y,
                                            float depth, unsigned char iterations, unsigned char depth_in_octree);
         float                getDepthBufferValue(int x, int y);
+        void                 setDepthBufferValue(int x, int y, float value);
 };
 
 #endif // _SERIAL_DEVICE_H
