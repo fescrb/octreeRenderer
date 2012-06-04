@@ -317,16 +317,16 @@ kernel void trace_bundle(global char* octree,
     float3 origin = info.eyePos;
     float3 from_centre_to_start = -(info.viewStep/2.0f) - (info.up/2.0f);
     float3 d_lower_left = ((info.viewPortStart + (info.viewStep * (x*width)) + (info.up * (y*width)))-origin);
-    d_lower_left+=(info.viewStep/2.0f);
+    d_lower_left+=from_centre_to_start;
     float3 d_upper_left = ((info.viewPortStart + (info.viewStep * (x*width)) + (info.up * ((y+1)*width)))-origin);
-    d_upper_left+=(info.viewStep/2.0f);
+    d_upper_left+=from_centre_to_start;
     float3 d_lower_right = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * (y*width)))-origin);
-    d_lower_right+=(info.viewStep/2.0f);
+    d_lower_right+=from_centre_to_start;
     float3 d_upper_right = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * ((y+1)*width)))-origin);
-    d_upper_right+=(info.viewStep/2.0f);
+    d_upper_right+=from_centre_to_start;
     
-    float3 direction = ((info.viewPortStart + (info.viewStep * ((x+1)*width)) + (info.up * ((y+1)*width)))-origin);
-    direction+=(info.viewStep/2.0f);
+    float3 direction = ((info.viewPortStart + (info.viewStep * (((x)*width)+(width/2))) + (info.up * (((y)*width)+(width/2))))-origin);
+    direction+=from_centre_to_start;
     
     float t = 0.0f;
     float t_prev = t;
@@ -373,20 +373,20 @@ kernel void trace_bundle(global char* octree,
             /*If we are inside the node*/
             if(t_min <= t && t < t_max) {
                  // We check if all rays fit
-                if(t >= min_component((corner_far - origin) / d_lower_left)) 
+                if(max_component((corner_close - origin)/d_lower_left) >= min_component((corner_far - origin) / d_lower_left)) 
                     collission = true;
                 
-                if(t >= min_component((corner_far - origin) / d_lower_right)) 
+                if(max_component((corner_close - origin)/d_lower_left) >= min_component((corner_far - origin) / d_lower_right)) 
                     collission = true;
                 
-                if(t >= min_component((corner_far - origin) / d_upper_left)) 
+                if(max_component((corner_close - origin)/d_lower_left) >= min_component((corner_far - origin) / d_upper_left)) 
                     collission = true;
                 
-                if(t >= min_component((corner_far - origin) / d_upper_right)) 
+                if(max_component((corner_close - origin)/d_lower_left) >= min_component((corner_far - origin) / d_upper_right)) 
                     collission = true;
                 
                 if(collission) {
-                    t = t_prev;
+                    //t = t_prev;
                     break;
                 }
 
@@ -435,6 +435,7 @@ kernel void trace_bundle(global char* octree,
                     
                 } else {
                     /* If the child is empty, we step the ray. */
+                    t_prev = t;
                     t = tmp_max;
                 }
             } else {
@@ -467,7 +468,7 @@ kernel void trace_bundle(global char* octree,
     }
     for(x = get_global_id(0)*width; x < (get_global_id(0)+1)*width; x++) {
         for(y = get_global_id(1)*width; y < (get_global_id(1)+1)*width; y++) {
-            write_imagef ( depthBuff, (int2)(x, y), (float4)(t/10.0f));
+            write_imagef ( depthBuff, (int2)(x, y), (float4)(t_prev));
         }
     }
 }

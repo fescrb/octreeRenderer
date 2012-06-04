@@ -18,6 +18,13 @@ float min(float3 vector) {
 	return minimum < vector[2] ? minimum : vector[2];
 }
 
+float min(float4 vector) {
+    float minimum = vector[0] < vector[1] ? vector[0] : vector[1];
+    minimum = minimum < vector[2] ? minimum : vector[2];
+    return minimum < vector[3] ? minimum : vector[3];
+}
+
+
 float max(float3 vector) {
 	float maximum = vector[0] > vector[1] ? vector[0] : vector[1];
 	return maximum > vector[2] ? maximum : vector[2];
@@ -133,6 +140,8 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     float3 d((info->viewPortStart + (info->viewStep * (((x)*width)+(width/2))) + (info->up * (((y)*width)+(width/2))))-o);
     d+=from_centre_to_start;
     
+    float max_mag = max(float4(mag(d_lower_left), mag(d_upper_left), mag(d_lower_right), mag(d_upper_right)));
+    
     float t = 0.0f;
     float t_prev = t;
     
@@ -193,7 +202,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                     collission = true;
                 
                 if(collission) {
-                    t = t_prev;
+                    //t = t_prev;
                     break;
                 }
                 
@@ -237,7 +246,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
 
                 } else {
                     // If the child is empty, we step the ray.
-                    t_prev = t;
+                    t_prev = t;//mag(corner_close-o)/max_mag;
                     t = tmp_max;
                 }
             } else {
@@ -266,7 +275,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     for(int i = (x*width); i < (x+1)*width; i++) {
         for(int j = (y*width); j < (y+1)*width; j++) {
             //printf("%d %d buffer val %f\n", i, j, t);
-            setDepthBufferValue(i, j, t);
+            setDepthBufferValue(i, j, t_prev);
         }
     }
 }
@@ -436,7 +445,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
         setFramePixel(x, y, red, green, blue);   
     }
-    setInfoPixels(x, y, /*getDepthBufferValue(x,y)/10.0f*/fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
+    setInfoPixels(x, y, getDepthBufferValue(x,y)/10.0f/*fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f)*/, it, depth_in_octree);
 }
 
 void SerialDevice::renderTask(int index, renderinfo *info) {
