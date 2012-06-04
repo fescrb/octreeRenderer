@@ -272,25 +272,28 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
 
     glBindTexture(GL_TEXTURE_2D, m_texture);
 
-    /*glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGB,
-                 getTotalTaskWindow().getWidth(),
-                 getTotalTaskWindow().getHeight(),
-                 0,
-                 GL_RGBA,
-                 GL_UNSIGNED_BYTE,
-                 frameBuffer);*/
+    if(m_renderMode == COLOUR) {
+        glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    GL_RGB,
+                    getTotalTaskWindow().getWidth(),
+                    getTotalTaskWindow().getHeight(),
+                    0,
+                    GL_RGBA,
+                    GL_UNSIGNED_BYTE,
+                    frameBuffer);
     
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 getTotalTaskWindow().getWidth(),
-                 getTotalTaskWindow().getHeight(),
-                 0,
-                 GL_LUMINANCE,
-                 GL_FLOAT,
-                 m_pDepthBuffer);
+    } else if (m_renderMode == DEPTH) {
+        glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    GL_LUMINANCE,
+                    getTotalTaskWindow().getWidth(),
+                    getTotalTaskWindow().getHeight(),
+                    0,
+                    GL_LUMINANCE,
+                    GL_FLOAT,
+                    m_pDepthBuffer);
+    }
 
     m_transferEnd.reset();
 

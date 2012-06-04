@@ -219,4 +219,10 @@ void OctreeRendererWindow::keyPressEvent(unsigned char key) {
         info->eyePos = info->eyePos - (cross(info->viewDir,normalize(info->up))/20.0f);
         recalculateViewportVectors();
     }
+    if(key == 'c' || key == 'C') {
+        m_pProgramState->getDeviceManager()->setRenderMode(Device::COLOUR);
+    }
+    if(key == 'z' || key == 'Z') {
+        m_pProgramState->getDeviceManager()->setRenderMode(Device::DEPTH);
+    }
 }

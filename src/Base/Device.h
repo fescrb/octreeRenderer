@@ -36,6 +36,13 @@ class Device {
         virtual void                 sendHeader(Bin bin) = 0;
         virtual void                 renderTask(int index, renderinfo *info) = 0;
         //virtual void             render(rect *window, renderinfo *info) = 0;
+        
+        enum                         RenderMode {
+            COLOUR, DEPTH
+        };
+        
+        void                         setRenderMode(RenderMode mode);
+        
         /**
          * Returns the framebuffer as a texture. NOTE: we always
          * assume that the target OpenGL context is CURRENT.
@@ -71,6 +78,8 @@ class Device {
 
         std::vector<rect>            m_tasks;
         rect                         m_tasksWindow;
+        
+        RenderMode                   m_renderMode;
 };
 
 #endif // _DEVICE_H

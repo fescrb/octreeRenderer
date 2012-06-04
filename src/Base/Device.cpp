@@ -5,7 +5,8 @@
 #include <cstdlib>
 
 Device::Device()
-:   m_pFrame(0) {
+:   m_pFrame(0),
+    m_renderMode(COLOUR){
     m_tasks = std::vector<rect>();
     m_frameBufferResolution = int2();
 }
@@ -98,4 +99,8 @@ int Device::getTaskCount() {
 
 rect Device::getTotalTaskWindow() {
     return m_tasksWindow;
+}
+
+void Device::setRenderMode(RenderMode mode) {
+    m_renderMode = mode;
 }

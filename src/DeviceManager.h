@@ -1,14 +1,15 @@
 #ifndef _DEVICE_MANAGER_H
 #define _DEVICE_MANAGER_H
 
+#include "Device.h"
+
+#include "Rect.h"
 #include "Vector.h"
 
 #include <vector>
 
 #include "Graphics.h"
 #include "FramebufferWindow.h"
-
-#include "Rect.h"
 
 #define WINDOW_SIZE 64
 
@@ -33,6 +34,8 @@ class DeviceManager {
 
 		std::vector<Device*>             getDeviceList();
 
+        void                             setRenderMode(Device::RenderMode mode);
+        
         void                             distributeHeaderAndOctreeRoot();
 		std::vector<framebuffer_window>  renderFrame(renderinfo *info, int2 resolution);
 

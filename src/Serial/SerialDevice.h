@@ -12,6 +12,7 @@ class SerialDevice
         void			     printInfo();
         void 			     sendData(Bin bin);
         void                 sendHeader(Bin bin);
+        void                 makeFrameBuffer(int2 size);
         void                 traceRayBundle(int x, int y, int width, renderinfo* info);
         void                 traceRay(int x, int y, renderinfo* info);
         virtual void	     renderTask(int index, renderinfo *info);

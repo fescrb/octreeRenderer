@@ -113,20 +113,25 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 	return index+1;
 }
 
+void SerialDevice::makeFrameBuffer(int2 size) {
+    Device::makeFrameBuffer(size);
+    m_renderStart.reset();
+}
+
 void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     float3 o(info->eyePos);
     float3 from_centre_to_start = -(info->viewStep/2.0f) - (info->up/2.0f);
     float3 d_lower_left((info->viewPortStart + (info->viewStep * (x*width)) + (info->up * (y*width)))-o);
-    d_lower_left+=(info->viewStep/2.0f);
+    d_lower_left+=from_centre_to_start;
     float3 d_upper_left((info->viewPortStart + (info->viewStep * (x*width)) + (info->up * ((y+1)*width)))-o);
-    d_upper_left+=(info->viewStep/2.0f);
+    d_upper_left+=from_centre_to_start;
     float3 d_lower_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * (y*width)))-o);
-    d_lower_right+=(info->viewStep/2.0f);
+    d_lower_right+=from_centre_to_start;
     float3 d_upper_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
-    d_upper_right+=(info->viewStep/2.0f);
+    d_upper_right+=from_centre_to_start;
     
-    float3 d((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
-    d+=(info->viewStep/2.0f);
+    float3 d((info->viewPortStart + (info->viewStep * (((x)*width)+(width/2))) + (info->up * (((y)*width)+(width/2))))-o);
+    d+=from_centre_to_start;
     
     float t = 0.0f;
     float t_prev = t;
@@ -175,16 +180,16 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 // We check if all rays fit
-                if(t >= min((corner_far - o) / d_lower_left)) 
+                if(max((corner_close - o) / d_lower_left) >= min((corner_far - o) / d_lower_left)) 
                     collission = true;
                 
-                if(t >= min((corner_far - o) / d_lower_right)) 
+                if(max((corner_close - o) / d_lower_right) >= min((corner_far - o) / d_lower_right)) 
                     collission = true;
                 
-                if(t >= min((corner_far - o) / d_upper_left)) 
+                if(max((corner_close - o) / d_upper_left) >= min((corner_far - o) / d_upper_left)) 
                     collission = true;
                 
-                if(t >= min((corner_far - o) / d_upper_right)) 
+                if(max((corner_close - o) / d_upper_right) >= min((corner_far - o) / d_upper_right)) 
                     collission = true;
                 
                 if(collission) {
@@ -197,7 +202,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                 float3 t_centre_vector = (voxelCentre - o) / d;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
-                float nodeHalfSize = fabs((corner_far-voxelCentre)[0])/2.0f;
+                float nodeHalfSize = fabs(fabs(corner_far[0])-fabs(voxelCentre[0]))/2.0f;
 
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
                                       xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
@@ -243,6 +248,10 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                     corner_far = stack[curr_index].far_corner;
                     curr_address = stack[curr_index].address;
                     voxelCentre = stack[curr_index].node_centre;
+                    float nodeHalfSize = fabs(fabs(corner_far[0])-fabs(voxelCentre[0]));
+                    corner_close =  float3(d[0] >= 0 ? voxelCentre[0] - nodeHalfSize : voxelCentre[0] + nodeHalfSize,
+                                           d[1] >= 0 ? voxelCentre[1] - nodeHalfSize : voxelCentre[1] + nodeHalfSize,
+                                           d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
                     t_max = stack[curr_index].t_max;
                     t_min = stack[curr_index].t_min;
                 } else {
@@ -257,7 +266,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     for(int i = (x*width); i < (x+1)*width; i++) {
         for(int j = (y*width); j < (y+1)*width; j++) {
             //printf("%d %d buffer val %f\n", i, j, t);
-            setDepthBufferValue(i, j, t/5.0f);
+            setDepthBufferValue(i, j, t);
         }
     }
 }
@@ -427,12 +436,10 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
         setFramePixel(x, y, red, green, blue);   
     }
-    setInfoPixels(x, y, fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
+    setInfoPixels(x, y, /*getDepthBufferValue(x,y)/10.0f*/fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
 }
 
 void SerialDevice::renderTask(int index, renderinfo *info) {
-    m_renderStart.reset();
-
     //printf("",m_pHeader[1]);
 
     rect window = m_tasks[index];
@@ -453,11 +460,10 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
             //printf("done %d %d\n", x, y);
         }
     }
-
-    m_renderEnd.reset();
 }
 
 framebuffer_window SerialDevice::getFrameBuffer() {
+    m_renderEnd.reset();
     m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
@@ -494,18 +500,8 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_LUMINANCE,
                  GL_UNSIGNED_BYTE,
                  m_pIterations);*/
-    //Depth
-    /*glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 getTotalTaskWindow().getWidth(),
-                 getTotalTaskWindow().getHeight(),
-                 0,
-                 GL_LUMINANCE,
-                 GL_FLOAT,
-                 m_pDepthBuffer);*/
-    // Color
-    glTexImage2D(GL_TEXTURE_2D,
+    if(m_renderMode == COLOUR) {
+        glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,
                  getTotalTaskWindow().getWidth(),
@@ -514,6 +510,17 @@ framebuffer_window SerialDevice::getFrameBuffer() {
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
                  m_pFrame);
+    } else if (m_renderMode == DEPTH) {
+        glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    GL_LUMINANCE,
+                    getTotalTaskWindow().getWidth(),
+                    getTotalTaskWindow().getHeight(),
+                    0,
+                    GL_LUMINANCE,
+                    GL_FLOAT,
+                    m_pDepthBuffer);
+    }
     m_transferEnd.reset();
 
     framebuffer_window fb_window;

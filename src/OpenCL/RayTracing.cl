@@ -467,7 +467,7 @@ kernel void trace_bundle(global char* octree,
     }
     for(x = get_global_id(0)*width; x < (get_global_id(0)+1)*width; x++) {
         for(y = get_global_id(1)*width; y < (get_global_id(1)+1)*width; y++) {
-            write_imagef ( depthBuff, (int2)(x, y), (float4)(t/5.0f));
+            write_imagef ( depthBuff, (int2)(x, y), (float4)(t/10.0f));
         }
     }
 }

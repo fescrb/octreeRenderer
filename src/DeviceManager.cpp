@@ -3,8 +3,6 @@
 #include "DataManager.h"
 #include "RenderInfo.h"
 
-#include "Device.h"
-
 #ifdef USE_OPENCL
 	#include "OpenCLContext.h"
 #endif
@@ -79,6 +77,12 @@ Device* DeviceManager::getDevice(int index) {
 
 	// Index out of range.
 	return 0;
+}
+
+void DeviceManager::setRenderMode(Device::RenderMode mode) {
+    for(int i = 0; i < getNumDevices(); i++) {
+        getDevice(i)->setRenderMode(mode);
+    }
 }
 
 //#include "Image.h"
