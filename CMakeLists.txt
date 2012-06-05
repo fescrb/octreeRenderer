@@ -33,17 +33,19 @@ if(USE_OPENCL)
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
 
-if(USE_OPENMP)
-
-	find_package(OpenMP)
-
-	if(OPENMP_FOUND)
-		message("Message: Using OpenMP")
-		set(USE_OPENMP "Yes")
+find_package(OpenMP)
+if(OPENMP_FOUND)
+		message("Message: OpenMP found")
 		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-		# We need to compile the serial implementation to use OpenMP
+endif(OPENMP_FOUND)
+
+
+if(USE_OPENMP)
+	if(OPENMP_FOUND)
+		message("Message: Using OpenMP")
+		set(USE_OPENMP "Yes")
 		set(USE_SERIAL_IMPLEMENTATION "Yes")
 		set(USE_OPENMP_IMPLEMENTATION "Yes")
 		add_definitions(-DUSE_OPENMP)
