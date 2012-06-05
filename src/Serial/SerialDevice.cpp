@@ -31,8 +31,7 @@ float max(float3 vector) {
 }
 
 char* getAttributes(char* node) {
-	int* addr_int = (int*)node;
-	return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
+	return node + ((node[2] >> 4) * 4);
 }
 
 uchar3 getColours(char* attr) {
@@ -70,7 +69,7 @@ float4 getNormal(char* attr) {
 }
 
 bool noChildren(char* node) {
-    return !node[7];
+    return !node[3];
 }
 
 char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction ) {
@@ -103,14 +102,40 @@ char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
 }
 
 bool nodeHasChildAt(char* node, char xyz_flag) {
-    return node[7] & (1 << xyz_flag);
+    return node[3] & (1 << xyz_flag);
 }
 
 char* getChild(char* node, char xyz_flag) {
     int *node_int = (int*)node;
-    int pos = (node_int[0] >> (xyz_flag * 3)) & 7;
-    node_int+=(pos+2);
-    node+=(pos+2)*4;
+    int pos = 0;//(node_int[0] >> (xyz_flag * 3)) & 7;
+    switch(xyz_flag) {
+        case 1:
+            pos = node_int[0] & 1;
+            break;
+        case 2:
+            pos = (node_int[0] >> 1) & 3;
+            break;
+        case 3:
+            pos = (node_int[0] >> 3) & 3;
+            break;
+        case 4:
+            pos = (node_int[0] >> 5) & 7;
+            break;
+        case 5:
+            pos = (node_int[0] >> 8) & 7;
+            break;
+        case 6:
+            pos = (node_int[0] >> 11) & 7;
+            break;
+        case 7:
+            pos = (node_int[0] >> 14) & 7;
+            break;
+        default:
+            break;
+    }
+    printf("addr %p flag %d int %d pos %d\n", node, xyz_flag ,node_int[0], pos);
+    node_int+=(pos+1);
+    node+=(pos+1)*4;
     return node + (node_int[0]*4);
 }
 
@@ -440,6 +465,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
     // If there was a collission.
     if(curr_address) {
+        printf("finished one\n");
         char* attributes = getAttributes(curr_address);
 
         uchar3 colour = getColours(attributes);

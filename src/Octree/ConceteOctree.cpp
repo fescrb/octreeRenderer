@@ -109,7 +109,7 @@ Bin ConcreteOctree::flatten() {
 
     unsigned int memoryRequired = 0;
 
-    memoryRequired += numOfNodes * 8; // For children flags + attribute pointer.
+    memoryRequired += numOfNodes * 4; // For children flags + attribute pointer.
 
     memoryRequired += (numOfNodes - 1) * 4; // For children pointers, minus 1 as root node doesn't need one.
 

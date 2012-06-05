@@ -112,14 +112,15 @@ char* ConcreteOctreeNode::flatten(char* buffer) {
                 default:
                     break;
             }
+            //printf("counter %d positions %d\n", counter, positions);
             counter ++;
         }
     }
-    buffer[0] = flags ;
-    buffer[1] = ((unsigned char)numberOfChildren+1)<<4;
+    buffer[3] = flags ;
+    buffer[2] = ((unsigned char)numberOfChildren+1)<<4;
     buffer_int[0] |= positions;
 
-    printf("flags %d number of children %d positions %d buffer int %d\n", flags, numberOfChildren, positions, buffer_int[0]);
+    //printf("flags %d number of children %d positions %d buffer int %d\n", flags, numberOfChildren, positions, buffer_int[0]);
 
     // Find out where we will write the attributes. Then write
     char* end = buffer + ((numberOfChildren + 1 ) *4);
