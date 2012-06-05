@@ -202,8 +202,6 @@ OctreeNode* OctreeCreator::createSubtree(octree<aabox>* bboxes, mesh m, aabox bo
                     OctreeNode *child_node = this_node->getChildAt(i);
 
                     if(child_node) {
-                        if(bboxes)
-                            bboxes->addChildToFlagAt(i);
                         has_children = true;
                         colour+=child_node->getColour();
                         /*printf("child_colour %f %f %f %f\n",
