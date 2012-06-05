@@ -5,8 +5,7 @@
 
 #include "MathUtil.h"
 
-Attributes::Attributes() 
-:   m_has_normal(false) {
+Attributes::Attributes() {
 
 }
 
@@ -29,7 +28,7 @@ void Attributes::setColour(float4 colour) {
     );
     //printf("colors %d\n",m_red);
 }
-        
+
 float4 Attributes::getColour() {
     return float4( unsigned_8bit_fixed_point_to_float(m_red),
                    unsigned_8bit_fixed_point_to_float(m_green),
@@ -41,7 +40,6 @@ float4 Attributes::getColour() {
 void Attributes::setNormal(float x,
                            float y,
                            float z ) {
-    m_has_normal=true;
     m_x = float_to_fixed_point_8bit(x);
     m_y = float_to_fixed_point_8bit(y);
     m_z = float_to_fixed_point_8bit(z);
@@ -58,31 +56,52 @@ float4 Attributes::getNormal() {
 
 
 unsigned int Attributes::getSize() {
-    unsigned int size = sizeof(m_red)+sizeof(m_green)+sizeof(m_blue)+sizeof(m_alpha);
-    if(m_has_normal)
-        size += sizeof(m_x)+sizeof(m_y)+sizeof(m_z)+sizeof(m_w);
-	return size;
+    //unsigned int size = sizeof(m_red)+sizeof(m_green)+sizeof(m_blue)+sizeof(m_alpha);
+    //if(m_has_normal)
+        //size += sizeof(m_x)+sizeof(m_y)+sizeof(m_z)+sizeof(m_w);
+	return sizeof(char)*4;
+}
+
+unsigned short Attributes::getColourAsShort() {
+    unsigned short rgb_565 = 0;
+
+    unsigned short red = m_red  & ~7;
+    rgb_565 |= (red << 8) ;
+
+    unsigned short green = m_green  & ~3;
+    rgb_565 |= (green << 3) ;
+
+    unsigned short blue = m_blue & ~7;
+    rgb_565 |= (blue >> 3) ;
+
+    //printf("red %d green %d blue %d short %d\n", m_red, m_green, m_blue, rgb_565);
+
+    return rgb_565;
+}
+
+unsigned short Attributes::getNormalAsShort() {
+    unsigned short normals = 0;
+
+    unsigned short x = m_x <<8;
+    normals|= x ;//<< 8;
+
+    normals|= ((unsigned char)m_y);
+
+    if(m_z >= 0)
+        normals &= ~1;
+    else
+        normals |= 1;
+
+    //printf("x %d %d y %d z %d short %d\n", m_x, x, m_y, m_z, normals);
+
+    return normals;
 }
 
 char* Attributes::flatten(char* buffer) {
-	buffer[0] = m_red;
-	buffer++;
-	buffer[0] = m_green;
-	buffer++;
-	buffer[0] = m_blue;
-	buffer++;
-	buffer[0] = m_alpha;
-	buffer++;
-    if(m_has_normal) {
-        buffer[0] = m_x;
-        buffer++;
-        buffer[0] = m_y;
-        buffer++;
-        buffer[0] = m_z;
-        buffer++;
-        buffer[0] = m_w;
-        buffer++;
-    }
+    unsigned short* buffer_short = (unsigned short*) buffer;
 
-	return buffer;
+    buffer_short[0] = getColourAsShort();
+	buffer_short[1] = getNormalAsShort();
+
+	return buffer + 4;
 }

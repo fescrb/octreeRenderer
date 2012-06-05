@@ -44,6 +44,40 @@ bool no_children(__global char* address) {
     return !address[7];
 }
 
+uchar3 getColours(global char* attr) {
+    unsigned short rgb_565 = ((unsigned short*)attr)[0];
+    uchar3 colour;
+    
+    colour.x = (rgb_565 >> 8) & ~7;
+    colour.y = ((unsigned char)(rgb_565 >> 3)) & ~3;
+    colour.z = (rgb_565 & 31) << 3;
+    
+    //printf("rgb565 %d red %d green %d blue %d\n", rgb_565, colour[0], colour[1], colour[2]);
+    
+    return colour;
+}
+
+float4 getNormal(global char* attr) {
+    unsigned short normals_short = ((unsigned short*)attr)[1];
+    float4 normal;
+    
+    char x = normals_short >> 8;
+    normal.x = fixed_point_8bit_to_float(x);
+    char y = 0 | (normals_short & 254);
+    normal.y = fixed_point_8bit_to_float(y);
+    
+    float z = sqrt(1 - (normal.x*normal.x) - (normal.y*normal.y));
+    if(normals_short & 1)
+        z*=-1.0f;
+    
+    normal.z = z;
+    normal.w = 0.0f;
+    
+    //printf("short %d x %f y %f z %f\n", normals_short, normal[0], normal[1], normal[2]);
+    
+    return normal;
+}
+
 char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     char flag = 0;
 
@@ -275,27 +309,23 @@ kernel void ray_trace(global char* octree,
 
 	if(col.node_pointer) {
 		global char* attr = get_attributes(col.node_pointer);
+        
+        uchar3 colour = getColours(attr);
 
-        unsigned char red = attr[0];
-        unsigned char green = attr[1];
-        unsigned char blue = attr[2];
-
-        // If attributes contains a normal
-        if(((global int*)header)[1] > 4) {
-            //Fixed direction light coming from (1, 1, 1);
-            float4 direction_towards_light = normalize((float4)(info.lightPos - rayPos,0.0f));
-            float4 normal = (float4)(fixed_point_8bit_to_float(attr[4]),
-                                     fixed_point_8bit_to_float(attr[5]),
-                                     fixed_point_8bit_to_float(attr[6]),
-                                     fixed_point_8bit_to_float(attr[7]));
-            // K_diff is always 1, for now
-            float diffuse_coefficient = dot(direction_towards_light,normal);
-            if(diffuse_coefficient<0)
-                diffuse_coefficient=0.0f;
-            red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
-            green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
-            blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
-        }
+        unsigned char red = colour.x;
+        unsigned char green = colour.y;
+        unsigned char blue = colour.z;
+        
+        //Fixed direction light coming from (1, 1, 1);
+        float4 direction_towards_light = normalize((float4)(info.lightPos - rayPos,0.0f));
+        float4 normal = getNormal(attr);
+        // K_diff is always 1, for now
+        float diffuse_coefficient = dot(direction_towards_light,normal);
+        if(diffuse_coefficient<0)
+            diffuse_coefficient=0.0f;
+        red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
+        green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
+        blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
         uint4 color = (uint4)(red, green, blue, 255);
         //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);

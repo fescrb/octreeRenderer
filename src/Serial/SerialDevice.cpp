@@ -35,6 +35,40 @@ char* getAttributes(char* node) {
 	return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
+uchar3 getColours(char* attr) {
+    unsigned short rgb_565 = ((unsigned short*)attr)[0];
+    uchar3 colour = uchar3();
+
+    colour.setX((rgb_565 >> 8) & ~7);
+    colour.setY(((unsigned char)(rgb_565 >> 3)) & ~3);
+    colour.setZ((rgb_565 & 31) << 3);
+
+    //printf("rgb565 %d red %d green %d blue %d\n", rgb_565, colour[0], colour[1], colour[2]);
+
+    return colour;
+}
+
+float4 getNormal(char* attr) {
+    unsigned short normals_short = ((unsigned short*)attr)[1];
+    float4 normal;
+
+    char x = normals_short >> 8;
+    normal.setX(fixed_point_8bit_to_float(x));
+    char y = 0 | (normals_short & 254);
+    normal.setY(fixed_point_8bit_to_float(y));
+
+    float z = sqrt(1 - (normal.getX()*normal.getX()) - (normal.getY()*normal.getY()));
+    if(normals_short & 1)
+        z*=-1.0f;
+
+    normal.setZ(z);
+    normal.setW(0.0f);
+
+    //printf("short %d x %f y %f z %f\n", normals_short, normal[0], normal[1], normal[2]);
+
+    return normal;
+}
+
 bool noChildren(char* node) {
     return !node[7];
 }
@@ -43,9 +77,9 @@ char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction ) {
 	float3 flagVector = rayPos - nodeCentre;
 	char flag = 0;
 	for(int i = 0; i < 3; i++)
-        if(flagVector[i] > F32_EPSILON) 
+        if(flagVector[i] > F32_EPSILON)
             flag |= (1 << i);
-        else if (flagVector[i] <= F32_EPSILON && flagVector[i] >= -F32_EPSILON) 
+        else if (flagVector[i] <= F32_EPSILON && flagVector[i] >= -F32_EPSILON)
             if(direction[i] >= 0.0f)
                 flag |= (1 << i);
 
@@ -58,10 +92,10 @@ char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     for(int i = 0; i < 3; i++) {
         if( t >= t_centre_vector[i] ) {
             if(direction[i] >= 0.0f)
-                flag |= (1 << i); 
+                flag |= (1 << i);
         } else {
             if(direction[i] < 0.0f)
-                flag |= (1 << i); 
+                flag |= (1 << i);
         }
     }
 
@@ -136,21 +170,21 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     d_lower_right+=from_centre_to_start;
     float3 d_upper_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
     d_upper_right+=from_centre_to_start;
-    
+
     float3 d((info->viewPortStart + (info->viewStep * (((x)*width)+(width/2))) + (info->up * (((y)*width)+(width/2))))-o);
     d+=from_centre_to_start;
-    
+
     float max_mag = max(float4(mag(d_lower_left), mag(d_upper_left), mag(d_lower_right), mag(d_upper_right)));
-    
+
     float t = 0.0f;
     float t_prev = t;
-    
+
     float half_size = OCTREE_ROOT_HALF_SIZE;
-    
+
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,
                       d[2] >= 0 ? half_size : -half_size);
-    
+
     float pixel_half_size = info->pixel_half_size * width;
 
     float3 corner_close(corner_far.neg());
@@ -189,25 +223,25 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 // We check if all rays fit
-                if(max((corner_close - o) / d_lower_left) >= min((corner_far - o) / d_lower_left)) 
+                if(max((corner_close - o) / d_lower_left) >= min((corner_far - o) / d_lower_left))
                     collission = true;
-                
-                if(max((corner_close - o) / d_lower_right) >= min((corner_far - o) / d_lower_right)) 
+
+                if(max((corner_close - o) / d_lower_right) >= min((corner_far - o) / d_lower_right))
                     collission = true;
-                
-                if(max((corner_close - o) / d_upper_left) >= min((corner_far - o) / d_upper_left)) 
+
+                if(max((corner_close - o) / d_upper_left) >= min((corner_far - o) / d_upper_left))
                     collission = true;
-                
-                if(max((corner_close - o) / d_upper_right) >= min((corner_far - o) / d_upper_right)) 
+
+                if(max((corner_close - o) / d_upper_right) >= min((corner_far - o) / d_upper_right))
                     collission = true;
-                
+
                 if(collission) {
                     //t = t_prev;
                     break;
                 }
-                
+
                 rayPos = o + (d * t);
-                
+
                 float3 t_centre_vector = (voxelCentre - o) / d;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
@@ -225,13 +259,13 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
 
                 if(nodeHasChildAt(curr_address, xyz_flag)) {
                     // If the voxel we are at is not empty, go down.
-                    
+
                     // We check for LOD.
                     if(nodeHalfSize < pixel_half_size*t) {
                         collission = true;
                         break;
                     }
-                    
+
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 
                     curr_address = getChild(curr_address, xyz_flag);
@@ -271,7 +305,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
             }
         }
     }
-    
+
     for(int i = (x*width); i < (x+1)*width; i++) {
         for(int j = (y*width); j < (y+1)*width; j++) {
             //printf("%d %d buffer val %f\n", i, j, t);
@@ -284,12 +318,12 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float half_size = OCTREE_ROOT_HALF_SIZE;
     char depth_in_octree = 0;
     short it = 0;
-    
+
     float pixel_half_size = info->pixel_half_size;
-    
+
     //if(x == 292 && y == 322)
         //printf("yep\n");
-    
+
     // Ray setup.
     float3 o(info->viewPortStart + (info->viewStep * (x)) + (info->up * (y)));
     float3 d(o-info->eyePos); //Perspective projection now.
@@ -339,7 +373,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 rayPos = o + (d * t);
-                
+
                 float3 t_centre_vector = (voxelCentre - o) / d;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
@@ -357,13 +391,13 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
                 if(nodeHasChildAt(curr_address, xyz_flag)) {
                     // If the voxel we are at is not empty, go down.
-                    
+
                     // We check for LOD.
                     if(nodeHalfSize < pixel_half_size*t) {
                         collission = true;
                         break;
                     }
-                    
+
                     curr_index = push(stack, curr_index, curr_address, corner_far, voxelCentre, t_min, t_max);
 
                     curr_address = getChild(curr_address, xyz_flag);
@@ -375,7 +409,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
                                            d[2] >= 0 ? voxelCentre[2] - nodeHalfSize : voxelCentre[2] + nodeHalfSize);
                     t_max = tmp_max;
                     t_min = max((corner_close - o) / d);
-                    
+
                     ++depth_in_octree;
 
                 } else {
@@ -403,47 +437,42 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     }
 
     float ambient = 0.2f;
-    
+
     // If there was a collission.
     if(curr_address) {
         char* attributes = getAttributes(curr_address);
 
-        unsigned char red = attributes[0];
-        unsigned char green = attributes[1];
-        unsigned char blue = attributes[2];
+        uchar3 colour = getColours(attributes);
 
-        // If attributes contains a normal
-        if(((int*)m_pHeader)[1] > 4) {
-            //Fixed direction light coming from (1, 1, 1);
-            float4 direction_towards_light = normalize(float4(info->lightPos-rayPos, 0.0f));
-            float4 normal = float4(fixed_point_8bit_to_float(attributes[4]),
-                                   fixed_point_8bit_to_float(attributes[5]),
-                                   fixed_point_8bit_to_float(attributes[6]),
-                                   fixed_point_8bit_to_float(attributes[7]));
-            // K_diff is always 1, for now
-            float diffuse_coefficient = dot(direction_towards_light,normal);
-            if(diffuse_coefficient<0)
-                diffuse_coefficient=0.0f;
-            /*printf("rayPos %f %f %f dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
-                   rayPos[0],
-                   rayPos[1],
-                   rayPos[2],
-                   direction_towards_light[0],
-                   direction_towards_light[1],
-                   direction_towards_light[2],
-                   direction_towards_light[3],
-                   normal[0],
-                   normal[1],
-                   normal[2],
-                   normal[3],
-                   diffuse_coefficient);*/
-            red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
-            green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
-            blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
+        unsigned char red = colour.getX();
+        unsigned char green = colour.getY();
+        unsigned char blue = colour.getZ();
 
-        }
+        //Fixed direction light coming from (1, 1, 1);
+        float4 direction_towards_light = normalize(float4(info->lightPos-rayPos, 0.0f));
+        float4 normal = getNormal(attributes);
+        // K_diff is always 1, for now
+        float diffuse_coefficient = dot(direction_towards_light,normal);
+        if(diffuse_coefficient<0)
+            diffuse_coefficient=0.0f;
+        /*printf("rayPos %f %f %f dir_to_light %f %f %f %f, normal %f %f %f %f diff %f\n",
+               rayPos[0],
+               rayPos[1],
+               rayPos[2],
+               direction_towards_light[0],
+               direction_towards_light[1],
+               direction_towards_light[2],
+               direction_towards_light[3],
+               normal[0],
+               normal[1],
+               normal[2],
+               normal[3],
+               diffuse_coefficient);*/
+        red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
+        green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
+        blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
-        setFramePixel(x, y, red, green, blue);   
+        setFramePixel(x, y, red, green, blue);
     }
     setInfoPixels(x, y, getDepthBufferValue(x,y)/10.0f/*fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f)*/, it, depth_in_octree);
 }
@@ -455,7 +484,7 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
     int2 start = window.getOrigin();
     int2 size = window.getSize();
     int2 end = start+size;
-    
+
     for(int y = start[1]; y < end[1]/8; y++) {
         for(int x = start[0]; x < end[0]/8; x++) {
             traceRayBundle(x, y, 8, info);

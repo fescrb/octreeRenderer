@@ -16,67 +16,67 @@ ConcreteOctree::ConcreteOctree() {
 
 Octree* ConcreteOctree::getSimpleOctree() {
     ConcreteOctree *octree = new ConcreteOctree();
-    
+
     // Create root node + atts
     Attributes rootAtts;
     rootAtts.setColour(128, 128, 128, 128);
     rootAtts.setNormal(0.0f, 0.0f, -1.0f);
     ConcreteOctreeNode *root = new ConcreteOctreeNode(rootAtts);
-    
+
     // Create topleft node + atts
     Attributes topleftAtts;
     topleftAtts.setColour(255, 255, 255, 255);
     topleftAtts.setNormal(-0.57445626f, 0.57445626f, -0.57445626f);
     ConcreteOctreeNode *topleft = new ConcreteOctreeNode(topleftAtts);
-    
+
     // Create topright node + atts
     Attributes toprightAtts;
     toprightAtts.setColour(255, 0, 0, 255);
     toprightAtts.setNormal(0.57445626f, 0.57445626f, -0.57445626f);
     ConcreteOctreeNode *topright = new ConcreteOctreeNode(toprightAtts);
-    
+
     // Create bottomleft node + atts
     Attributes bottomleftAtts;
     bottomleftAtts.setColour(0, 255, 0, 255);
     bottomleftAtts.setNormal(-0.57445626f, -0.57445626f, -0.57445626f);
     ConcreteOctreeNode *bottomleft = new ConcreteOctreeNode(bottomleftAtts);
-    
+
     // Create bottomright node + atts
     Attributes bottomrightAtts;
     bottomrightAtts.setColour(0, 0, 255, 255);
     bottomrightAtts.setNormal(0.57445626f, -0.57445626f, -0.57445626f);
     ConcreteOctreeNode *bottomright = new ConcreteOctreeNode(bottomrightAtts);
-    
+
     octree->m_pRootNode = root;
     root->addChild(topleft, ConcreteOctreeNode::Y | ConcreteOctreeNode::Z );
     root->addChild(topright, ConcreteOctreeNode::X | ConcreteOctreeNode::Y | ConcreteOctreeNode::Z);
     root->addChild(bottomleft, ConcreteOctreeNode::Z);
     root->addChild(bottomright, ConcreteOctreeNode::X | ConcreteOctreeNode::Z);
-    
+
     octree->m_pHeader = new OctreeHeader(octree);
-    
+
     renderinfo info;
-    
+
     info.eyePos.setX(0); //x
     info.eyePos.setY(0); //y
     info.eyePos.setZ(-256.0f); //z
-    
+
     info.viewDir.setX(0); //x
     info.viewDir.setY(0); //y
     info.viewDir.setZ(1.0f); //z
-    
+
     info.up.setX(0); //x
     info.up.setY(1.0f); //y
     info.up.setZ(0); //z
-    
+
     info.eyePlaneDist = 1.0f; //Parallel projection, neither of these matter.
     info.fov = 1.0f;
-    
+
     info.lightPos = float3(128.0f,128.0f,-128.0f);
     info.lightBrightness = 256;
-    
+
     octree->setInitialRenderInfo(info);
-    
+
     return octree;
 }
 

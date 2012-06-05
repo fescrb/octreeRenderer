@@ -11,4 +11,6 @@ typedef vector4<F32> float4;
 
 typedef vector2<I32> int2;
 
+typedef vector3<U8> uchar3;
+
 #endif //OCTREEREN_VECTOR_H

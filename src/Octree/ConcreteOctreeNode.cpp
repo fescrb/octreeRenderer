@@ -87,17 +87,39 @@ char* ConcreteOctreeNode::flatten(char* buffer) {
     for(int i = 0; i < 8; i++) {
         if(m_vChildren[i]){
             flags |= ( 1 << i );
-            positions |= (counter << (i*3));
+            switch(i) {
+                case 1:
+                    positions |= counter;
+                    break;
+                case 2:
+                    positions |= (counter << (1));
+                    break;
+                case 3:
+                    positions |= (counter << (3));
+                    break;
+                case 4:
+                    positions |= (counter << (5));
+                    break;
+                case 5:
+                    positions |= (counter << (8));
+                    break;
+                case 6:
+                    positions |= (counter << (11));
+                    break;
+                case 7:
+                    positions |= (counter << (14));
+                    break;
+                default:
+                    break;
+            }
             counter ++;
         }
     }
-    buffer_int[0] = positions;
-    buffer_int++;
-    buffer+=sizeof(int);
-    
-    // Write the number of children. This is the attribute pointer (for now).
-    buffer_int[0] = numberOfChildren + 1;
-    buffer[3] = flags ;
+    buffer[0] = flags ;
+    buffer[1] = ((unsigned char)numberOfChildren+1)<<4;
+    buffer_int[0] |= positions;
+
+    printf("flags %d number of children %d positions %d buffer int %d\n", flags, numberOfChildren, positions, buffer_int[0]);
 
     // Find out where we will write the attributes. Then write
     char* end = buffer + ((numberOfChildren + 1 ) *4);

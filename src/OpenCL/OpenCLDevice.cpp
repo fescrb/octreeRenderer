@@ -124,25 +124,25 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        
+
         error = clSetKernelArg( m_clearDepthBuffKernel, 0, sizeof(cl_mem), &m_depthBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        size_t origin[2] = {0, 0}; 
-        size_t region[2] = {size[0], size[1]}; 
+        size_t origin[2] = {0, 0};
+        size_t region[2] = {size[0], size[1]};
         error = clEnqueueNDRangeKernel( m_commandQueue, m_clearDepthBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        
+
         /*error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
         if(clIsError(error)){
             clPrintError(error);
         }*/
     }
-    size_t origin[2] = {0, 0}; 
-    size_t region[2] = {size[0], size[1]}; 
+    size_t origin[2] = {0, 0};
+    size_t region[2] = {size[0], size[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_clearFrameBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -172,19 +172,19 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
-    
+
     rect bundle_window = rect(window.getOrigin()/RAY_BUNDLE_WINDOW_SIZE, window.getSize()/RAY_BUNDLE_WINDOW_SIZE);
-    
+
     cl_int bundle_window_size = RAY_BUNDLE_WINDOW_SIZE;
-    
+
     cl_renderinfo cl_info= convert(*info);
 
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
 
     /*
-     * We first trace the ray bundles 
+     * We first trace the ray bundles
      */
-    
+
     cl_int error = clSetKernelArg( m_rayBundleTraceKernel, 0, sizeof(cl_mem), &m_memory);
     if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -194,28 +194,28 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     error = clSetKernelArg( m_rayBundleTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     error = clSetKernelArg( m_rayBundleTraceKernel, 3, sizeof(cl_int), &bundle_window_size);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     size_t bundle_offset[2] = {bundle_window.getOrigin()[0], bundle_window.getOrigin()[1]};
     size_t bundle_dimensions[2] = {bundle_window.getSize()[0], bundle_window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayBundleTraceKernel, 2, bundle_offset, bundle_dimensions, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     /*
      * We now trace the rays
-     */ 
-    
+     */
+
 	error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
  	if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -230,7 +230,7 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
  	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
-    
+
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
@@ -250,10 +250,10 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
     framebuffer_window fb_window;
     fb_window.window = getTotalTaskWindow();
     fb_window.texture = 0;
-    
+
     if(fb_window.window.getWidth() == 0 || fb_window.window.getHeight() == 0)
         return fb_window;
-    
+
 	if (!m_texture) {
         glGenTextures(1, &m_texture);
 
@@ -282,7 +282,7 @@ framebuffer_window OpenCLDevice::getFrameBuffer() {
                     GL_RGBA,
                     GL_UNSIGNED_BYTE,
                     frameBuffer);
-    
+
     } else if (m_renderMode == DEPTH) {
         glTexImage2D(GL_TEXTURE_2D,
                     0,
@@ -308,38 +308,38 @@ unsigned char* OpenCLDevice::getFrame() {
     int size = getTotalTaskWindow().getWidth()*getTotalTaskWindow().getHeight()*4;
 
     cl_int error;
-    
+
     //printf("device %d origin %d %d region %d %d\n", this, origin[0], origin[1], region[0], region[1]);
-    
+
     // Read the depth buffer, not always necessary
     error = clEnqueueReadImage( m_commandQueue, m_depthBuff, GL_FALSE, origin, region, 0, 0, m_pDepthBuffer, 1, &m_eventRenderingFinished, NULL);
     if(clIsError(error)){
         clPrintError(error);
     }
-    
+
     //error = clEnqueueReadBuffer ( m_commandQueue, m_frameBuff, GL_FALSE, 0, size, (void*) m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     error = clEnqueueReadImage ( m_commandQueue, m_frameBuff, GL_FALSE, origin, region, 0, 0, m_pFrame, 1, &m_eventRenderingFinished, &m_eventFrameBufferRead);
     if(clIsError(error)){
         clPrintError(error);
     }
-    
+
     cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
     error = clWaitForEvents(2, events);
 	if(clIsError(error)){
         clPrintError(error);
     }
-    
+
     /*printf("--------------\n");
-    for(int y = 0; y < getTotalTaskWindow().getHeight(); y++) 
-        for(int x = 0; x < getTotalTaskWindow().getWidth(); x++) {     
+    for(int y = 0; y < getTotalTaskWindow().getHeight(); y++)
+        for(int x = 0; x < getTotalTaskWindow().getWidth(); x++) {
             int index = (x*4)+(y*4*getTotalTaskWindow().getWidth());
             if(m_pFrame[index] > 244){
-                printf("x %d y %d\n", x, y); 
+                printf("x %d y %d\n", x, y);
                 printf("depthbuffer value %f\n", m_pDepthBuffer[(x)+(y*getTotalTaskWindow().getWidth())]);
             }
         }
     printf("--------------\n");*/
-    
+
     return m_pFrame;
 }
 
