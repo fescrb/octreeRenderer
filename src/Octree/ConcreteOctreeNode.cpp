@@ -112,10 +112,10 @@ char* ConcreteOctreeNode::flatten(char* buffer) {
                 default:
                     break;
             }
-            //printf("counter %d positions %d\n", counter, positions);
             counter ++;
         }
     }
+    buffer_int[0] = 0;
     buffer[3] = flags ;
     buffer[2] = ((unsigned char)numberOfChildren+1)<<4;
     buffer_int[0] |= positions;

@@ -133,7 +133,7 @@ char* getChild(char* node, char xyz_flag) {
         default:
             break;
     }
-    printf("addr %p flag %d int %d pos %d\n", node, xyz_flag ,node_int[0], pos);
+    //printf("addr %p flag %d int %d pos %d\n", node, xyz_flag ,node_int[0], pos);
     node_int+=(pos+1);
     node+=(pos+1)*4;
     return node + (node_int[0]*4);
@@ -200,6 +200,9 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     d+=from_centre_to_start;
 
     float max_mag = max(float4(mag(d_lower_left), mag(d_upper_left), mag(d_lower_right), mag(d_upper_right)));
+    
+    //if(x ==57 && y==30)
+        //printf("this one");
 
     float t = 0.0f;
     float t_prev = t;
@@ -465,7 +468,6 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
     // If there was a collission.
     if(curr_address) {
-        printf("finished one\n");
         char* attributes = getAttributes(curr_address);
 
         uchar3 colour = getColours(attributes);
