@@ -72,19 +72,6 @@ bool noChildren(char* node) {
     return !node[3];
 }
 
-char makeXYZFlag(float3 rayPos, float3 nodeCentre, float3 direction ) {
-	float3 flagVector = rayPos - nodeCentre;
-	char flag = 0;
-	for(int i = 0; i < 3; i++)
-        if(flagVector[i] > F32_EPSILON)
-            flag |= (1 << i);
-        else if (flagVector[i] <= F32_EPSILON && flagVector[i] >= -F32_EPSILON)
-            if(direction[i] >= 0.0f)
-                flag |= (1 << i);
-
-	return flag;
-}
-
 char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     char flag = 0;
 
