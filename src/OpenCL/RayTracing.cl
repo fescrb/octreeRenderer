@@ -41,24 +41,26 @@ float fixed_point_8bit_to_float(char fixed) {
 }
 
 bool no_children(__global char* address) {
-    return !address[7];
+    return !address[3];
+}
+
+global char* get_attributes(global char* node) {
+    return node + ((((global unsigned char*)node)[2] >> 4) * 4);
 }
 
 uchar3 getColours(global char* attr) {
-    unsigned short rgb_565 = ((unsigned short*)attr)[0];
+    unsigned short rgb_565 = ((global unsigned short*)attr)[0];
     uchar3 colour;
     
     colour.x = (rgb_565 >> 8) & ~7;
     colour.y = ((unsigned char)(rgb_565 >> 3)) & ~3;
     colour.z = (rgb_565 & 31) << 3;
     
-    //printf("rgb565 %d red %d green %d blue %d\n", rgb_565, colour[0], colour[1], colour[2]);
-    
     return colour;
 }
 
 float4 getNormal(global char* attr) {
-    unsigned short normals_short = ((unsigned short*)attr)[1];
+    unsigned short normals_short = ((global unsigned short*)attr)[1];
     float4 normal;
     
     char x = normals_short >> 8;
@@ -72,8 +74,6 @@ float4 getNormal(global char* attr) {
     
     normal.z = z;
     normal.w = 0.0f;
-    
-    //printf("short %d x %f y %f z %f\n", normals_short, normal[0], normal[1], normal[2]);
     
     return normal;
 }
@@ -109,20 +109,40 @@ char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
 }
 
 bool nodeHasChildAt(global char* node, char xyz_flag) {
-	return node[7] & (1 << xyz_flag);  
+	return node[3] & (1 << xyz_flag);  
 }
 
 global char* getChild(global char* node, char xyz_flag) {
     global int *node_int = (global int*)node;
-    int pos = (node_int[0] >> (xyz_flag * 3)) & 0b111;
-    node_int+=(pos+2);
-    node+=(pos+2)*4;
+    int pos = 0;//(node_int[0] >> (xyz_flag * 3)) & 0b111;
+    switch(xyz_flag) {
+    case 1:
+        pos = node_int[0] & 1;
+        break;
+    case 2:
+        pos = (node_int[0] >> 1) & 3;
+        break;
+    case 3:
+        pos = (node_int[0] >> 3) & 3;
+        break;
+    case 4:
+        pos = (node_int[0] >> 5) & 7;
+        break;
+    case 5:
+        pos = (node_int[0] >> 8) & 7;
+        break;
+    case 6:
+        pos = (node_int[0] >> 11) & 7;
+        break;
+    case 7:
+        pos = (node_int[0] >> 14) & 7;
+        break;
+    default:
+        break;
+    }
+    node_int+=(pos+1);
+    node+=(pos+1)*4;
     return node + (node_int[0]*4);
-}
-
-global char* get_attributes(global char* node) {
-    global int* addr_int = (global int*)node;
-    return node + ((addr_int[1] & ~(255 << 24)) * 4) +4;
 }
 
 int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float3 corner_close, float t_min, float t_max) {
