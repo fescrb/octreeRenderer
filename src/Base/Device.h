@@ -38,7 +38,7 @@ class Device {
         //virtual void             render(rect *window, renderinfo *info) = 0;
         
         enum                         RenderMode {
-            COLOUR, DEPTH
+            COLOUR, DEPTH, OCTREE_DEPTH, ITERATIONS
         };
         
         void                         setRenderMode(RenderMode mode);

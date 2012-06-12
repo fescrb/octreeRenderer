@@ -31,7 +31,7 @@ float max(float3 vector) {
 }
 
 char* getAttributes(char* node) {
-	return node + ((node[2] >> 4) * 4);
+	return node + ((((unsigned char*)node)[2] >> 4) * 4);
 }
 
 uchar3 getColours(char* attr) {
@@ -489,7 +489,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
         setFramePixel(x, y, red, green, blue);
     }
-    setInfoPixels(x, y, getDepthBufferValue(x,y)/10.0f/*fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f)*/, it, depth_in_octree);
+    setInfoPixels(x, y, /*getDepthBufferValue(x,y)/10.0f*/fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
 }
 
 void SerialDevice::renderTask(int index, renderinfo *info) {
@@ -533,27 +533,27 @@ framebuffer_window SerialDevice::getFrameBuffer() {
 	} else
 		 glBindTexture(GL_TEXTURE_2D, m_texture);
 
-    //Octree Depth
-    /*glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 getTotalTaskWindow().getWidth(),
-                 getTotalTaskWindow().getHeight(),
-                 0,
-                 GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 m_pOctreeDepth);*/
-    //Iterations
-    /*glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_LUMINANCE,
-                 getTotalTaskWindow().getWidth(),
-                 getTotalTaskWindow().getHeight(),
-                 0,
-                 GL_LUMINANCE,
-                 GL_UNSIGNED_BYTE,
-                 m_pIterations);*/
-    if(m_renderMode == COLOUR) {
+    if(m_renderMode == OCTREE_DEPTH) {
+        glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    GL_LUMINANCE,
+                    getTotalTaskWindow().getWidth(),
+                    getTotalTaskWindow().getHeight(),
+                    0,
+                    GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE,
+                    m_pOctreeDepth);
+     } else if(m_renderMode == ITERATIONS) {
+        glTexImage2D(GL_TEXTURE_2D,
+                    0,
+                    GL_LUMINANCE,
+                    getTotalTaskWindow().getWidth(),
+                    getTotalTaskWindow().getHeight(),
+                    0,
+                    GL_LUMINANCE,
+                    GL_UNSIGNED_BYTE,
+                    m_pIterations);
+    } else if(m_renderMode == COLOUR) {
         glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGB,

@@ -225,4 +225,10 @@ void OctreeRendererWindow::keyPressEvent(unsigned char key) {
     if(key == 'z' || key == 'Z') {
         m_pProgramState->getDeviceManager()->setRenderMode(Device::DEPTH);
     }
+    if(key == 'i' || key == 'I') {
+        m_pProgramState->getDeviceManager()->setRenderMode(Device::ITERATIONS);
+    }
+    if(key == 'o' || key == 'O') {
+        m_pProgramState->getDeviceManager()->setRenderMode(Device::OCTREE_DEPTH);
+    }
 }
