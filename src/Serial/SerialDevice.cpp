@@ -30,6 +30,12 @@ float max(float3 vector) {
 	return maximum > vector[2] ? maximum : vector[2];
 }
 
+float max(float4 vector) {
+    float maximum = vector[0] > vector[1] ? vector[0] : vector[1];
+    maximum = maximum > vector[2] ? maximum : vector[2];
+    return maximum > vector[3] ? maximum : vector[3];
+}
+
 char* getAttributes(char* node) {
 	return node + ((((unsigned char*)node)[2] >> 4) * 4);
 }
@@ -168,7 +174,6 @@ int push(Stack* stack, int index, char* node, float3 far_corner, float3 node_cen
 
 void SerialDevice::makeFrameBuffer(int2 size) {
     Device::makeFrameBuffer(size);
-    m_renderStart.reset();
 }
 
 void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
@@ -183,16 +188,18 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     float3 d_upper_right((info->viewPortStart + (info->viewStep * ((x+1)*width)) + (info->up * ((y+1)*width)))-o);
     d_upper_right+=from_centre_to_start;
 
-    float3 d((info->viewPortStart + (info->viewStep * (((x)*width)+(width/2))) + (info->up * (((y)*width)+(width/2))))-o);
-    d+=from_centre_to_start;
+    float3 d = d_upper_right;
+    float d_1;
+    float d_2;
+    float d_3;
 
     float max_mag = max(float4(mag(d_lower_left), mag(d_upper_left), mag(d_lower_right), mag(d_upper_right)));
     
+    //printf("mag d %f maxmag %f\n", mag(d), max_mag);
     //if(x ==57 && y==30)
         //printf("this one");
 
     float t = 0.0f;
-    float t_prev = t;
 
     float half_size = OCTREE_ROOT_HALF_SIZE;
 
@@ -211,6 +218,8 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     // If we are out
     if(t < t_min)
         t = t_min;
+    
+    float t_prev = t;
 
     char* curr_address = m_pOctreeData;
     float3 voxelCentre(0.0f, 0.0f, 0.0f);
@@ -231,23 +240,42 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
     while(!collission) {
         if(t >= t_out) {
             collission = true;
-            curr_address = 0;
         } else if(noChildren(curr_address)){
             collission = true;
         } else {
             // If we are inside the node
             if(t_min <= t && t < t_max) {
                 // We check if all rays fit
-                if(max((corner_close - o) / d_lower_left) >= min((corner_far - o) / d_lower_left))
+                
+                float nodeSize = fabs(fabs(corner_far[0])-fabs(voxelCentre[0]));
+                float3 tmp_corner_far = float3(d_lower_left[0] >= 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                               d_lower_left[1] >= 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                               d_lower_left[2] >= 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
+                float3 tmp_corner_clo = float3(d_lower_left[0] < 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                               d_lower_left[1] < 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                               d_lower_left[2] < 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
+                
+                if(max((tmp_corner_clo - o) / d_lower_left) >= min((tmp_corner_far - o) / d_lower_left))
                     collission = true;
+                
+                tmp_corner_far = float3(d_lower_right[0] >= 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                        d_lower_right[1] >= 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                        d_lower_right[2] >= 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
+                tmp_corner_clo = float3(d_lower_right[0] < 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                        d_lower_right[1] < 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                        d_lower_right[2] < 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
 
-                if(max((corner_close - o) / d_lower_right) >= min((corner_far - o) / d_lower_right))
+                if(max((tmp_corner_clo - o) / d_lower_right) >= min((tmp_corner_far - o) / d_lower_right))
                     collission = true;
+                
+                tmp_corner_far = float3(d_upper_left[0] >= 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                        d_upper_left[1] >= 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                        d_upper_left[2] >= 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
+                tmp_corner_clo = float3(d_upper_left[0] < 0 ? voxelCentre[0] + nodeSize : voxelCentre[0] - nodeSize,
+                                        d_upper_left[1] < 0 ? voxelCentre[1] + nodeSize : voxelCentre[1] - nodeSize,
+                                        d_upper_left[2] < 0 ? voxelCentre[2] + nodeSize : voxelCentre[2] - nodeSize);
 
-                if(max((corner_close - o) / d_upper_left) >= min((corner_far - o) / d_upper_left))
-                    collission = true;
-
-                if(max((corner_close - o) / d_upper_right) >= min((corner_far - o) / d_upper_right))
+                if(max((tmp_corner_clo - o) / d_upper_left) >= min((tmp_corner_far - o) / d_upper_left))
                     collission = true;
 
                 if(collission) {
@@ -260,13 +288,13 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                 float3 t_centre_vector = (voxelCentre - o) / d;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
-                float nodeHalfSize = fabs(fabs(corner_far[0])-fabs(voxelCentre[0]))/2.0f;
-
+                float nodeHalfSize = nodeSize/2.0f;
+                
                 float3 tmpNodeCentre( xyz_flag & 1 ? voxelCentre[0] + nodeHalfSize : voxelCentre[0] - nodeHalfSize,
                                       xyz_flag & 2 ? voxelCentre[1] + nodeHalfSize : voxelCentre[1] - nodeHalfSize,
                                       xyz_flag & 4 ? voxelCentre[2] + nodeHalfSize : voxelCentre[2] - nodeHalfSize);
 
-                float3 tmp_corner_far(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
+                tmp_corner_far= float3(d[0] >= 0 ? tmpNodeCentre[0] + nodeHalfSize : tmpNodeCentre[0] - nodeHalfSize,
                                       d[1] >= 0 ? tmpNodeCentre[1] + nodeHalfSize : tmpNodeCentre[1] - nodeHalfSize,
                                       d[2] >= 0 ? tmpNodeCentre[2] + nodeHalfSize : tmpNodeCentre[2] - nodeHalfSize);
 
@@ -295,7 +323,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
 
                 } else {
                     // If the child is empty, we step the ray.
-                    t_prev = t;//mag(corner_close-o)/max_mag;
+                    t_prev = (t);// *mag(d))/max_mag;
                     t = tmp_max;
                 }
             } else {
@@ -314,7 +342,6 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
                     t_min = stack[curr_index].t_min;
                 } else {
                     // We are outside the volume.
-                    curr_address = 0;
                     collission = true;
                 }
             }
@@ -323,7 +350,7 @@ void SerialDevice::traceRayBundle(int x, int y, int width, renderinfo* info) {
 
     for(int i = (x*width); i < (x+1)*width; i++) {
         for(int j = (y*width); j < (y+1)*width; j++) {
-            //printf("%d %d buffer val %f\n", i, j, t);
+            //printf("%d %d, %d %d buffer val %f\n", x, y, i, j, t_prev);
             setDepthBufferValue(i, j, t_prev);
         }
     }
@@ -345,6 +372,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     o = info->eyePos;
     //d = normalize(d);
     float t = getDepthBufferValue(x,y);
+    //printf("%d %d buffer val %f\n", x, y, t);
 
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,
@@ -489,7 +517,7 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
 
         setFramePixel(x, y, red, green, blue);
     }
-    setInfoPixels(x, y, /*getDepthBufferValue(x,y)/10.0f*/fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f), it, depth_in_octree);
+    setInfoPixels(x, y, (getDepthBufferValue(x,y)/mag(d))/(OCTREE_ROOT_HALF_SIZE*4.0f)/*fabs(dot(rayPos, info->viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f)*/, it, depth_in_octree);
 }
 
 void SerialDevice::renderTask(int index, renderinfo *info) {
@@ -500,9 +528,9 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
     int2 size = window.getSize();
     int2 end = start+size;
 
-    for(int y = start[1]; y < end[1]/8; y++) {
-        for(int x = start[0]; x < end[0]/8; x++) {
-            traceRayBundle(x, y, 8, info);
+    for(int y = start[1]/RAY_BUNDLE_WINDOW_SIZE; y < end[1]/RAY_BUNDLE_WINDOW_SIZE; y++) {
+        for(int x = start[0]/RAY_BUNDLE_WINDOW_SIZE; x < end[0]/RAY_BUNDLE_WINDOW_SIZE; x++) {
+            traceRayBundle(x, y, RAY_BUNDLE_WINDOW_SIZE, info);
             //printf("done %d %d\n", x, y);
         }
     }
@@ -516,7 +544,7 @@ void SerialDevice::renderTask(int index, renderinfo *info) {
 }
 
 framebuffer_window SerialDevice::getFrameBuffer() {
-    m_renderEnd.reset();
+    renderEnd();
     m_transferStart.reset();
     if (!m_texture) {
         glGenTextures(1, &m_texture);
@@ -613,12 +641,4 @@ float SerialDevice::getDepthBufferValue(int x, int y) {
 void SerialDevice::setDepthBufferValue(int x, int y, float value) {
     int index = (getTotalTaskWindow().getWidth()*y) + x;
     m_pDepthBuffer[index] = value;
-}
-
-high_res_timer SerialDevice::getRenderTime() {
-    return m_renderEnd - m_renderStart;
-}
-
-high_res_timer SerialDevice::getBufferToTextureTime() {
-    return m_transferEnd - m_transferStart;
 }

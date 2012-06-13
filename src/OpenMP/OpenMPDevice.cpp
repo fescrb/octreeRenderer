@@ -17,7 +17,7 @@ void OpenMPDevice::renderTask(int index, renderinfo *info) {
     for(int y = start[1]/RAY_BUNDLE_WINDOW_SIZE; y < end[1]/RAY_BUNDLE_WINDOW_SIZE; y++) {
         #pragma omp parallel for
         for(int x = start[0]/RAY_BUNDLE_WINDOW_SIZE; x < end[0]/RAY_BUNDLE_WINDOW_SIZE; x++) {
-            traceRayBundle(x, y, 8, info);
+            traceRayBundle(x, y, RAY_BUNDLE_WINDOW_SIZE, info);
             //printf("done %d %d\n", x, y);
         }
     }

@@ -19,15 +19,6 @@ class SerialDevice
         framebuffer_window   getFrameBuffer();
         unsigned char       *getFrame();
 
-        high_res_timer       getRenderTime();
-        high_res_timer       getBufferToTextureTime();
-
-	protected:
-		high_res_timer       m_renderStart;
-        high_res_timer       m_renderEnd;
-        high_res_timer       m_transferStart;
-        high_res_timer       m_transferEnd;
-
     private:
         char			    *m_pOctreeData;
         char                *m_pHeader;

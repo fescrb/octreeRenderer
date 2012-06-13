@@ -185,10 +185,14 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 
     setPerDeviceTasks(resolution);
 
+    #pragma omp parallel for 
 	for(int i = 0; i < devices; i++)
 		device_list[i]->makeFrameBuffer(resolution);
 
+    for(int i = 0; i < devices; i++)
+        device_list[i]->renderStart();;
 
+    #pragma omp parallel for 
 	for(int i = 0; i < devices; i++)
         for(int j = 0; j < device_list[i]->getTaskCount(); j++)
             device_list[i]->renderTask(j,info);
@@ -197,11 +201,6 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 		fb_windows.push_back(device_list[i]->getFrameBuffer());
 
     getFrameTimeResults(resolution);
-    //exit(0);
-
-		//Image image(resolution[0], resolution[1], Image::RGB, thisDevice->getFrame());
-		//image.toBMP("frame.bmp");
-
 
 	return fb_windows;
 }

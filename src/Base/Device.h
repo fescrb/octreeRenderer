@@ -50,9 +50,12 @@ class Device {
          */
         virtual framebuffer_window   getFrameBuffer() = 0;
         virtual unsigned char       *getFrame() = 0;
+        
+        void                         renderStart();
+        void                         renderEnd();
 
-        virtual high_res_timer       getRenderTime() = 0;
-        virtual high_res_timer       getBufferToTextureTime() = 0;
+        high_res_timer               getRenderTime();
+        high_res_timer               getBufferToTextureTime();
 
         /*
          * Task-related functions
@@ -66,7 +69,6 @@ class Device {
         rect                         getTotalTaskWindow();
 
     protected:
-
         DeviceInfo                  *m_pDeviceInfo;
         
         unsigned char               *m_pFrame;
@@ -80,6 +82,11 @@ class Device {
         rect                         m_tasksWindow;
         
         RenderMode                   m_renderMode;
+        
+        high_res_timer               m_renderStart;
+        high_res_timer               m_renderEnd;
+        high_res_timer               m_transferStart;
+        high_res_timer               m_transferEnd;
 };
 
 #endif // _DEVICE_H

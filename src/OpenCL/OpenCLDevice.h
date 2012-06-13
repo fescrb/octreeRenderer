@@ -35,9 +35,6 @@ class OpenCLDevice:
 
 		void 				 onRenderingFinished();
 
-        high_res_timer       getRenderTime();
-        high_res_timer       getBufferToTextureTime();
-
 	private:
 
 		cl_device_id 		 m_DeviceID;
@@ -63,11 +60,6 @@ class OpenCLDevice:
         cl_mem               m_depthBuff;
         cl_mem               m_iterationsBuff;
         cl_mem               m_octreeDepthBuff;
-
-        high_res_timer       m_renderStart;
-        high_res_timer       m_renderEnd;
-        high_res_timer       m_transferStart;
-        high_res_timer       m_transferEnd;
 };
 
 #endif //_OPENCL_DEVICE_H

@@ -104,3 +104,19 @@ rect Device::getTotalTaskWindow() {
 void Device::setRenderMode(RenderMode mode) {
     m_renderMode = mode;
 }
+
+void Device::renderStart() {
+    m_renderStart.reset();
+}
+
+void Device::renderEnd() {
+    m_renderEnd.reset();
+}
+
+high_res_timer Device::getRenderTime() {
+    return m_renderEnd - m_renderStart;
+}
+
+high_res_timer Device::getBufferToTextureTime() {
+    return m_transferEnd - m_transferStart;
+}

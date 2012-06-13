@@ -167,8 +167,6 @@ void OpenCLDevice::sendHeader(Bin bin) {
 }
 
 void OpenCLDevice::renderTask(int index, renderinfo *info) {
-    m_renderStart.reset();
-
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
@@ -309,6 +307,13 @@ unsigned char* OpenCLDevice::getFrame() {
 
     cl_int error;
 
+    error = clWaitForEvents(1, &m_eventRenderingFinished);
+    if(clIsError(error)){
+        clPrintError(error);
+    }
+    
+    renderEnd();
+    m_transferStart.reset();
     //printf("device %d origin %d %d region %d %d\n", this, origin[0], origin[1], region[0], region[1]);
 
     // Read the depth buffer, not always necessary
@@ -322,9 +327,8 @@ unsigned char* OpenCLDevice::getFrame() {
     if(clIsError(error)){
         clPrintError(error);
     }
-
-    cl_event events[2] = {m_eventRenderingFinished, m_eventFrameBufferRead};
-    error = clWaitForEvents(2, events);
+    
+    error = clWaitForEvents(1, &m_eventFrameBufferRead);
 	if(clIsError(error)){
         clPrintError(error);
     }
@@ -345,16 +349,7 @@ unsigned char* OpenCLDevice::getFrame() {
 
 void OpenCLDevice::onRenderingFinished() {
     //printf("render end\n");
-	m_renderEnd.reset();
-    m_transferStart.reset();
-}
-
-high_res_timer OpenCLDevice::getRenderTime() {
-    return m_renderEnd - m_renderStart;
-}
-
-high_res_timer OpenCLDevice::getBufferToTextureTime() {
-    return m_transferEnd - m_transferStart;
+    
 }
 
 cl_context OpenCLDevice::getOpenCLContext() {

@@ -194,8 +194,6 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 		curr_address = 0; 
 	}
 
-    float3 rayPos = origin;
-
 	while(!collission) {
         it++;
 		if(t >= t_out) {
@@ -206,8 +204,6 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
         } else {
             /*If we are inside the node*/
             if(t_min <= t && t < t_max) {
-                rayPos = origin + (direction * t);
-                
                 float3 t_centre_vector = (voxelCentre - origin) / direction;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
@@ -347,10 +343,12 @@ kernel void ray_trace(global char* octree,
         green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
-        uint4 color = (uint4)(red, green, blue, 255);
+        //uint4 color = (uint4)(red, green, blue, 255);
         //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
         //char color_per_level = 255/((global int*)header)[0];
         //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
+        float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
+        uint4 color = (uint4)(255*dep, 255*dep, 255*dep, 255);
 
         write_imageui ( frameBuff, (int2)(x, y), color);
     }
