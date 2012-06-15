@@ -7,9 +7,9 @@
 OctreeHeader::OctreeHeader() {
 }
 
-OctreeHeader::OctreeHeader(ConcreteOctree* octree) {
+OctreeHeader::OctreeHeader(ConcreteOctree* octree,int depth) {
     setAttributeSize(octree->getAttributeSize());
-    setOctreeDepth(octree->getDepth());
+    setOctreeDepth(depth);
 }
         
 void OctreeHeader::setAttributeSize(int size) {

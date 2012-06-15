@@ -127,9 +127,19 @@ char* getChild(char* node, char xyz_flag) {
             break;
     }
     //printf("addr %p flag %d int %d pos %d\n", node, xyz_flag ,node_int[0], pos);
-    node_int+=(pos+1);
+    int diff = 0;
+    if(node[2] & 2) {
+        unsigned short *node_short = (unsigned short*)node;
+        node_short+=(pos+2);
+        diff = node_short[0];
+        pos /= 2;
+        //printf("diff %d pos %d\n", diff, pos);
+    } else {
+        node_int+=(pos+1);
+        diff = node_int[0];
+    }
     node+=(pos+1)*4;
-    return node + (node_int[0]*4);
+    return node + (diff*4);
 }
 
 SerialDevice::SerialDevice()
@@ -371,9 +381,12 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float3 d(o-info->eyePos); //Perspective projection now.
     o = info->eyePos;
     //d = normalize(d);
-    float t = getDepthBufferValue(x,y);
+    float t = 0;//getDepthBufferValue(x,y);
     //printf("%d %d buffer val %f\n", x, y, t);
 
+    if(x == 512 && y ==320)
+        printf("follow this one\n");
+    
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,
                       d[2] >= 0 ? half_size : -half_size);

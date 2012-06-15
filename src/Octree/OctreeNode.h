@@ -7,7 +7,7 @@ class OctreeNode {
 	public:
         virtual OctreeNode      *getChildAt(int index) = 0;
         
-		virtual char            *flatten(char* buffer) = 0;
+		virtual char            *flatten(char* buffer, int depth) = 0;
 
 		virtual unsigned int     getDepth() = 0;
 		virtual unsigned int     getNumberOfNodes() = 0;

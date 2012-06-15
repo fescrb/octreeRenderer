@@ -76,6 +76,8 @@ mesh OBJFileReader::getMesh() {
         }
     }
     
+    printf("This model has %d triangles\n", objMesh.getTriangleCount());
+    
     return objMesh;
 }
 

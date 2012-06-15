@@ -53,7 +53,7 @@ Octree* ConcreteOctree::getSimpleOctree() {
     root->addChild(bottomleft, ConcreteOctreeNode::Z);
     root->addChild(bottomright, ConcreteOctreeNode::X | ConcreteOctreeNode::Z);
 
-    octree->m_pHeader = new OctreeHeader(octree);
+    octree->m_pHeader = new OctreeHeader(octree, octree->getDepth());
 
     renderinfo info;
 
@@ -106,6 +106,8 @@ Bin ConcreteOctree::getRoot() {
 
 Bin ConcreteOctree::flatten() {
     unsigned int numOfNodes = getNumberOfNodes();
+    
+    printf("This octree has %d nodes \n", numOfNodes);
 
     unsigned int memoryRequired = 0;
 
@@ -120,7 +122,9 @@ Bin ConcreteOctree::flatten() {
 
     char* buffer = (char*) malloc (memoryRequired);
 
-    m_pRootNode->flatten(buffer);
+    char* end = m_pRootNode->flatten(buffer, m_pHeader->getOctreeDepth());
+    
+    unsigned int memoryUsed = end - buffer;
 
-    return Bin(buffer, memoryRequired);
+    return Bin(buffer, memoryUsed);
 }

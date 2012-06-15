@@ -118,7 +118,7 @@ void OctreeCreator::convert() {
 
     m_pRootNode = root;
 
-    this->m_pHeader = new OctreeHeader(this);
+    this->m_pHeader = new OctreeHeader(this, m_depth);
 
     m_converted = true;
 

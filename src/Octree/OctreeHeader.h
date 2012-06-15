@@ -8,7 +8,7 @@ class ConcreteOctree;
 class OctreeHeader {
     public:
         explicit    OctreeHeader();
-        explicit    OctreeHeader(ConcreteOctree* octree);
+        explicit    OctreeHeader(ConcreteOctree* octree, int depth);
         
         void        setAttributeSize(int size);
         int         getAttributeSize();

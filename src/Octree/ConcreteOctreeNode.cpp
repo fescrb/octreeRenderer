@@ -76,9 +76,8 @@ unsigned int ConcreteOctreeNode::getNumberOfNodes() {
 
 #include <cstdio>
 
-char* ConcreteOctreeNode::flatten(char* buffer) {
+char* ConcreteOctreeNode::flatten(char* buffer, int depth) {
     int* buffer_int = (int*) buffer;
-    short* buffer_short = (short*) buffer;
 
     // Create children flag. Then write it.
     char flags = 0;
@@ -117,23 +116,54 @@ char* ConcreteOctreeNode::flatten(char* buffer) {
     }
     buffer_int[0] = 0;
     buffer[3] = flags ;
-    buffer[2] = ((unsigned char)numberOfChildren+1)<<4;
+    if(depth > 4) {
+        buffer[2] = ((unsigned char)numberOfChildren+1)<<4;
+    } else {
+        buffer[2] = ((unsigned char)(numberOfChildren/2) + (numberOfChildren%2) + 1)<<4;
+        buffer[2] |= 2;
+    }
     buffer_int[0] |= positions;
 
     //printf("flags %d number of children %d positions %d buffer int %d\n", flags, numberOfChildren, positions, buffer_int[0]);
 
     // Find out where we will write the attributes. Then write
-    char* end = buffer + ((numberOfChildren + 1 ) *4);
+    char* end;
+    if(depth > 4)
+        end = buffer + ((numberOfChildren + 1 ) *4);
+    else
+        end = buffer + (((numberOfChildren/2) + (numberOfChildren%2) + 1 ) *4);
+    int* attr_location = (int*)end;
     end = m_attributes.flatten(end);
 
     buffer_int++;
+    if(attr_location!=buffer_int)
+        buffer_int[0] = 0;
+    unsigned short* buffer_short = (unsigned short*) buffer_int;
 
-    for(int i = 0; i < 8; i++) {
-        if(m_vChildren[i]){
-            buffer_int[0] = (int*)end - buffer_int;
-            //printf("diff %d\n", buffer_int[0]);
-            buffer_int++;
-            end = m_vChildren[i]->flatten(end);
+    if(depth > 4) {
+        for(int i = 0; i < 8; i++) {
+            if(m_vChildren[i]){
+                buffer_int[0] = (int*)end - buffer_int;
+                //printf("diff %d\n", buffer_int[0]);
+                buffer_int++;
+                end = m_vChildren[i]->flatten(end, depth-1);
+            }
+        }
+    } else {
+        int cur_pos = 0;
+        for(int i = 0; i < 8; i++) {
+            if(m_vChildren[i]){
+                buffer_short[0] = (int*)end - buffer_int;
+                //printf("diff %d at depth %d child %d out of %d int is %d cur_pos %d mod 2 %d\n", buffer_short[0], depth, i, numberOfChildren, buffer_int[0],cur_pos,cur_pos%2);
+                if(cur_pos%2) {
+                    buffer_int++;
+                    if(attr_location!=buffer_int)
+                        buffer_int[0] = 0;
+                }
+                buffer_short++;
+                end = m_vChildren[i]->flatten(end, depth-1);
+                cur_pos++;
+            }
         }
     }
 

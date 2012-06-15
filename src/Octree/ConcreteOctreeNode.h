@@ -27,7 +27,7 @@ class ConcreteOctreeNode
         float4                   getColour();
         float4                   getNormal();
 
-        char                    *flatten(char* buffer);
+        char                    *flatten(char* buffer, int depth);
 
         unsigned int             getDepth();
         unsigned int             getNumberOfNodes();
