@@ -381,11 +381,8 @@ void SerialDevice::traceRay(int x, int y, renderinfo* info) {
     float3 d(o-info->eyePos); //Perspective projection now.
     o = info->eyePos;
     //d = normalize(d);
-    float t = 0;//getDepthBufferValue(x,y);
+    float t = getDepthBufferValue(x,y);
     //printf("%d %d buffer val %f\n", x, y, t);
-
-    if(x == 512 && y ==320)
-        printf("follow this one\n");
     
     float3 corner_far(d[0] >= 0 ? half_size : -half_size,
                       d[1] >= 0 ? half_size : -half_size,

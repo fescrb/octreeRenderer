@@ -140,9 +140,18 @@ global char* getChild(global char* node, char xyz_flag) {
     default:
         break;
     }
-    node_int+=(pos+1);
+    int diff = 0;
+    if(node[2] & 2) {
+        global unsigned short *node_short = (global unsigned short*)node;
+        node_short+=(pos+2);
+        diff = node_short[0];
+        pos /= 2;
+    } else {
+        node_int+=(pos+1);
+        diff = node_int[0];
+    }
     node+=(pos+1)*4;
-    return node + (node_int[0]*4);
+    return node + (diff*4);
 }
 
 int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float3 corner_close, float t_min, float t_max) {
