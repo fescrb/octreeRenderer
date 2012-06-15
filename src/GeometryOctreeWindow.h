@@ -1,7 +1,7 @@
 #ifndef _GEOMETRY_OCTREE_WINDOW_H
 #define _GEOMETRY_OCTREE_WINDOW_H
 
-#include "Window.h"
+#include "OctreeWindow.h"
 
 #include "Vector4.h"
 
@@ -9,7 +9,7 @@ class OctreeCreator;
 class OctreeWriter;
 
 class GeometryOctreeWindow
-:   public Window {
+:   public OctreeWindow {
     public:
         explicit                 GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator, OctreeWriter *octreeWriter);
 

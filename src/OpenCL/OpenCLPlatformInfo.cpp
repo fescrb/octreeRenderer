@@ -3,12 +3,15 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include <string>
+
 OpenCLPlatformInfo::OpenCLPlatformInfo(cl_platform_id platform_id)
 :   m_sPlatformProfile(0),
     m_sPlatformVersion(0),
     m_sPlatformName(0),
     m_sPlatformVendor(0),
-    m_sPlatformExtensions(0) {
+    m_sPlatformExtensions(0),
+    m_openGLSharing(false) {
     
     size_t size = 0;
     clGetPlatformInfo(platform_id, CL_PLATFORM_PROFILE, size, NULL, &size);
@@ -39,6 +42,10 @@ OpenCLPlatformInfo::OpenCLPlatformInfo(cl_platform_id platform_id)
     
     m_sPlatformExtensions = (char*) malloc (size+1);
     clGetPlatformInfo(platform_id, CL_PLATFORM_EXTENSIONS, size, m_sPlatformExtensions, NULL);
+    
+    std::string extensions = std::string(m_sPlatformExtensions);
+    if(extensions.find("cl_khr_gl_sharing") != extensions.npos)
+        m_openGLSharing = true;
 }
 
 OpenCLPlatformInfo::~OpenCLPlatformInfo() {
@@ -65,4 +72,8 @@ void OpenCLPlatformInfo::printInfo() {
 
 char* OpenCLPlatformInfo::getName() {
     return m_sPlatformName;
+}
+
+bool OpenCLPlatformInfo::getAllowsOpenGLSharing() {
+    return m_openGLSharing;
 }

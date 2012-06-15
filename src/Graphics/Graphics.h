@@ -5,6 +5,7 @@
     #include <GL/glut.h>
     #include <GL/gl.h>
     #include <GL/glext.h>
+    #include <GL/glx.h>
 #endif //_LINUX
 
 #ifdef _OSX

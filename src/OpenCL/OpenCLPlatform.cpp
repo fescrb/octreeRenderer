@@ -4,6 +4,8 @@
 
 #include "OpenCLUtils.h"
 
+#include "Graphics.h"
+
 OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 :	m_PlatformID(platform_id),
     m_pPlatformInfo(new OpenCLPlatformInfo(platform_id)){
@@ -30,10 +32,19 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 	for(int i = 0; i < device_num; i++) {
 		// Create the context.
         // TODO: fix properties
+        cl_context context;
         //cl_context_properties properties[3] = {CL_CONTEXT_PLATFORM, platform_id, 0};
-        
-        // Perhaps should have callback specified?
-        cl_context context = clCreateContext(0, 1, &aDevice_ids[i], NULL, NULL, &err);
+        if(m_pPlatformInfo->getAllowsOpenGLSharing()) {
+            printf("%s allows OpenGL sharing\n", m_pPlatformInfo->getName());
+            cl_context_properties properties[7] = {CL_GL_CONTEXT_KHR,  (cl_context_properties)glXGetCurrentContext(),
+                                                   CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(), 
+                                                   CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id,
+                                                   0};
+            context = clCreateContext(properties, 1, &aDevice_ids[i], NULL, NULL, &err);
+        } else {
+            printf("%s doesn't allow OpenGL sharing\n", m_pPlatformInfo->getName());
+            context = clCreateContext(0, 1, &aDevice_ids[i], NULL, NULL, &err);
+        }
         
         if(clIsError(err)){
             clPrintError(err); return;

@@ -17,6 +17,7 @@ class OpenCLPlatformInfo {
         void                 printInfo();
         
         char*                getName();
+        bool                 getAllowsOpenGLSharing();
     
     private:
         char                *m_sPlatformProfile;
@@ -24,6 +25,8 @@ class OpenCLPlatformInfo {
         char                *m_sPlatformName;
         char                *m_sPlatformVendor;
         char                *m_sPlatformExtensions;
+        
+        bool                 m_openGLSharing;
 };
 
 #endif //_OPENCL_PLATFORM_INFO_H

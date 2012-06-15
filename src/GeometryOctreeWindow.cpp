@@ -8,7 +8,7 @@
 #include <cstdio>
 
 GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimensions, OctreeCreator* octreeCreator, OctreeWriter *octreeWriter)
-:   Window(argc, argv, dimensions),
+:   OctreeWindow(argc, argv, dimensions),
     m_octreeCreator(octreeCreator),
     m_octreeWriter(octreeWriter){
 
@@ -37,7 +37,7 @@ void GeometryOctreeWindow::initGL() {
 }
 
 void GeometryOctreeWindow::resize(GLint width, GLint height) {
-    Window::resize(width, height);
+    OctreeWindow::resize(width, height);
     
     float light_pos[] ={ m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes()[0] * 2.0f, 0.0f, 0.0f} ;
     float color[] = {1.0f, 1.0f, 1.0f, 1.0f};

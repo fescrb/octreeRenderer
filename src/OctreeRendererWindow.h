@@ -1,13 +1,13 @@
 #ifndef _OCTREE_RENDERER_WINDOW_H
 #define _OCTREE_RENDERER_WINDOW_H
 
-#include "Window.h"
+#include "OctreeWindow.h"
 
 #include "Shader.h"
 #include "Program.h"
 
 class OctreeRendererWindow
-:   public Window {
+:   public OctreeWindow {
     public:
         explicit                 OctreeRendererWindow(int argc, char** argv, int2 dimensions, ProgramState* state);
 

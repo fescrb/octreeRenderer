@@ -3,6 +3,7 @@
 
 #ifdef _LINUX
     #include <CL/cl.h>
+    #include <CL/cl_gl.h>
 #endif //_LINUX
 
 #ifdef _OSX

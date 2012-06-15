@@ -14,7 +14,7 @@
 #include <vector>
 
 OctreeRendererWindow::OctreeRendererWindow(int argc, char** argv, int2 dimensions, ProgramState* state)
-:   Window(argc, argv, dimensions, false),
+:   OctreeWindow(argc, argv, dimensions, false),
     m_pProgramState(state){
     setRenderWindow(this);
 
@@ -102,6 +102,7 @@ void OctreeRendererWindow::render() {
         glEnd();
     }
 
+    glBindTexture(GL_TEXTURE_2D, 0);
     glutSwapBuffers();
 }
 
@@ -110,7 +111,7 @@ void OctreeRendererWindow::idle() {
 };
 
 void OctreeRendererWindow::resize(GLint width, GLint height) {
-    Window::resize(width, height);
+    OctreeWindow::resize(width, height);
 
     // Set up viewport and parallel projection.
     glViewport(0, 0, width, height);

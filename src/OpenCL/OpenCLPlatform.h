@@ -3,13 +3,7 @@
 
 #include <vector>
 
-#ifdef _LINUX
-    #include <CL/cl.h>
-#endif //_LINUX
-
-#ifdef _OSX
-    #include <OpenCL/cl.h>
-#endif //_OSX
+#include "CLIncludes.h"
 
 class OpenCLPlatformInfo;
 class OpenCLDevice;
