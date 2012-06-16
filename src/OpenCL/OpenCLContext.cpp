@@ -32,7 +32,7 @@ OpenCLContext::OpenCLContext() {
 
 	// We initialize the platforms.
 	for(int i = 0; i < num_of_platforms; i++) {
-		m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i]));
+        m_vpPlatforms.push_back(new OpenCLPlatform(platform_ids[i]));
         
         /*#ifdef _LINUX
             std::string name(m_vpPlatforms[m_vpPlatforms.size()-1]->getInfo()->getName());

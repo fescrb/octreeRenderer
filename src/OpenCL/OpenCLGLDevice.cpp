@@ -24,7 +24,7 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
         
         glTexImage2D(GL_TEXTURE_2D,
                     0,
-                    GL_RGB,
+                    GL_RGBA,
                     size.getX(),
                     size.getY(),
                     0,
@@ -32,7 +32,8 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
                     GL_UNSIGNED_BYTE,
                     m_pFrame);
     }
-    glGenTextures(1, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glFlush();
     cl_int error;
     
     if(size != m_frameBufferResolution) {
@@ -108,7 +109,10 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
     }
     
     error = clEnqueueAcquireGLObjects(m_commandQueue, 1, &m_frameBuff, 0, NULL, NULL);
-
+    if(clIsError(error)){
+        clPrintError(error); //exit(1);
+    }
+    clFlush(m_commandQueue);
     
     size_t origin[2] = {0, 0};
     size_t region[2] = {size[0], size[1]};
@@ -119,5 +123,42 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
 }
 
 framebuffer_window OpenCLGLDevice::getFrameBuffer() {
+    cl_int error;
     
+    framebuffer_window window;
+    
+    if(!getTotalTaskWindow().getWidth()) {
+        window.window = rect(int2(),int2());
+        window.texture = 0;
+        return window;
+    }
+    
+    /*unsigned char* frame = getFrame();
+    
+    for(int i = 0; i < getTotalTaskWindow().getWidth() * getTotalTaskWindow().getHeight() * 4; i++)
+        if(frame[i] != 0)
+            printf("not 0\n");*/
+
+    error = clWaitForEvents(1, &m_eventRenderingFinished);
+    if(clIsError(error)){
+        clPrintError(error);
+    }
+    
+    renderEnd();
+    m_transferStart.reset();
+    
+    error = clEnqueueReleaseGLObjects(m_commandQueue, 1, &m_frameBuff, 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error);
+    }
+    
+    clFlush(m_commandQueue);
+    
+    
+    window.window = rect(int2(),int2(m_frameBufferResolution));
+    window.texture = m_texture;
+    
+    m_transferEnd.reset();
+    
+    return window;
 }

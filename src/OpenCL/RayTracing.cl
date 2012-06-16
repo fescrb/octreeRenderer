@@ -304,7 +304,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 }
 
 kernel void clear_framebuffer(write_only image2d_t frameBuff) {
-    write_imageui ( frameBuff, (int2)(get_global_id(0), get_global_id(1)), (uint4)(0, 0, 0, 0));
+    write_imagef ( frameBuff, (int2)(get_global_id(0), get_global_id(1)), (float4)(0, 0, 0, 0));
 }
 
 kernel void clear_depthbuffer(write_only image2d_t depthBuff) {
@@ -352,14 +352,19 @@ kernel void ray_trace(global char* octree,
         green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
-        uint4 color = (uint4)(red, green, blue, 255);
-        //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
-        //char color_per_level = 255/(((global int*)header)[0] - 1);
-        //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
-        //float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
-        //uint4 color = (uint4)(255*dep, 255*dep, 255*dep, 255);
+        if(get_image_channel_data_type(frameBuff) == CLK_UNSIGNED_INT8) {
+            uint4 color = (uint4)(red, green, blue, 255);
+            write_imageui ( frameBuff, (int2)(x, y), color);
+        } else {
+            float4 color = (float4)(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
+            //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
+            //char color_per_level = 255/(((global int*)header)[0] - 1);
+            //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
+            //float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
+            //uint4 color = (uint4)(255*dep, 255*dep, 255*dep, 255);
 
-        write_imageui ( frameBuff, (int2)(x, y), color);
+            write_imagef ( frameBuff, (int2)(x, y), color);
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 #include "OpenCLPlatform.h"
 #include "OpenCLPlatformInfo.h"
 #include "OpenCLDevice.h"
+#include "OpenCLGLDevice.h"
 
 #include "OpenCLUtils.h"
 
@@ -50,7 +51,10 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
             clPrintError(err); return;
         }
         
-        m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
+        if(m_pPlatformInfo->getAllowsOpenGLSharing()) 
+            m_vpDevices.push_back(new OpenCLGLDevice(aDevice_ids[i], context));
+        else
+            m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
         //m_vpDevices.insert(m_vpDevices.begin(), new OpenCLDevice(aDevice_ids[i], context));
 	}
 }

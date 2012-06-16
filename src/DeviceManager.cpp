@@ -185,7 +185,6 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 
     setPerDeviceTasks(resolution);
 
-    #pragma omp parallel for 
 	for(int i = 0; i < devices; i++)
 		device_list[i]->makeFrameBuffer(resolution);
 
