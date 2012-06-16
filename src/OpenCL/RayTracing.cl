@@ -3,8 +3,9 @@
 #define F32_EPSILON 1E-6
 #define OCTREE_ROOT_HALF_SIZE 1.0f
 
-#define WINDOW_SIZE 64
-#define WINDOW_PIXEL_COUNT 4096
+#define WINDOW_SIZE 32
+#define WINDOW_PIXEL_COUNT 1024
+#define RAY_BUNDLE_WINDOW_SIZE 4
 
 struct renderinfo{
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
@@ -307,34 +308,53 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 }
 
 kernel void calculate_costs(read_only image2d_t itBuff, write_only global uint* costs) {
-    local uint local_costs[WINDOW_SIZE*WINDOW_SIZE];
+    local uint local_costs[WINDOW_PIXEL_COUNT];
 
     sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
     int x = get_global_id(0);
-    int y = get_global_id(1);
-    int index = x%WINDOW_SIZE + ((y%WINDOW_SIZE)*WINDOW_SIZE);
+    const int height = get_image_height(itBuff);
+    //int index = x%WINDOW_SIZE + ((y%WINDOW_SIZE)*WINDOW_SIZE);
 
-    float4 val = read_imagef(itBuff, sampler, (int2)(x, y));
+    uint val = 0;
+    for(int y = 0; y < height; y++) {
+        val+= (read_imagef(itBuff, sampler, (int2)(x, y))).x;
+    }
+
+    local_costs[x%RAY_BUNDLE_WINDOW_SIZE] = val;
     
-    local_costs[index] = val.x;
+    barrier(CLK_LOCAL_MEM_FENCE);
+
+    if(x%RAY_BUNDLE_WINDOW_SIZE==0) {
+        for(int i = 1; i < RAY_BUNDLE_WINDOW_SIZE; i++) {
+            val+= local_costs[i];
+        }
+        costs[x/WINDOW_SIZE] = val;
+    }
+    /*//uint val = (read_imagef(itBuff, sampler, (int2)(x, y))).x;
+    
+    //local_costs[index] = val;
 
     for(int fact = 1; fact < WINDOW_SIZE*WINDOW_SIZE; fact*=2) {
         if(index%(fact*2)==0) {
-            local_costs[index] = local_costs[index] + local_costs[index+fact];
+            //local_costs[index] = local_costs[index] + local_costs[index+fact];
         }
         
-        barrier(CLK_LOCAL_MEM_FENCE);
+        //barrier(CLK_LOCAL_MEM_FENCE);
     }
 
     if(index == 0) {
         int y_step = get_image_width(itBuff)/WINDOW_SIZE;
 
-        costs[x/WINDOW_SIZE+((y/WINDOW_SIZE)*y_step)] = local_costs[0];
-    }
+        //costs[x/WINDOW_SIZE+((y/WINDOW_SIZE)*y_step)] = local_costs[0];
+    }*/
 }
 
 kernel void clear_buffer(write_only image2d_t buffer) {
     write_imagef(buffer, (int2)(get_global_id(0), get_global_id(1)), (float4)(0.0f, 0.0f, 0.0f, 0.0f));
+}
+
+kernel void clear_uintbuffer(write_only global uint* costs) {
+    costs[get_global_id(0)] = 0;
 }
 
 kernel void ray_trace(global char* octree,

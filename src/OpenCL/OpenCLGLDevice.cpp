@@ -149,7 +149,6 @@ framebuffer_window OpenCLGLDevice::getFrameBuffer() {
         clPrintError(error);
     }
     
-    renderEnd();
     m_transferStart.reset();
     
     error = clEnqueueReleaseGLObjects(m_commandQueue, 1, &m_frameBuff, 0, NULL, NULL);

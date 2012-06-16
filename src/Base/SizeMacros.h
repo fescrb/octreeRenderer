@@ -1,0 +1,8 @@
+#ifndef _SIZE_MACROS_H
+#define _SIZE_MACROS_H
+
+#define WINDOW_SIZE 32
+
+#define RAY_BUNDLE_WINDOW_SIZE 4
+
+#endif //_SIZE_MACROS_H

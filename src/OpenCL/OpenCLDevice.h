@@ -26,6 +26,9 @@ class OpenCLDevice:
         void                         calculateCostsForTask(int index);
         virtual framebuffer_window   getFrameBuffer();
         unsigned char               *getFrame();
+        unsigned int                *getCosts();
+        
+        void                         renderEnd();
 
         cl_context                   getOpenCLContext();
         cl_device_id                 getOpenCLDeviceID();
@@ -44,6 +47,8 @@ class OpenCLDevice:
         cl_kernel                    m_rayTraceKernel;
         cl_kernel                    m_rayBundleTraceKernel;
         cl_kernel                    m_clearBufferKernel;
+        cl_kernel                    m_calculateCostsKernel;
+        cl_kernel                    m_clearCostsKernel;
 
         GLuint                       m_texture;
 

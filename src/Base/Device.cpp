@@ -2,11 +2,14 @@
 
 #include "DeviceInfo.h"
 
+#include "SizeMacros.h"
+
 #include <cstdlib>
 
-Device::Device()
+Device::Device(bool software_clear)
 :   m_pFrame(0),
-    m_renderMode(COLOUR){
+    m_renderMode(COLOUR),
+    m_software_clear(software_clear){
     m_tasks = std::vector<rect>();
     m_frameBufferResolution = int2();
 }
@@ -32,21 +35,24 @@ void Device::makeFrameBuffer(int2 size) {
         m_pDepthBuffer = (float*)malloc(sizeof(float)*size[0]*size[1]);
         m_pIterations = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);
         m_pOctreeDepth = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);
+        m_pCosts = (unsigned int*)malloc(sizeof(unsigned int)*(size[0]/WINDOW_SIZE)*(size[1]/WINDOW_SIZE));
         m_frameBufferResolution = size;
     }
 
     // Clear.
-    int i = 0;
-    int bufferSize = m_frameBufferResolution[0]*m_frameBufferResolution[1];
-    while ( i < bufferSize) {
-        m_pFrame[(i*4)  ]=0;
-        m_pFrame[(i*4)+1]=0;
-        m_pFrame[(i*4)+2]=0;
-        m_pFrame[(i*4)+3]=0;
-        m_pDepthBuffer[i] = 0.0f;
-        m_pIterations[i] = 0;
-        m_pOctreeDepth[i] = 0;
-        i++;
+    if(m_software_clear) {
+        int i = 0;
+        int bufferSize = m_frameBufferResolution[0]*m_frameBufferResolution[1];
+        while ( i < bufferSize) {
+            m_pFrame[(i*4)  ]=0;
+            m_pFrame[(i*4)+1]=0;
+            m_pFrame[(i*4)+2]=0;
+            m_pFrame[(i*4)+3]=0;
+            m_pDepthBuffer[i] = 0.0f;
+            m_pIterations[i] = 0;
+            m_pOctreeDepth[i] = 0;
+            i++;
+        }
     }
 }
 

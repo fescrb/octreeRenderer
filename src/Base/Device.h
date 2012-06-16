@@ -12,15 +12,13 @@
 
 #include <vector>
 
-#define RAY_BUNDLE_WINDOW_SIZE 8
-
 class DeviceInfo;
 class OctreeSegment;
 class renderinfo;
 
 class Device {
     public:
-		explicit                     Device();
+		explicit                     Device(bool software_clear = true);
         virtual                     ~Device();
 
 		virtual char                *getName();
@@ -53,9 +51,10 @@ class Device {
          */
         virtual framebuffer_window   getFrameBuffer() = 0;
         virtual unsigned char       *getFrame() = 0;
+        virtual unsigned int        *getCosts() = 0;
         
         void                         renderStart();
-        void                         renderEnd();
+        virtual void                 renderEnd();
 
         high_res_timer               getRenderTime();
         high_res_timer               getBufferToTextureTime();
@@ -78,6 +77,7 @@ class Device {
         float                       *m_pDepthBuffer;
         unsigned char               *m_pIterations;
         unsigned char               *m_pOctreeDepth;
+        unsigned int                *m_pCosts;
         
         int2                         m_frameBufferResolution;
 
@@ -90,6 +90,8 @@ class Device {
         high_res_timer               m_renderEnd;
         high_res_timer               m_transferStart;
         high_res_timer               m_transferEnd;
+        
+        bool                         m_software_clear;
 };
 
 #endif // _DEVICE_H

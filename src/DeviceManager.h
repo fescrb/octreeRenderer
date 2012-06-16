@@ -11,8 +11,6 @@
 #include "Graphics.h"
 #include "FramebufferWindow.h"
 
-#define WINDOW_SIZE 64
-
 class Device;
 class Context;
 class DataManager;

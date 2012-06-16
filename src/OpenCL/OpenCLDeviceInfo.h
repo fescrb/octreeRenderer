@@ -24,7 +24,11 @@ class OpenCLDeviceInfo
 		cl_device_type	 m_deviceType;
 		unsigned int 	 m_maxComputeUnits;
 		unsigned int 	 m_maxComputeUnitFrequency;
+        unsigned int     m_maxWorkGroupSize;
+        size_t           m_workSizesDimensions;
+        size_t          *m_maxWorkGroupSizes;
 		unsigned long	 m_globalMemorySize;
+        unsigned long    m_localMemorySize;
         cl_image_format *m_image_formats;
         cl_uint          m_format_count;
 };

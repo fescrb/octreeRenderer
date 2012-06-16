@@ -15,6 +15,8 @@
 	#include "SerialContext.h"
 #endif
 
+#include "SizeMacros.h"
+
 #include <cstdio>
 
 DeviceManager::DeviceManager(DataManager *dataManager, int2 resolution)
@@ -111,7 +113,8 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             total_pps+=m_vDeviceCharacteristics[i].pixels_per_second;
         }
         
-        int total_window_count = m_division_window_count[0] * m_division_window_count[1];
+        int total_rows = m_division_window_count[0];
+        int total_window_count = total_rows* m_division_window_count[1];
         
         std::vector<division_window> unset_windows;
         
@@ -125,20 +128,11 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
         for (int i = 0; i < device_count; i++) {
             getDevice(i)->clearTasks();
 
-            int count = total_window_count * (m_vDeviceCharacteristics[i].pixels_per_second/total_pps);
+            int count = total_rows * (m_vDeviceCharacteristics[i].pixels_per_second/total_pps);
             
-            //printf("Device %d pps %f total_pps %f count %d \n", i, m_vDeviceCharacteristics[i].pixels_per_second, total_pps, count);
-            
-            //if(!i) {
-            //    size.setX(size.getX()+(domain_resolution.getX()%device_count));
-            //}
-
+            getDevice(i)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*WINDOW_SIZE, domain_resolution.getY())));
+            count*=m_division_window_count[1];
             for(int j = 0; j < count; j++) {
-                getDevice(i)->addTask(unset_windows[0].window);
-                /*printf("Device %d gets window %d %d, %d %d\n", i, unset_windows[0].window.getX(),
-                                                                  unset_windows[0].window.getY(), 
-                                                                  unset_windows[0].window.getWidth() ,
-                                                                  unset_windows[0].window.getHeight());*/
                 unset_windows.erase(unset_windows.begin());
             }
             
@@ -151,8 +145,12 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
         }
         
         while(unset_windows.size() != 0) {
-            getDevice(0)->addTask(unset_windows[0].window);
-            unset_windows.erase(unset_windows.begin());
+            int count = 1;
+            getDevice(0)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*WINDOW_SIZE, domain_resolution.getY())));
+            count*=m_division_window_count[1];
+            for(int j = 0; j < count; j++) {
+                unset_windows.erase(unset_windows.begin());
+            }
         }
         //exit(1);
     }
@@ -201,10 +199,19 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
         #pragma omp parallel for 
         for(int j = 0; j < device_list[i]->getTaskCount(); j++)
             device_list[i]->renderTask(j);
+        //#pragma omp parallel for 
+        //for(int j = 0; j < device_list[i]->getTaskCount(); j++)
+            //device_list[i]->calculateCostsForTask(j);
+        
+        device_list[i]->renderEnd();
     }
 
-	for(int i = 0; i < devices; i++)
+    std::vector<const unsigned int*> costs;
+    
+	for(int i = 0; i < devices; i++) {
 		fb_windows.push_back(device_list[i]->getFrameBuffer());
+        //costs.push_back(device_list[i]->getCosts());
+    }
 
     getFrameTimeResults(resolution);
 
