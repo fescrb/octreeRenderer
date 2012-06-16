@@ -1,4 +1,4 @@
-#define STACK_SIZE 10
+#define STACK_SIZE 12
 
 #define F32_EPSILON 1E-6
 #define OCTREE_ROOT_HALF_SIZE 1.0f
