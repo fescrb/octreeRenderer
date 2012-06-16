@@ -3,6 +3,9 @@
 #define F32_EPSILON 1E-6
 #define OCTREE_ROOT_HALF_SIZE 1.0f
 
+#define WINDOW_SIZE 64
+#define WINDOW_PIXEL_COUNT 4096
+
 struct renderinfo{
 	float3 eyePos, viewDir, up, viewPortStart, viewStep;
 	float eyePlaneDist, fov, pixel_half_size;
@@ -14,7 +17,7 @@ struct renderinfo{
 struct collission {
     global char* node_pointer;
     float t;
-    unsigned char iterations;
+    unsigned short iterations;
     unsigned char depth_in_octree;
 };
 
@@ -172,7 +175,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 }
 
 struct collission find_collission(global char* octree, float3 origin, float3 direction, float t, float pixel_half_size) {
-    unsigned char it = 0;
+    unsigned short it = 0;
     unsigned char depth_in_octree = 0;
 
 	float half_size = OCTREE_ROOT_HALF_SIZE;
@@ -303,19 +306,43 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 	return col;
 }
 
-kernel void clear_framebuffer(write_only image2d_t frameBuff) {
-    write_imagef ( frameBuff, (int2)(get_global_id(0), get_global_id(1)), (float4)(0, 0, 0, 0));
+kernel void calculate_costs(read_only image2d_t itBuff, write_only global uint* costs) {
+    local uint local_costs[WINDOW_SIZE*WINDOW_SIZE];
+
+    sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
+    int x = get_global_id(0);
+    int y = get_global_id(1);
+    int index = x%WINDOW_SIZE + ((y%WINDOW_SIZE)*WINDOW_SIZE);
+
+    float4 val = read_imagef(itBuff, sampler, (int2)(x, y));
+    
+    local_costs[index] = val.x;
+
+    for(int fact = 1; fact < WINDOW_SIZE*WINDOW_SIZE; fact*=2) {
+        if(index%(fact*2)==0) {
+            local_costs[index] = local_costs[index] + local_costs[index+fact];
+        }
+        
+        barrier(CLK_LOCAL_MEM_FENCE);
+    }
+
+    if(index == 0) {
+        int y_step = get_image_width(itBuff)/WINDOW_SIZE;
+
+        costs[x/WINDOW_SIZE+((y/WINDOW_SIZE)*y_step)] = local_costs[0];
+    }
 }
 
-kernel void clear_depthbuffer(write_only image2d_t depthBuff) {
-    write_imagef ( depthBuff, (int2)(get_global_id(0), get_global_id(1)), (float4)(0.0f, 0.0f, 0.0f, 0.0f));
+kernel void clear_buffer(write_only image2d_t buffer) {
+    write_imagef(buffer, (int2)(get_global_id(0), get_global_id(1)), (float4)(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 kernel void ray_trace(global char* octree,
                       global char* header,
                       struct renderinfo info,
                       write_only image2d_t frameBuff,
-                      read_only  image2d_t depthBuff) {
+                      read_only  image2d_t depthBuff,
+                      write_only image2d_t itBuff) {
     int x = get_global_id(0);
 	int y = get_global_id(1);
 
@@ -323,7 +350,7 @@ kernel void ray_trace(global char* octree,
     float3 d = o-info.eyePos;
     o = info.eyePos;
 
-    sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_LINEAR;
+    sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
     float4 t_start = read_imagef(depthBuff, sampler, (int2)(x,y));
 
 	struct collission col = find_collission(octree, o, d, t_start.x, info.pixel_half_size);
@@ -366,6 +393,7 @@ kernel void ray_trace(global char* octree,
             write_imagef ( frameBuff, (int2)(x, y), color);
         }
     }
+    write_imagef( itBuff, (int2)(x, y), (float4)(col.iterations));
 }
 
 kernel void trace_bundle(global char* octree,

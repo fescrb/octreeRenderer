@@ -207,6 +207,6 @@ const char* clGetImageChannelTypeString(cl_channel_type channel_type) {
         case CL_FLOAT:
             return "CL_FLOAT";
         default:
-            return "Channel order invalid or unknown";
+            return "Channel type  invalid or unknown";
     }
 }

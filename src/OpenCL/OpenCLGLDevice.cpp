@@ -36,6 +36,9 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
     glFlush();
     cl_int error;
     
+    size_t origin[2] = {0, 0};
+    size_t region[2] = {size[0], size[1]};
+    
     if(size != m_frameBufferResolution) {
         if(m_frameBufferResolution[0]) {
             error = clReleaseMemObject(m_frameBuff);
@@ -64,12 +67,12 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error);
         }
-        /*image_format.image_channel_order = CL_UNSIGNED_INT8;
-        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+        cl_image_format it_image_format = {CL_R, CL_UNSIGNED_INT16};
+        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &it_image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
         }
-        m_octreeDepthBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
+        /*m_octreeDepthBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
         }*/
@@ -86,18 +89,22 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        error = clSetKernelArg( m_clearFrameBuffKernel, 0, sizeof(cl_mem), &m_frameBuff);
+        error = clSetKernelArg( m_rayTraceKernel, 5, sizeof(cl_mem), &m_iterationsBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-
-        error = clSetKernelArg( m_clearDepthBuffKernel, 0, sizeof(cl_mem), &m_depthBuff);
+        
+        error = clSetKernelArg( m_clearBufferKernel, 0, sizeof(cl_mem), &m_depthBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        size_t origin[2] = {0, 0};
-        size_t region[2] = {size[0], size[1]};
-        error = clEnqueueNDRangeKernel( m_commandQueue, m_clearDepthBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
+        
+        error = clEnqueueNDRangeKernel( m_commandQueue, m_clearBufferKernel, 2, origin, region, NULL, 0, NULL, NULL);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        
+        error = clSetKernelArg( m_clearBufferKernel, 0, sizeof(cl_mem), &m_frameBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
@@ -114,9 +121,7 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
     }
     clFlush(m_commandQueue);
     
-    size_t origin[2] = {0, 0};
-    size_t region[2] = {size[0], size[1]};
-    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearFrameBuffKernel, 2, origin, region, NULL, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearBufferKernel, 2, origin, region, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
