@@ -113,30 +113,28 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             total_pps+=m_vDeviceCharacteristics[i].pixels_per_second;
         }
         
-        int total_rows = m_division_window_count[0];
-        int total_window_count = total_rows* m_division_window_count[1];
-        
         std::vector<division_window> unset_windows;
         
         //printf("division res %d %d\n", m_division_window_count[0], m_division_window_count[1]);
         
-        for(int i = 0; i < total_window_count; i++) {
-            //printf("%d is %d,%d\n", i, i/m_division_window_count[0],i%m_division_window_count[0]);
-            unset_windows.push_back(m_division_windows[i/m_division_window_count[1]][i%m_division_window_count[1]]);   
+        for(int i = 0; i < m_division_window_count; i++) {
+            unset_windows.push_back(m_division_windows[i]);   
         }
 
         for (int i = 0; i < device_count; i++) {
             getDevice(i)->clearTasks();
 
-            int count = total_rows * (m_vDeviceCharacteristics[i].pixels_per_second/total_pps);
+            int count = m_division_window_count * (m_vDeviceCharacteristics[i].pixels_per_second/total_pps);
+            if(i == 0)
+                count++;
             
-            getDevice(i)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*WINDOW_SIZE, domain_resolution.getY())));
-            count*=m_division_window_count[1];
+            getDevice(i)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*RAY_BUNDLE_WINDOW_SIZE, domain_resolution.getY())));
             for(int j = 0; j < count; j++) {
                 unset_windows.erase(unset_windows.begin());
             }
             
             /*printf("------------\n");
+            printf("div count %d total %d\n", count, m_division_window_count);
             printf("Device %d totl window %d %d, %d %d\n", i, getDevice(i)->getTotalTaskWindow().getX(),
                                                               getDevice(i)->getTotalTaskWindow().getY(), 
                                                               getDevice(i)->getTotalTaskWindow().getWidth() ,
@@ -146,13 +144,11 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
         
         while(unset_windows.size() != 0) {
             int count = 1;
-            getDevice(0)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*WINDOW_SIZE, domain_resolution.getY())));
-            count*=m_division_window_count[1];
+            getDevice(0)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*RAY_BUNDLE_WINDOW_SIZE, domain_resolution.getY())));
             for(int j = 0; j < count; j++) {
                 unset_windows.erase(unset_windows.begin());
             }
         }
-        //exit(1);
     }
 }
 
@@ -199,9 +195,9 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
         #pragma omp parallel for 
         for(int j = 0; j < device_list[i]->getTaskCount(); j++)
             device_list[i]->renderTask(j);
-        //#pragma omp parallel for 
-        //for(int j = 0; j < device_list[i]->getTaskCount(); j++)
-            //device_list[i]->calculateCostsForTask(j);
+        #pragma omp parallel for 
+        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
+            device_list[i]->calculateCostsForTask(j);
         
         device_list[i]->renderEnd();
     }
@@ -210,7 +206,7 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
     
 	for(int i = 0; i < devices; i++) {
 		fb_windows.push_back(device_list[i]->getFrameBuffer());
-        //costs.push_back(device_list[i]->getCosts());
+        costs.push_back(device_list[i]->getCosts());
     }
 
     getFrameTimeResults(resolution);
@@ -228,16 +224,13 @@ std::vector<Device*> DeviceManager::getDeviceList() {
 }
 
 void DeviceManager::createDivisionWindows(int2 domain_resolution) {
-    m_division_window_count = int2(domain_resolution[0]/WINDOW_SIZE, domain_resolution[1]/WINDOW_SIZE);
+    m_division_window_count = domain_resolution[0]/RAY_BUNDLE_WINDOW_SIZE;
     
-    m_division_windows = (division_window**) malloc (sizeof(division_window*) * m_division_window_count[0]);
+    m_division_windows = (division_window*) malloc (sizeof(division_window) * m_division_window_count);
     
-    for(int x = 0; x < m_division_window_count[0]; x++) {
-        m_division_windows[x] = (division_window*) malloc (sizeof(division_window) * m_division_window_count[1]);
-        for(int y = 0; y < m_division_window_count[1]; y++) {
-            division_window this_window;
-            this_window.window = rect(int2(x*WINDOW_SIZE, y*WINDOW_SIZE), int2(WINDOW_SIZE, WINDOW_SIZE));
-            m_division_windows[x][y] = this_window;
-        }
+    for(int x = 0; x < m_division_window_count; x++) {
+        division_window this_window;
+        this_window.window = rect(int2(x*RAY_BUNDLE_WINDOW_SIZE, 0), int2(RAY_BUNDLE_WINDOW_SIZE, domain_resolution[1]));
+        m_division_windows[x] = this_window;
     }
 }

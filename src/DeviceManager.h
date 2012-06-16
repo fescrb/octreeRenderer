@@ -54,8 +54,8 @@ class DeviceManager {
         std::vector<device_characteristics>
                                          m_vDeviceCharacteristics;
 
-        division_window                **m_division_windows;
-        int2                             m_division_window_count;
+        division_window                 *m_division_windows;
+        int                              m_division_window_count;
 
         void                             createDivisionWindows(int2 domain_resolution);
         

@@ -35,7 +35,7 @@ void Device::makeFrameBuffer(int2 size) {
         m_pDepthBuffer = (float*)malloc(sizeof(float)*size[0]*size[1]);
         m_pIterations = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);
         m_pOctreeDepth = (unsigned char*)malloc(sizeof(unsigned char)*size[0]*size[1]);
-        m_pCosts = (unsigned int*)malloc(sizeof(unsigned int)*(size[0]/WINDOW_SIZE)*(size[1]/WINDOW_SIZE));
+        m_pCosts = (unsigned int*)malloc(sizeof(unsigned int)*(size[0]/RAY_BUNDLE_WINDOW_SIZE));
         m_frameBufferResolution = size;
     }
 

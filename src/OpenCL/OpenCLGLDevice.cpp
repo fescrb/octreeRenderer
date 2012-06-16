@@ -2,6 +2,8 @@
 
 #include "OpenCLUtils.h"
 
+#include "SizeMacros.h"
+
 OpenCLGLDevice::OpenCLGLDevice(cl_device_id device_id, cl_context context)
 :   OpenCLDevice(device_id, context){
     
@@ -67,10 +69,10 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error);
         }
-        cl_image_format it_image_format = {CL_R, CL_UNSIGNED_INT16};
-        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &it_image_format, size[0], size[1], 0, NULL, &error);
+        cl_image_format it_image_format = {CL_INTENSITY, CL_FLOAT};
+        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &it_image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
-            clPrintError(error);
+            clPrintError(error); exit(1);
         }
         /*m_octreeDepthBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
@@ -108,6 +110,25 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
+        
+        // FOR COST CREATION
+        error = clSetKernelArg(m_calculateCostsKernel, 0, sizeof(cl_mem), &m_iterationsBuff);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        m_windowCosts = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, sizeof(cl_uint)*(size[0]/RAY_BUNDLE_WINDOW_SIZE), NULL, &error);
+        error = clSetKernelArg(m_calculateCostsKernel, 1, sizeof(cl_mem), &m_windowCosts);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
+        //error = clSetKernelArg( m_calculateCostsKernel, 2, sizeof(cl_uint)*(WINDOW_SIZE)*(WINDOW_SIZE), NULL);
+        //if(clIsError(error)){
+        //    clPrintError(error); exit(1);
+        //}
+        error = clSetKernelArg( m_clearCostsKernel, 0, sizeof(cl_mem), &m_windowCosts);
+        if(clIsError(error)){
+            clPrintError(error); exit(1);
+        }
 
         /*error = clEnqueueWriteImage(m_commandQueue, m_frameBuff, CL_FALSE, origin, region, region[0]*4, 0, m_pFrame, 0, NULL, NULL);
         if(clIsError(error)){
@@ -119,9 +140,15 @@ void OpenCLGLDevice::makeFrameBuffer(int2 size) {
     if(clIsError(error)){
         clPrintError(error); //exit(1);
     }
-    clFlush(m_commandQueue);
+    clFinish(m_commandQueue);
     
     error = clEnqueueNDRangeKernel( m_commandQueue, m_clearBufferKernel, 2, origin, region, NULL, 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    size_t clear_origin[1] = {0};
+    size_t clear_region[1] = {(size[0]/RAY_BUNDLE_WINDOW_SIZE)};
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearCostsKernel, 1, clear_origin, clear_region, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }

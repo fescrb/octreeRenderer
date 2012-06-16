@@ -308,45 +308,27 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 }
 
 kernel void calculate_costs(read_only image2d_t itBuff, write_only global uint* costs) {
-    local uint local_costs[WINDOW_PIXEL_COUNT];
+    local uint local_costs[RAY_BUNDLE_WINDOW_SIZE];
 
     sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
     int x = get_global_id(0);
     const int height = get_image_height(itBuff);
-    //int index = x%WINDOW_SIZE + ((y%WINDOW_SIZE)*WINDOW_SIZE);
 
     uint val = 0;
     for(int y = 0; y < height; y++) {
-        val+= (read_imagef(itBuff, sampler, (int2)(x, y))).x;
+        val+= (read_imagef(itBuff, sampler, (int2)(x, y))).x*512.0f;
     }
 
-    local_costs[x%RAY_BUNDLE_WINDOW_SIZE] = val;
+    local_costs[get_local_id(0)] = val;
     
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    if(x%RAY_BUNDLE_WINDOW_SIZE==0) {
+    if(get_local_id(0)==0) {
         for(int i = 1; i < RAY_BUNDLE_WINDOW_SIZE; i++) {
             val+= local_costs[i];
         }
-        costs[x/WINDOW_SIZE] = val;
+        costs[x/RAY_BUNDLE_WINDOW_SIZE] = val;
     }
-    /*//uint val = (read_imagef(itBuff, sampler, (int2)(x, y))).x;
-    
-    //local_costs[index] = val;
-
-    for(int fact = 1; fact < WINDOW_SIZE*WINDOW_SIZE; fact*=2) {
-        if(index%(fact*2)==0) {
-            //local_costs[index] = local_costs[index] + local_costs[index+fact];
-        }
-        
-        //barrier(CLK_LOCAL_MEM_FENCE);
-    }
-
-    if(index == 0) {
-        int y_step = get_image_width(itBuff)/WINDOW_SIZE;
-
-        //costs[x/WINDOW_SIZE+((y/WINDOW_SIZE)*y_step)] = local_costs[0];
-    }*/
 }
 
 kernel void clear_buffer(write_only image2d_t buffer) {
@@ -400,11 +382,12 @@ kernel void ray_trace(global char* octree,
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
         if(get_image_channel_data_type(frameBuff) == CLK_UNSIGNED_INT8) {
-            uint4 color = (uint4)(red, green, blue, 255);
+            //uint4 color = (uint4)(red, green, blue, 255);
+            uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
             write_imageui ( frameBuff, (int2)(x, y), color);
         } else {
-            float4 color = (float4)(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
-            //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
+            //float4 color = (float4)(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
+            float4 color = (float4)(col.iterations/255.0f, col.iterations/255.0f, col.iterations/255.0f, 1.0f);
             //char color_per_level = 255/(((global int*)header)[0] - 1);
             //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
             //float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
@@ -413,7 +396,7 @@ kernel void ray_trace(global char* octree,
             write_imagef ( frameBuff, (int2)(x, y), color);
         }
     }
-    write_imagef( itBuff, (int2)(x, y), (float4)(col.iterations));
+    write_imagef(itBuff, (int2)(x, y), (float4)(col.iterations/512.0f)); 
 }
 
 kernel void trace_bundle(global char* octree,

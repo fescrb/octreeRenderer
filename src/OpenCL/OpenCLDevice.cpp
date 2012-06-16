@@ -116,7 +116,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
             clPrintError(error);
         }
         cl_image_format it_image_format = {CL_INTENSITY, CL_FLOAT};
-        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_WRITE_ONLY, &it_image_format, size[0], size[1], 0, NULL, &error);
+        m_iterationsBuff = clCreateImage2D ( m_context, CL_MEM_READ_WRITE, &it_image_format, size[0], size[1], 0, NULL, &error);
         if(clIsError(error)){
             clPrintError(error);
         }
@@ -162,7 +162,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
-        m_windowCosts = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, sizeof(cl_uint)*(size[0]/WINDOW_SIZE)*(size[1]/WINDOW_SIZE), NULL, &error);
+        m_windowCosts = clCreateBuffer(m_context, CL_MEM_WRITE_ONLY, sizeof(cl_uint)*(size[0]/RAY_BUNDLE_WINDOW_SIZE), NULL, &error);
         error = clSetKernelArg( m_calculateCostsKernel, 1, sizeof(cl_mem), &m_windowCosts);
         if(clIsError(error)){
             clPrintError(error); exit(1);
@@ -186,7 +186,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
         clPrintError(error); exit(1);
     }
     size_t clear_origin[1] = {0};
-    size_t clear_region[1] = {(size[0]/WINDOW_SIZE)*(size[1]/WINDOW_SIZE)};
+    size_t clear_region[1] = {(size[0]/RAY_BUNDLE_WINDOW_SIZE)};
     error = clEnqueueNDRangeKernel( m_commandQueue, m_clearCostsKernel, 1, clear_origin, clear_region, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
@@ -300,17 +300,18 @@ void OpenCLDevice::calculateCostsForTask(int index) {
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
-
-    /*
-     * We now trace the rays
-     */
+    
+    cl_int error = clSetKernelArg(m_calculateCostsKernel, 0, sizeof(cl_mem), &m_iterationsBuff);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
     
 
     size_t offset[1] = {window.getOrigin()[0]};
     size_t dimensions[1] = {window.getSize()[0]};
     size_t work_group[1] = {RAY_BUNDLE_WINDOW_SIZE};
-    //printf("offset %d %d dimensions %d %d work_group %d %d\n", offset[0], offset[1], dimensions[0], dimensions[1], work_group[0], work_group[1]);
-    cl_int error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 1, offset, dimensions, work_group, 0, NULL, NULL);
+    printf("offset %d  dimensions %d  work_group %d \n", offset[0], dimensions[0], work_group[0]);
+    error = clEnqueueNDRangeKernel(m_commandQueue, m_calculateCostsKernel, 1, offset, dimensions, work_group, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -424,12 +425,15 @@ unsigned char* OpenCLDevice::getFrame() {
 }
 
 unsigned int* OpenCLDevice::getCosts() {
+    if(getTotalTaskWindow().getWidth()==0 ) {
+        return 0;
+    }
     
     clEnqueueReadBuffer(m_commandQueue, 
                         m_windowCosts, 
                         CL_FALSE, 
                         0, 
-                        sizeof(cl_uint)*(m_frameBufferResolution[0]/WINDOW_SIZE)*(m_frameBufferResolution[1]/WINDOW_SIZE),
+                        sizeof(cl_uint)*(m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE),
                         m_pCosts,
                         0,
                         NULL,
@@ -437,12 +441,11 @@ unsigned int* OpenCLDevice::getCosts() {
     
     clFinish(m_commandQueue);
     
-    for(int y = 0; y < (m_frameBufferResolution[1]/WINDOW_SIZE); y++) {
-        for(int x = 0; x < (m_frameBufferResolution[0]/WINDOW_SIZE); x++) {
-            printf("%d ", m_pCosts[x + (y*(m_frameBufferResolution[0]/WINDOW_SIZE))]);
-        }
-        printf("\n");
+    for(int x = 0; x < (m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE); x++) {
+        printf("%d ", m_pCosts[x]);
     }
+    printf("\n");
+
     
     return m_pCosts;
 }
