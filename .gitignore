@@ -16,3 +16,6 @@ octreeRenderer.layout
 *.voct
 Debug/*
 *log
+*sponza*
+*hairball*
+*sibenik*
