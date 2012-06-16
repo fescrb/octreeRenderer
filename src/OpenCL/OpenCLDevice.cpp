@@ -45,6 +45,13 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
     m_rayBundleTraceKernel = m_pProgram->getOpenCLKernel("trace_bundle");
     m_clearFrameBuffKernel = m_pProgram->getOpenCLKernel("clear_framebuffer");
     m_clearDepthBuffKernel = m_pProgram->getOpenCLKernel("clear_depthbuffer");
+    
+    cl_int bundle_window_size = RAY_BUNDLE_WINDOW_SIZE;
+    
+    err = clSetKernelArg( m_rayBundleTraceKernel, 3, sizeof(cl_int), &bundle_window_size);
+    if(clIsError(err)){
+        clPrintError(err); exit(1);
+    }
 }
 
 OpenCLDevice::~OpenCLDevice(){
@@ -150,7 +157,20 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 }
 
 void OpenCLDevice::sendData(Bin bin){
-    clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+    cl_int error = clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+    
+    error = clSetKernelArg( m_rayBundleTraceKernel, 0, sizeof(cl_mem), &m_memory);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
 }
 
 void OpenCLDevice::sendHeader(Bin bin) {
@@ -163,19 +183,42 @@ void OpenCLDevice::sendHeader(Bin bin) {
         clPrintError(err); return;
     }
 
-    clEnqueueWriteBuffer(m_commandQueue, m_header, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+    err= clEnqueueWriteBuffer(m_commandQueue, m_header, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+    if(clIsError(err)){
+        clPrintError(err); return;
+    }
+    
+    err = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_mem), &m_header);
+    if(clIsError(err)){
+        clPrintError(err); exit(1);
+    }
+    
+    err = clSetKernelArg( m_rayBundleTraceKernel, 1, sizeof(cl_mem), &m_header);
+    if(clIsError(err)){
+        clPrintError(err); exit(1);
+    }
 }
 
-void OpenCLDevice::renderTask(int index, renderinfo *info) {
+void OpenCLDevice::setRenderInfo(renderinfo *info) {
+    cl_renderinfo cl_info= convert(*info);
+    
+    cl_int error = clSetKernelArg( m_rayBundleTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+
+    error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
+    if(clIsError(error)){
+        clPrintError(error); exit(1);
+    }
+}
+
+void OpenCLDevice::renderTask(int index) {
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
 
     rect bundle_window = rect(window.getOrigin()/RAY_BUNDLE_WINDOW_SIZE, window.getSize()/RAY_BUNDLE_WINDOW_SIZE);
-
-    cl_int bundle_window_size = RAY_BUNDLE_WINDOW_SIZE;
-
-    cl_renderinfo cl_info= convert(*info);
 
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
 
@@ -183,29 +226,11 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
      * We first trace the ray bundles
      */
 
-    cl_int error = clSetKernelArg( m_rayBundleTraceKernel, 0, sizeof(cl_mem), &m_memory);
-    if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-
-    error = clSetKernelArg( m_rayBundleTraceKernel, 1, sizeof(cl_mem), &m_header);
-    if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-
-    error = clSetKernelArg( m_rayBundleTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
-    if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-
-    error = clSetKernelArg( m_rayBundleTraceKernel, 3, sizeof(cl_int), &bundle_window_size);
-    if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
+   
 
     size_t bundle_offset[2] = {bundle_window.getOrigin()[0], bundle_window.getOrigin()[1]};
     size_t bundle_dimensions[2] = {bundle_window.getSize()[0], bundle_window.getSize()[1]};
-    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayBundleTraceKernel, 2, bundle_offset, bundle_dimensions, NULL, 0, NULL, NULL);
+    cl_int error = clEnqueueNDRangeKernel( m_commandQueue, m_rayBundleTraceKernel, 2, bundle_offset, bundle_dimensions, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -213,21 +238,6 @@ void OpenCLDevice::renderTask(int index, renderinfo *info) {
     /*
      * We now trace the rays
      */
-
-	error = clSetKernelArg( m_rayTraceKernel, 0, sizeof(cl_mem), &m_memory);
- 	if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-
-    error = clSetKernelArg( m_rayTraceKernel, 1, sizeof(cl_mem), &m_header);
-    if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
-
-    error = clSetKernelArg( m_rayTraceKernel, 2, sizeof(cl_renderinfo), &cl_info);
- 	if(clIsError(error)){
-        clPrintError(error); exit(1);
-    }
 
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};

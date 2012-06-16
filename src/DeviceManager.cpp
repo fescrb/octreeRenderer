@@ -189,12 +189,16 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 		device_list[i]->makeFrameBuffer(resolution);
 
     for(int i = 0; i < devices; i++)
-        device_list[i]->renderStart();;
+        device_list[i]->renderStart();
 
+    #pragma omp parallel for 
+    for(int i = 0; i < devices; i++)
+        device_list[i]->setRenderInfo(info);
+    
     #pragma omp parallel for 
 	for(int i = 0; i < devices; i++)
         for(int j = 0; j < device_list[i]->getTaskCount(); j++)
-            device_list[i]->renderTask(j,info);
+            device_list[i]->renderTask(j);
 
 	for(int i = 0; i < devices; i++)
 		fb_windows.push_back(device_list[i]->getFrameBuffer());

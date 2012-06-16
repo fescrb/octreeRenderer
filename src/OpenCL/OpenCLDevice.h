@@ -20,7 +20,8 @@ class OpenCLDevice:
         virtual void                 makeFrameBuffer(int2 size);
         void                         sendData(Bin bin);
         void                         sendHeader(Bin bin);
-        void                         renderTask(int index, renderinfo *info);
+        void                         setRenderInfo(renderinfo *info);
+        void                         renderTask(int index);
         virtual framebuffer_window   getFrameBuffer();
         unsigned char               *getFrame();
 

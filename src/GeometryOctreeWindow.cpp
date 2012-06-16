@@ -76,6 +76,7 @@ void GeometryOctreeWindow::render() {
 
 void GeometryOctreeWindow::idle() {
     if(!m_octreeCreator->isConverted()) {
+        render();
         m_octreeCreator->convert();
         m_octreeWriter->write();
     }

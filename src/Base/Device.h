@@ -34,7 +34,8 @@ class Device {
         virtual void                 makeFrameBuffer(int2 size);
         virtual void                 sendData(Bin bin) = 0;
         virtual void                 sendHeader(Bin bin) = 0;
-        virtual void                 renderTask(int index, renderinfo *info) = 0;
+        virtual void                 setRenderInfo(renderinfo *info) = 0;
+        virtual void                 renderTask(int index) = 0;
         //virtual void             render(rect *window, renderinfo *info) = 0;
         
         enum                         RenderMode {
