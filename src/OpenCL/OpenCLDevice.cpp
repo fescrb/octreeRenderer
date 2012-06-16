@@ -217,11 +217,11 @@ void OpenCLDevice::setRenderInfo(renderinfo *info) {
     }
 }
 
-void OpenCLDevice::renderTask(int index) {
+void OpenCLDevice::advanceTask(int index) {
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
-
+    
     rect bundle_window = rect(window.getOrigin()/RAY_BUNDLE_WINDOW_SIZE, window.getSize()/RAY_BUNDLE_WINDOW_SIZE);
 
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
@@ -238,6 +238,12 @@ void OpenCLDevice::renderTask(int index) {
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }
+}
+
+void OpenCLDevice::renderTask(int index) {
+    rect window = m_tasks[index];
+    if(window.getWidth() == 0 || window.getHeight() == 0)
+        return;
 
     /*
      * We now trace the rays
@@ -245,7 +251,7 @@ void OpenCLDevice::renderTask(int index) {
 
     size_t offset[2] = {window.getOrigin()[0], window.getOrigin()[1]};
     size_t dimensions[2] = {window.getSize()[0], window.getSize()[1]};
-    error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
+    cl_int error = clEnqueueNDRangeKernel( m_commandQueue, m_rayTraceKernel, 2, offset, dimensions, NULL, 0, NULL, &m_eventRenderingFinished);
 	if(clIsError(error)){
         clPrintError(error); exit(1);
     }
@@ -256,6 +262,10 @@ void OpenCLDevice::renderTask(int index) {
 	if(clIsError(error)){
 		clPrintError(error);
 	}
+}
+
+void OpenCLDevice::calculateCostsForTask(int index) {
+    
 }
 
 framebuffer_window OpenCLDevice::getFrameBuffer() {

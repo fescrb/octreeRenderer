@@ -195,6 +195,10 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
     #pragma omp parallel for 
 	for(int i = 0; i < devices; i++) {
         device_list[i]->setRenderInfo(info);
+        #pragma omp parallel for 
+        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
+            device_list[i]->advanceTask(j);
+        #pragma omp parallel for 
         for(int j = 0; j < device_list[i]->getTaskCount(); j++)
             device_list[i]->renderTask(j);
     }
