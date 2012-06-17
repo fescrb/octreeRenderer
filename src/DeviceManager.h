@@ -39,11 +39,12 @@ class DeviceManager {
 
 	private:        
         struct device_characteristics {
-            float                        pixels_per_second;
+            float                        it_per_second;
         };
         
         struct division_window {
             rect                         window;
+            unsigned int                 cost;
         };
 
         void                             setPerDeviceTasks(int2 domain_resolution);

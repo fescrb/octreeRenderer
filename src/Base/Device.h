@@ -58,6 +58,7 @@ class Device {
 
         high_res_timer               getRenderTime();
         high_res_timer               getBufferToTextureTime();
+        high_res_timer               getTotalTime();
 
         /*
          * Task-related functions

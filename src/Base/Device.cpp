@@ -126,3 +126,7 @@ high_res_timer Device::getRenderTime() {
 high_res_timer Device::getBufferToTextureTime() {
     return m_transferEnd - m_transferStart;
 }
+
+high_res_timer Device::getTotalTime() {
+    return getRenderTime()+getBufferToTextureTime();
+}

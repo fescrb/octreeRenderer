@@ -90,6 +90,7 @@ OBJFileReader::LineType OBJFileReader::getLineType(const char* line) {
                 return TYPE_VERTEX_DECLARATION;
             if(line[1] == 'n')
                 return TYPE_NORMAL_DECLARATION;
+            break;
         case 'f':
             return TYPE_FACE_DECLARATION;
         case 'm':
@@ -101,6 +102,7 @@ OBJFileReader::LineType OBJFileReader::getLineType(const char* line) {
         default:
             return TYPE_UNKOWN;
     }
+    return TYPE_UNKOWN;
 }
 
 float4 OBJFileReader::getVertexFromLine(char* line) {

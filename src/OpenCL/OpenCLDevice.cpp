@@ -425,10 +425,6 @@ unsigned char* OpenCLDevice::getFrame() {
 }
 
 unsigned int* OpenCLDevice::getCosts() {
-    if(getTotalTaskWindow().getWidth()==0 ) {
-        return 0;
-    }
-    
     clEnqueueReadBuffer(m_commandQueue, 
                         m_windowCosts, 
                         CL_FALSE, 
@@ -441,10 +437,13 @@ unsigned int* OpenCLDevice::getCosts() {
     
     clFinish(m_commandQueue);
     
-    for(int x = 0; x < (m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE); x++) {
-        printf("%d ", m_pCosts[x]);
-    }
-    printf("\n");
+    /*if(getTotalTaskWindow().getWidth() ) {
+        printf("this %p ", this);
+        for(int x = 0; x < (m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE); x++) {
+            printf("%d ", m_pCosts[x]);
+        }
+        printf("\n");
+    }*/
 
     
     return m_pCosts;

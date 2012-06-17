@@ -176,7 +176,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 }
 
 struct collission find_collission(global char* octree, float3 origin, float3 direction, float t, float pixel_half_size) {
-    unsigned short it = 0;
+    unsigned short it = 1;
     unsigned char depth_in_octree = 0;
 
 	float half_size = OCTREE_ROOT_HALF_SIZE;
@@ -382,12 +382,12 @@ kernel void ray_trace(global char* octree,
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
 
         if(get_image_channel_data_type(frameBuff) == CLK_UNSIGNED_INT8) {
-            //uint4 color = (uint4)(red, green, blue, 255);
-            uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
+            uint4 color = (uint4)(red, green, blue, 255);
+            //uint4 color = (uint4)(col.iterations, col.iterations, col.iterations, 255);
             write_imageui ( frameBuff, (int2)(x, y), color);
         } else {
-            //float4 color = (float4)(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
-            float4 color = (float4)(col.iterations/255.0f, col.iterations/255.0f, col.iterations/255.0f, 1.0f);
+            float4 color = (float4)(red/255.0f, green/255.0f, blue/255.0f, 1.0f);
+            //float4 color = (float4)(col.iterations/255.0f, col.iterations/255.0f, col.iterations/255.0f, 1.0f);
             //char color_per_level = 255/(((global int*)header)[0] - 1);
             //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
             //float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);

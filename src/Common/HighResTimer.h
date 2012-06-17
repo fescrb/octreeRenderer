@@ -6,6 +6,12 @@ struct high_res_timer {
 						 high_res_timer();
 		void 			 reset();
 		
+        inline high_res_timer operator+ (const high_res_timer rhs) {
+            high_res_timer timer;
+            timer.m_seconds = m_seconds + rhs.m_seconds;
+            return timer;
+        }
+        
 		inline high_res_timer operator-(const high_res_timer rhs) {
 			high_res_timer timer;
 			timer.m_seconds = m_seconds -rhs.m_seconds;
