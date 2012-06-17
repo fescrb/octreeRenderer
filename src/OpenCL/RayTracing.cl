@@ -178,9 +178,13 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
 	float half_size = OCTREE_ROOT_HALF_SIZE;
 
-	float3 corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
-								 direction.y >= 0 ? half_size : -half_size,
-								 direction.z >= 0 ? half_size : -half_size);
+    float3 corner_far_step = (float3)(direction.x >= 0 ? half_size : -half_size,
+                                      direction.y >= 0 ? half_size : -half_size,
+                                      direction.z >= 0 ? half_size : -half_size);
+
+    const float3 vector_two = (float3)(2.0f, 2.0f, 2.0f);
+
+	float3 corner_far = corner_far_step;
 
 	float3 corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
 
@@ -218,14 +222,13 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
                 float nodeHalfSize = half_size/2.0f;
+                float3 tmp_corner_far_step = corner_far_step/vector_two;
                 
                 float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
-												 xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
-												 xyz_flag & 4 ? voxelCentre.z + nodeHalfSize : voxelCentre.z - nodeHalfSize);
+                                                 xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
+                                                 xyz_flag & 4 ? voxelCentre.z + nodeHalfSize : voxelCentre.z - nodeHalfSize);
                 
-                float3 tmp_corner_far = (float3)(direction.x >= 0 ? tmpNodeCentre.x + nodeHalfSize : tmpNodeCentre.x - nodeHalfSize,
-												 direction.y >= 0 ? tmpNodeCentre.y + nodeHalfSize : tmpNodeCentre.y - nodeHalfSize,
-												 direction.z >= 0 ? tmpNodeCentre.z + nodeHalfSize : tmpNodeCentre.z - nodeHalfSize);
+                float3 tmp_corner_far = tmpNodeCentre+tmp_corner_far_step;
                 
                 float tmp_max = min_component((tmp_corner_far - origin) / direction);
                 
@@ -246,6 +249,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 
                     depth_in_octree++;
                     half_size = nodeHalfSize;
+                    corner_far_step = tmp_corner_far_step;
                     
                 } else {
                     /* If the child is empty, we step the ray. */
@@ -256,21 +260,21 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                 curr_index--;
                 if(curr_index>=0) {
                     /* Pop that stack! */
-					voxelCentre = short_stack[curr_index].node_centre;
-					curr_address = short_stack[curr_index].address;
-					t_max = short_stack[curr_index].t_max;
+                    voxelCentre = short_stack[curr_index].node_centre;
+                    curr_address = short_stack[curr_index].address;
+                    t_max = short_stack[curr_index].t_max;
                     half_size*=2;
+                    corner_far_step*=vector_two;
                     depth_in_octree--;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
-					curr_index = 0;
+                    curr_index = 0;
                     curr_address = octree;
                     half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
-					corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
-										  direction.y >= 0 ? half_size : -half_size,
-										  direction.z >= 0 ? half_size : -half_size);
-					t_max = min_component((corner_far - origin) / direction);
+                    corner_far_step*=vector_two;
+                    corner_far = (float3)(corner_far_step);
+                    t_max = min_component((corner_far - origin) / direction);
                     depth_in_octree = 0;
                 }
             }
