@@ -201,10 +201,13 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
     } else {
         m_frameCount++;
         for(int i = 0; i < m_vDeviceList.size(); i++) {
-            m_vDeviceCharacteristics[i].it_per_second = (((m_frameCount-1.0f)/m_frameCount)*(m_vDeviceCharacteristics[i].it_per_second))+((1.0f/m_frameCount)*(per_device_work_done[i]/((double)m_vDeviceList[i]->getTotalTime())));
-            /*printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
+            m_vDeviceCharacteristics[i].it_per_second = (((m_frameCount-1.0f)/m_frameCount)*(m_vDeviceCharacteristics[i].it_per_second)) + 
+                                                         ((1.0f/m_frameCount)*(per_device_work_done[i]/((double)m_vDeviceList[i]->getTotalTime())));
+            if(m_vDeviceList[i]->isCPU())
+                m_vDeviceCharacteristics[i].it_per_second*=0.9f;
+            printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
                                                                                    ((double)m_vDeviceList[i]->getBufferToTextureTime()),
-                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));*/
+                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));
         }
     }
 }

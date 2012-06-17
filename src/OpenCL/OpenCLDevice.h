@@ -34,6 +34,8 @@ class OpenCLDevice:
         cl_device_id                 getOpenCLDeviceID();
 
         void                         onRenderingFinished();
+        
+        bool                         isCPU();
 
     protected:
 

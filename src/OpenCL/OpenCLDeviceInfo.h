@@ -15,7 +15,6 @@ class OpenCLDeviceInfo
         
         char            *getName();
 
-	private:
 		char			*m_sDeviceName;
 
 		char			*m_sDeviceVendorString;

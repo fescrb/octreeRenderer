@@ -30,7 +30,9 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 		clPrintError(err); return;
 	}
     
-	for(int i = 0; i < 1; i++) {
+    bool primary_gpu_shared = false;
+    
+	for(int i = 0; i < device_num; i++) {
 		// Create the context.
         // TODO: fix properties
         cl_context context;
@@ -51,9 +53,10 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
             clPrintError(err); return;
         }
         
-        if(m_pPlatformInfo->getAllowsOpenGLSharing()) 
+        if(m_pPlatformInfo->getAllowsOpenGLSharing() && !primary_gpu_shared) { 
             m_vpDevices.push_back(new OpenCLGLDevice(aDevice_ids[i], context));
-        else
+            primary_gpu_shared = true;
+        } else
             m_vpDevices.push_back(new OpenCLDevice(aDevice_ids[i], context));
         //m_vpDevices.insert(m_vpDevices.begin(), new OpenCLDevice(aDevice_ids[i], context));
 	}
