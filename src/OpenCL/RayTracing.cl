@@ -24,7 +24,7 @@ struct collission {
 
 struct stack{
 	global char* address;
-	float3 far_corner, node_centre, corner_close;
+	float3 node_centre;
 	float t_max;
 };
 
@@ -158,7 +158,7 @@ global char* getChild(global char* node, char xyz_flag) {
     return node + (diff*4);
 }
 
-int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 corner_far, float3 voxelCentre, float3 corner_close, float t_max) {
+int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 voxelCentre, float t_max) {
 	if(curr_index >= STACK_SIZE) {
 		curr_index = STACK_SIZE - 1;
 		for(int i = 1; i < STACK_SIZE; i++) 
@@ -166,10 +166,8 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	}
 	
 	short_stack[curr_index].address = curr_address;
-	short_stack[curr_index].far_corner = corner_far;
 	short_stack[curr_index].node_centre = voxelCentre;
 	short_stack[curr_index].t_max = t_max;
-    short_stack[curr_index].corner_close = corner_close;
 	curr_index++;
 	return curr_index;
 }
@@ -240,7 +238,7 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                         break;
                     }
                     
-                    curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, corner_close, t_max);
+                    curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
                     curr_address = getChild(curr_address, xyz_flag);
                     voxelCentre = tmpNodeCentre;
@@ -258,11 +256,9 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
                 curr_index--;
                 if(curr_index>=0) {
                     /* Pop that stack! */
-                    corner_far = short_stack[curr_index].far_corner;
 					voxelCentre = short_stack[curr_index].node_centre;
 					curr_address = short_stack[curr_index].address;
 					t_max = short_stack[curr_index].t_max;
-                    corner_close = short_stack[curr_index].corner_close;
                     half_size*=2;
                     depth_in_octree--;
                 } else {
@@ -274,10 +270,6 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 					corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
 										  direction.y >= 0 ? half_size : -half_size,
 										  direction.z >= 0 ? half_size : -half_size);
-
-					corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
-
-					t_min = max_component((corner_close - origin) / direction); 
 					t_max = min_component((corner_far - origin) / direction);
                     depth_in_octree = 0;
                 }
@@ -453,6 +445,12 @@ kernel void trace_bundle(global char* octree,
             /*If we are inside the node*/
             if(t < t_max) {
                  // We check if all rays fit
+                corner_far = (float3)(d_lower_right.x >= 0 ? voxelCentre.x + half_size : voxelCentre.x - half_size,
+                                      d_lower_right.y >= 0 ? voxelCentre.y + half_size : voxelCentre.y - half_size,
+                                      d_lower_right.z >= 0 ? voxelCentre.z + half_size : voxelCentre.z - half_size);
+                corner_close = (float3)(d_lower_right.x >= 0 ? voxelCentre.x - half_size : voxelCentre.x + half_size,
+                                        d_lower_right.y >= 0 ? voxelCentre.y - half_size : voxelCentre.y + half_size,
+                                        d_lower_right.z >= 0 ? voxelCentre.z - half_size : voxelCentre.z + half_size);
                 if(max_component((corner_close - origin)/d_lower_right) >= min_component((corner_far - origin) / d_lower_right)) 
                     collission = true;
                 
@@ -463,7 +461,7 @@ kernel void trace_bundle(global char* octree,
                     collission = true;
                 
                 if(collission) {
-                    //t = t_prev;
+                    t = t_prev;
                     break;
                 }
                 
@@ -491,15 +489,11 @@ kernel void trace_bundle(global char* octree,
                         break;
                     }
                     
-                    curr_index = push(short_stack, curr_index, curr_address, corner_far, voxelCentre, corner_close, t_max);
+                    curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
                     curr_address = getChild(curr_address, xyz_flag);
-                    
-                    corner_far = tmp_corner_far;
+
                     voxelCentre = tmpNodeCentre;
-                    corner_close =  (float3)(direction.x >= 0 ? voxelCentre.x - nodeHalfSize : voxelCentre.x + nodeHalfSize,
-                                             direction.y >= 0 ? voxelCentre.y - nodeHalfSize : voxelCentre.y + nodeHalfSize,
-                                             direction.z >= 0 ? voxelCentre.z - nodeHalfSize : voxelCentre.z + nodeHalfSize);
                     t_max = tmp_max;
                     half_size = nodeHalfSize;
                     
@@ -513,11 +507,9 @@ kernel void trace_bundle(global char* octree,
                 curr_index--;
                 if(curr_index>=0) {
                     /* Pop that stack! */
-                    corner_far = short_stack[curr_index].far_corner;
                     voxelCentre = short_stack[curr_index].node_centre;
                     curr_address = short_stack[curr_index].address;
                     t_max = short_stack[curr_index].t_max;
-                    corner_close = short_stack[curr_index].corner_close;
                     half_size*=2;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
@@ -529,9 +521,6 @@ kernel void trace_bundle(global char* octree,
                                           direction.y >= 0 ? half_size : -half_size,
                                           direction.z >= 0 ? half_size : -half_size);
 
-                    corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
-
-                    t_min = max_component((corner_close - origin) / direction); 
                     t_max = min_component((corner_far - origin) / direction);
                 }
             }
