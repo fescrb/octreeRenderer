@@ -65,6 +65,9 @@ void OctreeRendererWindow::initGL() {
 }
 
 void OctreeRendererWindow::render() {
+    high_res_timer start;
+    start.reset();
+    
     glClear(GL_COLOR_BUFFER_BIT);
 
     std::vector<framebuffer_window> fb_windows = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getrenderinfo(), m_size);
@@ -104,6 +107,11 @@ void OctreeRendererWindow::render() {
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glutSwapBuffers();
+    
+    high_res_timer end;
+    end.reset();
+    
+    printf("Frame time is %f\n", end - start);
 }
 
 void OctreeRendererWindow::idle() {
