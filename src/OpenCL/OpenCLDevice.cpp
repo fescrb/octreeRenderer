@@ -35,7 +35,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 
     // Create octree memory in the object, the host will only write, not read. And the device will only read.
     // We make it 512MB for now
-    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 512*1024*1024, NULL, &err);
+    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 550*1024*1024, NULL, &err);
 
     if(clIsError(err)){
         clPrintError(err); return;
@@ -310,7 +310,7 @@ void OpenCLDevice::calculateCostsForTask(int index) {
     size_t offset[1] = {window.getOrigin()[0]};
     size_t dimensions[1] = {window.getSize()[0]};
     size_t work_group[1] = {RAY_BUNDLE_WINDOW_SIZE};
-    printf("offset %d  dimensions %d  work_group %d \n", offset[0], dimensions[0], work_group[0]);
+    //printf("offset %d  dimensions %d  work_group %d \n", offset[0], dimensions[0], work_group[0]);
     error = clEnqueueNDRangeKernel(m_commandQueue, m_calculateCostsKernel, 1, offset, dimensions, work_group, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);

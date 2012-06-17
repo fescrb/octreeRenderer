@@ -159,6 +159,8 @@ void OctreeRendererWindow::recalculateViewportVectors() {
 
     float stepMagnitude = fabs((info->eyePlaneDist * tan(info->fov/2.0f))/(float)m_size[1]);
     
+    viewportStep.setY(0.0f);
+    
     viewportStep = normalize(viewportStep) * stepMagnitude;
     
     up = normalize(up) * stepMagnitude;
@@ -204,7 +206,7 @@ void OctreeRendererWindow::mouseDragEvent(int x_displacement, int y_displacement
     
     if(y_angle_change!=0.0f) {
         info->viewDir = info->viewDir + (info->up * y_angle_change);
-        info->viewDir = normalize(info->viewDir);;
+        info->viewDir = normalize(info->viewDir);
         info->up = cross(info->viewStep, info->viewDir) * mag(info->up);
         recalculateViewportVectors();
     }
@@ -239,5 +241,8 @@ void OctreeRendererWindow::keyPressEvent(unsigned char key) {
     }
     if(key == 'o' || key == 'O') {
         m_pProgramState->getDeviceManager()->setRenderMode(Device::OCTREE_DEPTH);
+    }
+    if(key == 'v' || key == 'V') {
+        m_pProgramState->getrenderinfo()->print();
     }
 }

@@ -146,7 +146,7 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             getDevice(i)->clearTasks();
             getDevice(i)->addTask(total_work_window);
             
-            printf("------------\n");
+            /*printf("------------\n");
             printf("Device %d totl it %f this it %f cost %f\n", i, total_it,
                                                               m_vDeviceCharacteristics[i].it_per_second, 
                                                               cost);
@@ -154,7 +154,7 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
                                                               getDevice(i)->getTotalTaskWindow().getY(), 
                                                               getDevice(i)->getTotalTaskWindow().getWidth() ,
                                                               getDevice(i)->getTotalTaskWindow().getHeight());
-            printf("------------\n");
+            printf("------------\n");*/
         }
         
         while(unset_windows.size() != 0) {
@@ -202,15 +202,16 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
         dev_c.it_per_second = per_device_work_done[m_vDeviceCharacteristics.size()]/((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getTotalTime());
         
         
-        printf("New Device pps %f per_device_work_done %d render time %f transfer time %f\n", dev_c.it_per_second,  per_device_work_done[m_vDeviceCharacteristics.size()],
+        /*printf("New Device pps %f per_device_work_done %d render time %f transfer time %f\n", dev_c.it_per_second,  per_device_work_done[m_vDeviceCharacteristics.size()],
                                                                       ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getRenderTime()), 
-                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));
+                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));*/
         m_vDeviceCharacteristics.push_back(dev_c);
     } else {
         for(int i = 0; i < m_vDeviceList.size(); i++) {
             m_vDeviceCharacteristics[i].it_per_second = per_device_work_done[i]/((double)m_vDeviceList[i]->getTotalTime());
-            printf("Device %d render time %f transfer time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
-                                                                     ((double)m_vDeviceList[i]->getBufferToTextureTime()));
+            printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
+                                                                                   ((double)m_vDeviceList[i]->getBufferToTextureTime()),
+                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));
         }
     }
 }
