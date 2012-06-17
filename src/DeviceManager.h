@@ -57,6 +57,7 @@ class DeviceManager {
 
         division_window                 *m_division_windows;
         int                              m_division_window_count;
+        float                            m_frameCount;
 
         void                             createDivisionWindows(int2 domain_resolution);
         

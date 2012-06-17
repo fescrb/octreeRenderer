@@ -111,7 +111,7 @@ void OctreeRendererWindow::render() {
     high_res_timer end;
     end.reset();
     
-    printf("Frame time is %f\n", end - start);
+    printf("%f\n", end - start);
 }
 
 void OctreeRendererWindow::idle() {

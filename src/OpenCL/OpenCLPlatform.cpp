@@ -30,7 +30,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
 		clPrintError(err); return;
 	}
     
-	for(int i = 0; i < device_num; i++) {
+	for(int i = 0; i < 1; i++) {
 		// Create the context.
         // TODO: fix properties
         cl_context context;

@@ -18,9 +18,11 @@
 #include "SizeMacros.h"
 
 #include <cstdio>
+#include <CL/cl_platform.h>
 
 DeviceManager::DeviceManager(DataManager *dataManager, int2 resolution)
-:	m_pDataManager(dataManager){
+:	m_pDataManager(dataManager),
+    m_frameCount(1.0f) {
     createDivisionWindows(resolution);
 }
 
@@ -118,23 +120,18 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             total_it+=m_division_windows[i].cost;
         }
         
-        std::vector<division_window> unset_windows;
-        
-        //printf("division res %d %d\n", m_division_window_count[0], m_division_window_count[1]);
-        
-        for(int i = 0; i < m_division_window_count; i++) {
-            unset_windows.push_back(m_division_windows[i]);   
-        }
+        int unset_index = 0;
 
         for (int i = 0; i < device_count; i++) {
             getDevice(i)->clearTasks();
 
             float cost = total_it * (m_vDeviceCharacteristics[i].it_per_second/total_itps);
             
-            while(cost>0.0f && unset_windows.size() > 0) {
-                getDevice(i)->addTask(unset_windows[0].window);
-                cost-=unset_windows[0].cost;
-                unset_windows.erase(unset_windows.begin());
+            int unset_start = unset_index;
+            
+            while(cost>0.0f && unset_index < m_division_window_count) {
+                cost-=m_division_windows[unset_index].cost;
+                unset_index++;
             }
             
             //getDevice(i)->addTask(rect(unset_windows[0].window.getOrigin(),int2(count*RAY_BUNDLE_WINDOW_SIZE, domain_resolution.getY())));
@@ -142,9 +139,7 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             //    unset_windows.erase(unset_windows.begin());
             //}
 
-            rect total_work_window = getDevice(i)->getTotalTaskWindow();
-            getDevice(i)->clearTasks();
-            getDevice(i)->addTask(total_work_window);
+            getDevice(i)->addTask(rect(m_division_windows[unset_start].window.getOrigin(),int2(RAY_BUNDLE_WINDOW_SIZE*(unset_index-unset_start),domain_resolution.getY())));
             
             /*printf("------------\n");
             printf("Device %d totl it %f this it %f cost %f\n", i, total_it,
@@ -157,9 +152,9 @@ void DeviceManager::setPerDeviceTasks(int2 domain_resolution) {
             printf("------------\n");*/
         }
         
-        while(unset_windows.size() != 0) {
-            getDevice(getNumDevices()-1)->addTask(unset_windows[0].window);
-            unset_windows.erase(unset_windows.begin());
+        while(unset_index != m_division_window_count) {
+            getDevice(getNumDevices()-1)->addTask(m_division_windows[unset_index].window);
+            unset_index++;
         }
         
         //exit(1);
@@ -172,14 +167,12 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
     const unsigned int *costs[devices];
     
     // Fetch costs
-    #pragma omp parallel for 
     for(int i = 0; i < devices; i++) 
         costs[i] = m_vDeviceList[i]->getCosts();
     
     unsigned long per_device_work_done[devices];
     
     // Calculate work done per device
-    #pragma omp parallel for 
     for(int i = 0; i < devices; i++) {
         unsigned long total_work_done = 0;
         for(int j = 0; j < m_division_window_count; j++)
@@ -188,7 +181,6 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
     }
     
     // Update costs
-    #pragma omp parallel for 
     for(int i = 0; i < m_division_window_count; i++) {
         unsigned int total_work = 0;
         for(int j = 0; j < devices; j++)
@@ -207,11 +199,12 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
                                                                       ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));*/
         m_vDeviceCharacteristics.push_back(dev_c);
     } else {
+        m_frameCount++;
         for(int i = 0; i < m_vDeviceList.size(); i++) {
-            m_vDeviceCharacteristics[i].it_per_second = per_device_work_done[i]/((double)m_vDeviceList[i]->getTotalTime());
-            printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
+            m_vDeviceCharacteristics[i].it_per_second = (((m_frameCount-1.0f)/m_frameCount)*(m_vDeviceCharacteristics[i].it_per_second))+((1.0f/m_frameCount)*(per_device_work_done[i]/((double)m_vDeviceList[i]->getTotalTime())));
+            /*printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
                                                                                    ((double)m_vDeviceList[i]->getBufferToTextureTime()),
-                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));
+                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));*/
         }
     }
 }
@@ -223,7 +216,11 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
 
 	std::vector<Device*> device_list = getDeviceList();
 
-    setPerDeviceTasks(resolution);
+    
+    if(devices>1)
+        setPerDeviceTasks(resolution);
+    else
+        device_list[0]->addTask(rect(int2(),resolution));
 
 	for(int i = 0; i < devices; i++)
 		device_list[i]->makeFrameBuffer(resolution);
@@ -231,30 +228,27 @@ std::vector<framebuffer_window> DeviceManager::renderFrame(renderinfo *info, int
     for(int i = 0; i < devices; i++)
         device_list[i]->renderStart();
         
-    
-    #pragma omp parallel for 
-	for(int i = 0; i < devices; i++) {
-        device_list[i]->setRenderInfo(info);
+    if(devices>1) {
         #pragma omp parallel for 
-        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
-            device_list[i]->advanceTask(j);
-        #pragma omp parallel for 
-        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
-            device_list[i]->renderTask(j);
-        #pragma omp parallel for 
-        for(int j = 0; j < device_list[i]->getTaskCount(); j++)
-            device_list[i]->calculateCostsForTask(j);
-        
-        device_list[i]->renderEnd();
+        for(int i = 0; i < devices; i++) {
+            device_list[i]->setRenderInfo(info);
+            device_list[i]->advanceTask(0);
+            device_list[i]->renderTask(0);
+            device_list[i]->calculateCostsForTask(0);
+            
+            device_list[i]->renderEnd();
+        }
+    } else {
+        device_list[0]->setRenderInfo(info);
+        device_list[0]->advanceTask(0);
+        device_list[0]->renderTask(0);
     }
-
-    
     
 	for(int i = 0; i < devices; i++) {
 		fb_windows.push_back(device_list[i]->getFrameBuffer());
     }
-
-    getFrameTimeResults(resolution);
+    if(devices>1)
+        getFrameTimeResults(resolution);
 
 	return fb_windows;
 }

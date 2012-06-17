@@ -251,6 +251,9 @@ void OpenCLDevice::setRenderInfo(renderinfo *info) {
 }
 
 void OpenCLDevice::advanceTask(int index) {
+    if(index>=m_tasks.size())
+        return;
+    
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
@@ -271,6 +274,9 @@ void OpenCLDevice::advanceTask(int index) {
 }
 
 void OpenCLDevice::renderTask(int index) {
+    if(index>=m_tasks.size())
+        return;
+    
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
@@ -297,6 +303,9 @@ void OpenCLDevice::renderTask(int index) {
 }
 
 void OpenCLDevice::calculateCostsForTask(int index) {
+    if(index>=m_tasks.size())
+        return;
+    
     rect window = m_tasks[index];
     if(window.getWidth() == 0 || window.getHeight() == 0)
         return;
