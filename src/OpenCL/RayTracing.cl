@@ -16,14 +16,14 @@ struct renderinfo{
 };
 
 struct collission {
-    global char* node_pointer;
+    read_only global char* node_pointer;
     float t;
     unsigned short iterations;
     unsigned char depth_in_octree;
 };
 
 struct stack{
-	global char* address;
+	read_only global char* address;
 	float3 node_centre;
 	float t_max;
 };
@@ -44,15 +44,15 @@ float fixed_point_8bit_to_float(char fixed) {
     return fixed*step;
 }
 
-bool no_children(__global char* address) {
+bool no_children(read_only global char* address) {
     return !address[3];
 }
 
-global char* get_attributes(global char* node) {
+read_only global char* get_attributes(read_only global char* node) {
     return node + ((((global unsigned char*)node)[2] >> 4) * 4);
 }
 
-uchar3 getColours(global char* attr) {
+uchar3 getColours(read_only global char* attr) {
     unsigned short rgb_565 = ((global unsigned short*)attr)[0];
     uchar3 colour;
     
@@ -63,7 +63,7 @@ uchar3 getColours(global char* attr) {
     return colour;
 }
 
-float4 getNormal(global char* attr) {
+float4 getNormal(read_only global char* attr) {
     unsigned short normals_short = ((global unsigned short*)attr)[1];
     float4 normal;
     
@@ -112,11 +112,11 @@ char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     return flag;
 }
 
-bool nodeHasChildAt(global char* node, char xyz_flag) {
+bool nodeHasChildAt(read_only global char* node, char xyz_flag) {
 	return node[3] & (1 << xyz_flag);  
 }
 
-global char* getChild(global char* node, char xyz_flag) {
+read_only global char* getChild(read_only global char* node, char xyz_flag) {
     global int *node_int = (global int*)node;
     int pos = 0;//(node_int[0] >> (xyz_flag * 3)) & 0b111;
     switch(xyz_flag) {
@@ -158,7 +158,7 @@ global char* getChild(global char* node, char xyz_flag) {
     return node + (diff*4);
 }
 
-int push(struct stack* short_stack, int curr_index, global char* curr_address, float3 voxelCentre, float t_max) {
+int push(struct stack* short_stack, int curr_index, read_only global char* curr_address, float3 voxelCentre, float t_max) {
 	if(curr_index >= STACK_SIZE) {
 		curr_index = STACK_SIZE - 1;
 		for(int i = 1; i < STACK_SIZE; i++) 
@@ -172,7 +172,7 @@ int push(struct stack* short_stack, int curr_index, global char* curr_address, f
 	return curr_index;
 }
 
-struct collission find_collission(global char* octree, float3 origin, float3 direction, float t, float pixel_half_size) {
+struct collission find_collission(read_only global char* octree, float3 origin, float3 direction, float t, float pixel_half_size) {
     unsigned short it = 1;
     unsigned char depth_in_octree = 0;
 
@@ -194,9 +194,9 @@ struct collission find_collission(global char* octree, float3 origin, float3 dir
 			
 	/* If we are out */
 	if(t < t_min)
-		t = t_min;
+        t = t_min;
 			
-	global char* curr_address = octree;
+	read_only global char* curr_address = octree;
 	float3 voxelCentre = (float3)(0.0f);
 	bool collission = false;	
 	int curr_index = 0;
@@ -311,6 +311,10 @@ kernel void calculate_costs(read_only image2d_t itBuff, write_only global uint* 
     }
 }
 
+kernel void clear_framebuffer(write_only image2d_t buffer) {
+    write_imageui(buffer, (int2)(get_global_id(0), get_global_id(1)), (uint4)(0, 0, 0, 0));
+}
+
 kernel void clear_buffer(write_only image2d_t buffer) {
     write_imagef(buffer, (int2)(get_global_id(0), get_global_id(1)), (float4)(0.0f, 0.0f, 0.0f, 0.0f));
 }
@@ -319,8 +323,8 @@ kernel void clear_uintbuffer(write_only global uint* costs) {
     costs[get_global_id(0)] = 0;
 }
 
-kernel void ray_trace(global char* octree,
-                      global char* header,
+kernel void ray_trace(read_only global char* octree,
+                      read_only global char* header,
                       struct renderinfo info,
                       write_only image2d_t frameBuff,
                       read_only  image2d_t depthBuff,
@@ -342,7 +346,7 @@ kernel void ray_trace(global char* octree,
     float ambient = 0.2f;
 
 	if(col.node_pointer) {
-		global char* attr = get_attributes(col.node_pointer);
+		read_only global char* attr = get_attributes(col.node_pointer);
         
         uchar3 colour = getColours(attr);
 
@@ -379,8 +383,8 @@ kernel void ray_trace(global char* octree,
     write_imagef(itBuff, (int2)(x, y), (float4)(col.iterations/512.0f)); 
 }
 
-kernel void trace_bundle(global char* octree,
-                         global char* header,
+kernel void trace_bundle(read_only global char* octree,
+                         read_only global char* header,
                          struct renderinfo info,
                          int width,
                          write_only  image2d_t depthBuff) {
@@ -427,7 +431,7 @@ kernel void trace_bundle(global char* octree,
     if(t < t_min)
         t = t_min;
             
-    global char* curr_address = octree;
+    read_only global char* curr_address = octree;
     float3 voxelCentre = (float3)(0.0f);
     bool collission = false;    
     int curr_index = 0;

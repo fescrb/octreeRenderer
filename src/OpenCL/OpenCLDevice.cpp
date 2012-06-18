@@ -35,7 +35,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 
     // Create octree memory in the object, the host will only write, not read. And the device will only read.
     // We make it 512MB for now
-    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 750*1024*1024, NULL, &err);
+    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 600*1024*1024, NULL, &err);
 
     if(clIsError(err)){
         clPrintError(err); return;
@@ -46,6 +46,7 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
     m_rayBundleTraceKernel = m_pProgram->getOpenCLKernel("trace_bundle");
     m_clearBufferKernel = m_pProgram->getOpenCLKernel("clear_buffer");
+    m_clearFrameBufferKernel = m_pProgram->getOpenCLKernel("clear_framebuffer");
     m_calculateCostsKernel = m_pProgram->getOpenCLKernel("calculate_costs");
     m_clearCostsKernel = m_pProgram->getOpenCLKernel("clear_uintbuffer");
     
@@ -156,7 +157,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
             clPrintError(error); exit(1);
         }
         
-        error = clSetKernelArg( m_clearBufferKernel, 0, sizeof(cl_mem), &m_frameBuff);
+        error = clSetKernelArg( m_clearFrameBufferKernel, 0, sizeof(cl_mem), &m_frameBuff);
         if(clIsError(error)){
             clPrintError(error); exit(1);
         }
@@ -185,7 +186,7 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
             clPrintError(error);
         }*/
     }
-    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearBufferKernel, 2, origin, region, NULL, 0, NULL, NULL);
+    error = clEnqueueNDRangeKernel( m_commandQueue, m_clearFrameBufferKernel, 2, origin, region, NULL, 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }

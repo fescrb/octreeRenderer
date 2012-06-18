@@ -83,8 +83,8 @@ if(USE_SERIAL)
 	add_definitions(-DUSE_SERIAL)
 endif(USE_SERIAL)
 
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+#if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 	set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_SOURCE_DIR})
-endif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+#endif(${CMAKE_BUILD_TYPE} MATCHES "Debug")
 
 add_subdirectory(src)

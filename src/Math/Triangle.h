@@ -96,6 +96,8 @@ struct triangle {
             double l_l2 = mag(l2);
             
             double cos_angle = (dot(l1,l2)) / (l_l1*l_l2);
+            if(cos_angle == INFINITY || cos_angle == -INFINITY)
+                return 0;
             while(cos_angle > 1.0f)
                 cos_angle-=1.0f;
             while(cos_angle < -1.0f)

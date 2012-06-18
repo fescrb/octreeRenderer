@@ -21,7 +21,7 @@ OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
     
     char *options = (char*) malloc (512);
     
-    sprintf(options, " -D _OCL -I %s ", SourceFileManager::getDefaultInstance()->getShaderLocation());
+    sprintf(options, " -cl-fast-relaxed-math -D _OCL -I %s ", SourceFileManager::getDefaultInstance()->getShaderLocation());
     
 	cl_device_id device_id = device->getOpenCLDeviceID();
 	
