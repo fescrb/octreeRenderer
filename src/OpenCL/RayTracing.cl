@@ -28,27 +28,27 @@ struct stack{
 	float t_max;
 };
 
-float min_component(float3 vector) {
+inline float min_component(const float3 vector) {
 	float minimum = vector.x < vector.y? vector.x : vector.y;
 	return minimum < vector.z ? minimum : vector.z;
 }
 
-float max_component(float3 vector) {
+inline float max_component(const float3 vector) {
 	float maximum = vector.x > vector.y? vector.x : vector.y;
 	return maximum > vector.z ? maximum : vector.z;
 }
 
-float fixed_point_8bit_to_float(char fixed) {
+inline float fixed_point_8bit_to_float(const char fixed) {
     float range =127.0f; // Max value of a 7 bit unsigned integer.
     float step = 1.0f/range;
     return fixed*step;
 }
 
-bool no_children(read_only global char* address) {
-    return !address[3];
+inline bool no_children(const uint node_header) {
+    return !(node_header>>24);
 }
 
-read_only global char* get_attributes(read_only global char* node) {
+inline read_only global char* get_attributes(read_only global char* node) {
     return node + ((((global unsigned char*)node)[2] >> 4) * 4);
 }
 
@@ -82,7 +82,7 @@ float4 getNormal(read_only global char* attr) {
     return normal;
 }
 
-char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
+inline char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     char flag = 0;
 
     if( t >= t_centre_vector.x ) {
@@ -112,34 +112,34 @@ char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
     return flag;
 }
 
-bool nodeHasChildAt(read_only global char* node, char xyz_flag) {
-	return node[3] & (1 << xyz_flag);  
+inline bool nodeHasChildAt(const uint node_header, char xyz_flag) {
+	return (node_header>>24) & (1 << xyz_flag);  
 }
 
-read_only global char* getChild(read_only global char* node, char xyz_flag) {
+inline read_only global char* getChild(const uint node_header, read_only global char* node, char xyz_flag) {
     global int *node_int = (global int*)node;
     int pos = 0;//(node_int[0] >> (xyz_flag * 3)) & 0b111;
     switch(xyz_flag) {
     case 1:
-        pos = node_int[0] & 1;
+        pos = node_header & 1;
         break;
     case 2:
-        pos = (node_int[0] >> 1) & 3;
+        pos = (node_header >> 1) & 3;
         break;
     case 3:
-        pos = (node_int[0] >> 3) & 3;
+        pos = (node_header >> 3) & 3;
         break;
     case 4:
-        pos = (node_int[0] >> 5) & 7;
+        pos = (node_header >> 5) & 7;
         break;
     case 5:
-        pos = (node_int[0] >> 8) & 7;
+        pos = (node_header >> 8) & 7;
         break;
     case 6:
-        pos = (node_int[0] >> 11) & 7;
+        pos = (node_header >> 11) & 7;
         break;
     case 7:
-        pos = (node_int[0] >> 14) & 7;
+        pos = (node_header >> 14) & 7;
         break;
     default:
         break;
@@ -158,7 +158,7 @@ read_only global char* getChild(read_only global char* node, char xyz_flag) {
     return node + (diff*4);
 }
 
-int push(struct stack* short_stack, int curr_index, read_only global char* curr_address, float3 voxelCentre, float t_max) {
+inline int push(struct stack* short_stack, int curr_index, read_only global char* curr_address, float3 voxelCentre, float t_max) {
 	if(curr_index >= STACK_SIZE) {
 		curr_index = STACK_SIZE - 1;
 		for(int i = 1; i < STACK_SIZE; i++) 
@@ -197,6 +197,9 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
         t = t_min;
 			
 	read_only global char* curr_address = octree;
+    read_only global uint* curr_adress_int = (read_only global int*)curr_address;
+    uint node_header = curr_adress_int[0];
+
 	float3 voxelCentre = (float3)(0.0f);
 	bool collission = false;	
 	int curr_index = 0;
@@ -207,7 +210,7 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
 		if(t >= t_out) {
 			collission = true;
 			curr_address = 0;
-		} else if(no_children(curr_address)) {
+		} else if(no_children(node_header)) {
             collission = true;
         } else {
             /*If we are inside the node*/
@@ -226,7 +229,7 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                 
                 float tmp_max = min_component((tmp_corner_far - origin) / direction);
                 
-                if(nodeHasChildAt(curr_address, xyz_flag)) {
+                if(nodeHasChildAt(node_header, xyz_flag)) {
                     /* If the voxel we are at is not empty, go down. */
 
                     // We check for LOD.
@@ -237,7 +240,10 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                     
                     curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
-                    curr_address = getChild(curr_address, xyz_flag);
+                    curr_address = getChild(node_header, curr_address, xyz_flag);
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
+
                     voxelCentre = tmpNodeCentre;
                     t_max = tmp_max;
 
@@ -256,6 +262,8 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                     /* Pop that stack! */
                     voxelCentre = short_stack[curr_index].node_centre;
                     curr_address = short_stack[curr_index].address;
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
                     t_max = short_stack[curr_index].t_max;
                     half_size*=2;
                     corner_far_step*=vector_two;
@@ -264,6 +272,8 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                     /* Since we are using a short stack, we restart from the root node. */
                     curr_index = 0;
                     curr_address = octree;
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
                     half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
                     corner_far_step*=vector_two;
@@ -432,6 +442,8 @@ kernel void trace_bundle(read_only global char* octree,
         t = t_min;
             
     read_only global char* curr_address = octree;
+    read_only global uint* curr_adress_int = (read_only global int*)curr_address;
+    uint node_header = curr_adress_int[0];
     float3 voxelCentre = (float3)(0.0f);
     bool collission = false;    
     int curr_index = 0;
@@ -441,7 +453,7 @@ kernel void trace_bundle(read_only global char* octree,
         if(t >= t_out) {
             collission = true;
             curr_address = 0;
-        } else if(no_children(curr_address)) {
+        } else if(no_children(node_header)) {
             collission = true;
         } else {
             /*If we are inside the node*/
@@ -478,12 +490,14 @@ kernel void trace_bundle(read_only global char* octree,
 
                 float tmp_max = min_component((tmp_corner_far - origin) / direction);
                 
-                if(nodeHasChildAt(curr_address, xyz_flag)) {
+                if(nodeHasChildAt(node_header, xyz_flag)) {
                     /* If the voxel we are at is not empty, go down. */
                     
                     curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
-                    curr_address = getChild(curr_address, xyz_flag);
+                    curr_address = getChild(node_header, curr_address, xyz_flag);
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
 
                     voxelCentre = tmpNodeCentre;
                     t_max = tmp_max;
@@ -503,6 +517,8 @@ kernel void trace_bundle(read_only global char* octree,
                     /* Pop that stack! */
                     voxelCentre = short_stack[curr_index].node_centre;
                     curr_address = short_stack[curr_index].address;
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
                     t_max = short_stack[curr_index].t_max;
                     corner_far_step*=vector_two;
                     corner_far_step_upper_left*=vector_two;
@@ -511,6 +527,8 @@ kernel void trace_bundle(read_only global char* octree,
                     /* Since we are using a short stack, we restart from the root node. */
                     curr_index = 0;
                     curr_address = octree;
+                    curr_adress_int = (read_only global int*)curr_address;
+                    node_header = curr_adress_int[0];
                     half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
                     corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
