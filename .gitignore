@@ -22,3 +22,7 @@ Debug/*
 *_1GPU
 *_2GPU
 *_2GPUCPU
+*_res
+*.png
+*.bmp
+.cccc/*
