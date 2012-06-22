@@ -7,6 +7,7 @@ set(this_sources    ${this_sources}
                     BinReader.cpp
                     RenderInfoWriter.cpp
                     RenderInfoReader.cpp
+                    PNGReader.cpp
                     )
 
 set(this_headers    ${this_headers}
@@ -18,4 +19,5 @@ set(this_headers    ${this_headers}
                     BinReader.h
                     RenderInfoWriter.h
                     RenderInfoReader.h
+                    PNGReader.h
                     )

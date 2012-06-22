@@ -29,13 +29,11 @@ struct stack{
 };
 
 inline float min_component(const float3 vector) {
-	float minimum = vector.x < vector.y? vector.x : vector.y;
-	return minimum < vector.z ? minimum : vector.z;
+	return min(vector.z,min(vector.y,vector.x));
 }
 
 inline float max_component(const float3 vector) {
-	float maximum = vector.x > vector.y? vector.x : vector.y;
-	return maximum > vector.z ? maximum : vector.z;
+	return max(vector.z,max(vector.y,vector.x));
 }
 
 inline float fixed_point_8bit_to_float(const char fixed) {
@@ -82,7 +80,7 @@ float4 getNormal(read_only global char* attr) {
     return normal;
 }
 
-inline char makeXYZFlag(float3 t_centre_vector, float t, float3 direction) {
+inline char makeXYZFlag(const float3 t_centre_vector, const float t, const float3 direction) {
     char flag = 0;
 
     if( t >= t_centre_vector.x ) {

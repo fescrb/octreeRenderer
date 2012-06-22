@@ -53,7 +53,7 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
             clPrintError(err); return;
         }
         
-        if(m_pPlatformInfo->getAllowsOpenGLSharing() && !primary_gpu_shared) { 
+        if(m_pPlatformInfo->getAllowsOpenGLSharing()) { 
             m_vpDevices.push_back(new OpenCLGLDevice(aDevice_ids[i], context));
             primary_gpu_shared = true;
         } else

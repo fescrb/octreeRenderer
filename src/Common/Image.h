@@ -8,9 +8,9 @@ class Image {
 			RGBA
 		};
 	
-		explicit 		 Image(unsigned int width, unsigned int length);
+		explicit 		 Image(unsigned int width, unsigned int height);
 		explicit 		 Image(unsigned int width, 
-							   unsigned int length, 
+							   unsigned int height, 
 							   ImageFormat buffer_format, 
 							   const char* buffer);
 		explicit 		 Image(Image* image);
