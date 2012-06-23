@@ -16,6 +16,8 @@ class Context;
 class DataManager;
 class renderinfo;
 
+using namespace vector;
+
 class DeviceManager {
 	public:
 		explicit 				         DeviceManager(DataManager *dataManager, int2 resolution);

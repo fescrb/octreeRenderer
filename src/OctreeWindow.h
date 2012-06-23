@@ -7,6 +7,8 @@
 
 class ProgramState;
 
+using namespace vector;
+
 class OctreeWindow {
 	public:
 		explicit				 OctreeWindow(int argc, char** argv, int2 dimensions, bool useDepthBuffer = true);

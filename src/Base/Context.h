@@ -7,6 +7,8 @@ class Device;
 
 class Context {
 	public:
+        virtual                         ~Context() {}
+        
 		virtual void					 printDeviceInfo() = 0;
 
 		virtual unsigned int	 		 getNumDevices() = 0;

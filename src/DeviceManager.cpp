@@ -5,15 +5,19 @@
 
 #ifdef USE_OPENCL
 	#include "OpenCLContext.h"
-#endif
+#endif //USE_OPENCL
 
 #ifdef USE_OPENMP
     #include "OpenMPContext.h"
-#endif
+#endif //USE_OPENMP
 
 #ifdef USE_SERIAL
 	#include "SerialContext.h"
-#endif
+#endif //USE_SERIAL
+
+#ifdef USE_CUDA
+    #include "CUDAContext.h"
+#endif //USE_CUDA
 
 #include "SizeMacros.h"
 

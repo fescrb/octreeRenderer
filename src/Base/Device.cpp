@@ -6,6 +6,8 @@
 
 #include <cstdlib>
 
+using namespace vector;
+
 Device::Device(bool software_clear)
 :   m_pFrame(0),
     m_renderMode(COLOUR),

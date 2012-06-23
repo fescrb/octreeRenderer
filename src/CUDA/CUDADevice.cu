@@ -24,7 +24,7 @@ void CUDADevice::sendHeader(Bin bin) {
 
 }
 
-void CUDADevice::makeFrameBuffer(int2 size){
+void CUDADevice::makeFrameBuffer(vector::int2 size){
     Device::makeFrameBuffer(size);
 }
 

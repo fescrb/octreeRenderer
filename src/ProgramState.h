@@ -12,6 +12,8 @@ class renderinfo;
 
 #include "Vector.h"
 
+using namespace vector;
+
 class ProgramState {
     public:
         explicit                 ProgramState(int argc, char** argv, int2 resolution);

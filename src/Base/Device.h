@@ -29,7 +29,7 @@ class Device {
          * We clear the framebuffer if we needen't generate it
          * @param The dimensions of the required framebuffer.
          */
-        virtual void                 makeFrameBuffer(int2 size);
+        virtual void                 makeFrameBuffer(vector::int2 size);
         virtual void                 sendData(Bin bin) = 0;
         virtual void                 sendHeader(Bin bin) = 0;
         virtual void                 setRenderInfo(renderinfo *info) = 0;
@@ -82,7 +82,7 @@ class Device {
         unsigned char               *m_pOctreeDepth;
         unsigned int                *m_pCosts;
         
-        int2                         m_frameBufferResolution;
+        vector::int2                 m_frameBufferResolution;
 
         std::vector<rect>            m_tasks;
         rect                         m_tasksWindow;

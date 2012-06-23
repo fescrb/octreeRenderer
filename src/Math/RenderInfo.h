@@ -7,6 +7,8 @@
 
 #include <cstdio>
 
+using namespace vector;
+
 struct renderinfo {
 	// Scene info. Hard coded. Scene boundaries go from -256 to 256.
 	//float leftCorner[3];

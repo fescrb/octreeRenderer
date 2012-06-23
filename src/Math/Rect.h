@@ -6,14 +6,14 @@
 struct rect {
     public:
                          rect(){};
-        explicit         rect(int2 origin, int2 size): m_origin(origin), m_size(size){};
+        explicit         rect(vector::int2 origin, vector::int2 size): m_origin(origin), m_size(size){};
         explicit         rect(int x, int y, int width, int height):m_origin(x,y), m_size(width,height){};
     
-        int2             getOrigin() const{
+        vector::int2     getOrigin() const{
             return m_origin;
         }
     
-        int2             getSize() const{
+        vector::int2     getSize() const{
             return m_size;
         }
         
@@ -49,7 +49,7 @@ struct rect {
             m_size.setY(newHeight);
         }
     private:
-        int2             m_origin, m_size;
+        vector::int2     m_origin, m_size;
 };
 
 #endif //_RECT_H

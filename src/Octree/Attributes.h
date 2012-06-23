@@ -3,6 +3,8 @@
 
 #include "Vector.h"
 
+using namespace vector;
+
 class Attributes {
 
 	public:

@@ -15,7 +15,7 @@ class CUDADevice
          * We clear the framebuffer if we needen't generate it
          * @param The dimensions of the required framebuffer.
          */
-        void                 makeFrameBuffer(int2 size);
+        void                 makeFrameBuffer(vector::int2 size);
         void                 sendData(Bin bin);
         void                 sendHeader(Bin bin);
         void                 setRenderInfo(renderinfo *info);
