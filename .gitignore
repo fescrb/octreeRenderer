@@ -26,3 +26,4 @@ Debug/*
 *.png
 *.bmp
 .cccc/*
+*.kate-swp
