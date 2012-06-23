@@ -3,6 +3,8 @@
 
 #include "Mesh.h"
 
+#include "Material.h"
+
 class OBJFileReader {
     public:
         explicit                 OBJFileReader(const char* filename);
@@ -11,6 +13,7 @@ class OBJFileReader {
             TYPE_COMMENT, 
             TYPE_VERTEX_DECLARATION,
             TYPE_NORMAL_DECLARATION,
+            TYPE_TEXTURE_COORD_DECLARATION,
             TYPE_FACE_DECLARATION,
             TYPE_MTLLIB_REF,
             TYPE_USEMTL,
@@ -20,6 +23,7 @@ class OBJFileReader {
         struct                   OBJFileData {
             std::vector<float4>  vertexList;
             std::vector<float4>  normalList;
+            std::vector<float4>  textureCoordList;
         };
         
         mesh                     getMesh();
@@ -36,7 +40,7 @@ class OBJFileReader {
          * @param data A pointer to the current obj file status.
          * @return A list of all the triangles defined in the line.
          */
-        std::vector<triangle>    getFacesFromLine(char* line, const OBJFileData* data, float4 diffuse);
+        std::vector<triangle>    getFacesFromLine(char* line, const OBJFileData* data, material use_mtl);
         
         int                      countCharacter(char character, const char* line);
         

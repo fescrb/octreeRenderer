@@ -22,10 +22,11 @@ mesh OBJFileReader::getMesh() {
     // Indexing is different, so we pad.
     data->vertexList.push_back(float4());
     data->normalList.push_back(float4());
+    data->textureCoordList.push_back(float4());
     
     int normalCounter = 0;
     
-    std::map<std::string,float4> materials;
+    std::map<std::string,material> materials;
     std::string mtl_filename = std::string(m_filename);
     size_t backslash_loc = mtl_filename.rfind("/");
     if(backslash_loc == mtl_filename.npos)
@@ -35,7 +36,7 @@ mesh OBJFileReader::getMesh() {
     
     std::string mtl_in_use;
     
-    float4 diffuse = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    material cur_material = material();
     
     while(!in.eof()) {
         char line[1024];
@@ -54,8 +55,12 @@ mesh OBJFileReader::getMesh() {
                 tmp.setW(0.0f);
                 data->normalList.push_back(tmp);
                 break;
+            case TYPE_TEXTURE_COORD_DECLARATION:
+                tmp = getVertexFromLine(line); 
+                data->textureCoordList.push_back(tmp);
+                break;
             case TYPE_FACE_DECLARATION:
-                objMesh.appendTriangles(getFacesFromLine(line,data,diffuse));
+                objMesh.appendTriangles(getFacesFromLine(line,data,cur_material));
                 break;
             case TYPE_MTLLIB_REF:
                 strtok(line," ");
@@ -69,7 +74,7 @@ mesh OBJFileReader::getMesh() {
                 strtok(line," ");
                 filename = strtok(NULL," \n\0");
                 mtl_in_use = std::string(filename);
-                diffuse = materials[mtl_in_use];
+                cur_material = materials[mtl_in_use];
                 break;
             default:
                 ; // We do nothing.
@@ -90,6 +95,8 @@ OBJFileReader::LineType OBJFileReader::getLineType(const char* line) {
                 return TYPE_VERTEX_DECLARATION;
             if(line[1] == 'n')
                 return TYPE_NORMAL_DECLARATION;
+            if(line[1] == 't')
+                return TYPE_TEXTURE_COORD_DECLARATION;
             break;
         case 'f':
             return TYPE_FACE_DECLARATION;
@@ -113,7 +120,7 @@ float4 OBJFileReader::getVertexFromLine(char* line) {
     return float4(atof(x),atof(y),atof(z),1.0f);
 }
 
-std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileData* data, float4 diffuse) {
+std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileData* data, material use_mtl) {
     std::vector<triangle> triangles;
     
     int vertex_count = countCharacter(' ', line);
@@ -132,10 +139,12 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
         char* vertices[3] = {all_vertices[0], all_vertices[vert], all_vertices[vert+1]};
         
         int   vertex_indices[3] = {-1, -1, -1};
+        int   texture_coord_indices[3] = {-1, -1, -1};
         int   normal_indices[3] = {-1, -1, -1};
         
         // Boolean containing whether we haven't declared a normal.
         bool  undeclared_normal = false;
+        bool  has_texture = false;
         
         for(int i = 0; i < 3; i++) {
             int size = strlen(vertices[i]);
@@ -151,6 +160,12 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
             }
             
             vertex_indices[i] = atoi(data[0].data());
+            if(counter >= 1) {
+                if(data[1].size()) {
+                    texture_coord_indices[i] = atoi(data[1].data());
+                    has_texture = true;
+                }
+            }
             if(counter == 2)
                 normal_indices[i] = atoi(data[2].data());
             else
@@ -161,9 +176,16 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
         vertex secnd(data->vertexList[vertex_indices[1]]);
         vertex third(data->vertexList[vertex_indices[2]]);
         
-        first.setColour(diffuse);
-        secnd.setColour(diffuse);
-        third.setColour(diffuse);
+        if(!has_texture) {
+            first.setColour(use_mtl.diffuse);
+            secnd.setColour(use_mtl.diffuse);
+            third.setColour(use_mtl.diffuse);
+        } else {
+            printf("has texture!!\n");
+            first.setColour(data->textureCoordList[texture_coord_indices[0]]);
+            secnd.setColour(data->textureCoordList[texture_coord_indices[1]]);
+            third.setColour(data->textureCoordList[texture_coord_indices[2]]);
+        }
         
         triangle new_triangle(first, secnd, third);
         

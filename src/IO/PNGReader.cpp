@@ -27,13 +27,27 @@ void print_colour_type(png_byte colour_type) {
     }
 }
 
+PNGReader::PNGReader()
+: m_filename(0) {
+
+}
+
+
 PNGReader::PNGReader(const char* filename) {
     m_filename = (char*)malloc(strlen(filename)+1);
     strcpy(m_filename, filename);
 }
 
-PNGReader::~PNGReader() {
+PNGReader::PNGReader(const char* folder, const char* filename) {
+    m_filename = (char*)malloc(strlen(folder)+strlen(filename)+2);
+    sprintf(m_filename, "%s/%s", folder, filename);
+    printf("Loc is %s\n", m_filename);
+}
 
+
+PNGReader::~PNGReader() {
+    if(m_filename)
+        free(m_filename);
 }
 
 Texture *PNGReader::readImage() {

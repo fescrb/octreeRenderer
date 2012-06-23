@@ -5,7 +5,9 @@ class Texture;
 
 class PNGReader {
     public:
+                         PNGReader();
                          PNGReader(const char* filename);
+                         PNGReader(const char* folder, const char* filename);
         virtual         ~PNGReader();
         
         Texture         *readImage();

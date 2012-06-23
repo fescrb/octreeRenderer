@@ -6,6 +6,8 @@
 
 #include "Vector.h"
 
+#include "Material.h"
+
 class MTLFileReader {
     public:
         explicit                         MTLFileReader(const char* filename);
@@ -13,10 +15,11 @@ class MTLFileReader {
         enum                     LineType {
             TYPE_NEWMTL, 
             TYPE_KD,
+            TYPE_KD_TEXTURE,
             TYPE_UNKOWN
         };
         
-        std::map<std::string,float4>     getMaterials();
+        std::map<std::string,material>   getMaterials();
      
     private:
         LineType                         getLineType(const char* line);
