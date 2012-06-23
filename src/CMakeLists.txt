@@ -21,6 +21,12 @@ if(USE_OPENCL)
      add_subdirectory(OpenCL)
 endif(USE_OPENCL)
 
+if(USE_CUDA)
+    include_directories(${CUDA_INCLUDE_DIRS})
+    include_directories(CUDA)
+    add_subdirectory(CUDA)
+endif(USE_CUDA)
+
 if(USE_OPENMP_IMPLEMENTATION)
      include_directories(OpenMP)
      add_subdirectory(OpenMP)
@@ -33,7 +39,11 @@ endif(USE_SERIAL_IMPLEMENTATION)
 
 include(CMakeSources.cmake)
 
-add_library(Octree ${sources})
+if(USE_CUDA)
+    cuda_add_library(Octree ${sources})
+else(USE_CUDA)
+    add_library(Octree ${sources})
+endif(USE_CUDA)
 
 add_executable(octreeRenderer octreeRenderer.cpp)
 target_link_libraries(octreeRenderer Octree ${Device_LIBRARIES})

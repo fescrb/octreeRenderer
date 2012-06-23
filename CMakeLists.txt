@@ -6,6 +6,12 @@ if(DONT_USE_OPENCL)
      set(USE_OPENCL "No")
 endif(DONT_USE_OPENCL)
 
+set(USE_CUDA "Yes")
+if(DONT_USE_CUDA)
+     set(USE_CUDA "No")
+endif(DONT_USE_CUDA)
+
+
 #if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 #	set(USE_OPENMP "Yes")
 #endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -32,6 +38,18 @@ if(USE_OPENCL)
 	  message("ERROR: OpenCL not found")
      endif(OpenCL_FOUND)
 endif(USE_OPENCL)
+
+if(USE_CUDA)
+    find_package(CUDA)
+
+    if(CUDA_FOUND)
+        add_definitions(-DUSE_CUDA)
+        set(Device_LIBRARIES ${Device_LIBRARIES} ${CUDA_LIBRARIES}) 
+    else(CUDA_FOUND)
+        set(USE_CUDA "No")
+        message("ERROR: CUDA not found")
+    endif(CUDA_FOUND)
+endif(USE_CUDA)
 
 find_package(OpenMP)
 if(OPENMP_FOUND)
@@ -77,9 +95,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     add_definitions(-D_OSX)
 endif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-if(NOT USE_OPENCL AND NOT USE_OPENMP)
+if(NOT USE_OPENCL AND NOT USE_OPENMP AND NOT USE_CUDA)
     set(USE_SERIAL "Yes")
-endif(NOT USE_OPENCL AND NOT USE_OPENMP)
+endif(NOT USE_OPENCL AND NOT USE_OPENMP AND NOT USE_CUDA)
 
 if(USE_SERIAL)
 	set(USE_SERIAL_IMPLEMENTATION "Yes")
