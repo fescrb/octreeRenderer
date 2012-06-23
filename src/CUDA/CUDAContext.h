@@ -8,17 +8,17 @@ class CUDADevice;
 class CUDAContext
 :   public Context {
     public:
-                             CUDAContext();
+                                     CUDAContext();
                      
-        void                 printDeviceInfo();
+        void                         printDeviceInfo();
 
-        unsigned int         getNumDevices();
-        Device              *getDevice(int index);
+        unsigned int                 getNumDevices();
+        Device                      *getDevice(int index);
         
-        std::vector<Device*> getDeviceList();
+        std::vector<Device*>         getDeviceList();
         
     private:
-        CUDADevice          *m_pCUDADevice;
+        std::vector<CUDADevice*>     m_vCUDADevices;
 };
 
 #endif //_CUDA_CONTEXT_H

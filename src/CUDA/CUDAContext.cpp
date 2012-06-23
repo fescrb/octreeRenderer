@@ -14,27 +14,34 @@ CUDAContext::CUDAContext() {
     
     printf("CUDA Context: %d devices\n",count);
     
-    m_pCUDADevice = new CUDADevice(0);
+    for(int i = 0; i < count; i++) {
+        m_vCUDADevices.push_back(new CUDADevice(i));
+    }
 }
 
 Device* CUDAContext::getDevice(int index) {
-    return m_pCUDADevice;
+    return m_vCUDADevices[index];
 }
 
 unsigned int CUDAContext::getNumDevices(){
-    return 1;
+    return m_vCUDADevices.size();
 }
 
 
 std::vector< Device* > CUDAContext::getDeviceList() {
     std::vector< Device* > list = std::vector< Device* >(0);
-    list.push_back(m_pCUDADevice);
+    
+    for(int i = 0; i < m_vCUDADevices.size(); i++) {
+        list.push_back(m_vCUDADevices[i]);
+    }
     
     return list;
 }
 
 void CUDAContext::printDeviceInfo() {
-    m_pCUDADevice->printInfo();
+    for(int i = 0; i < m_vCUDADevices.size(); i++) {
+        m_vCUDADevices[i]->printInfo();
+    }
 }
 
 

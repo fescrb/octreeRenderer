@@ -266,11 +266,11 @@ __device__ collision find_collision(char *octree, const float3 o, const float3 d
     return col;
 }
 
-__global__ void ray_trace(cuda_render_info* render_info,char* header, char* octree, char* framebuffer) {
+__global__ void ray_trace(cuda_render_info* render_info,char* header, char* octree, char* framebuffer, const int x_start) {
     int x = threadIdx.x + (blockDim.x*blockIdx.x); 
     int y = threadIdx.y + (blockDim.y*blockIdx.y);
     
-    float3 o = render_info->viewPortStart + (render_info->viewStep * x) + (render_info->up * y);
+    float3 o = render_info->viewPortStart + (render_info->viewStep * (x_start + x)) + (render_info->up * y);
     float3 d = o-render_info->eyePos;
     o = render_info->eyePos;
     
@@ -338,10 +338,10 @@ __global__ void clear_costbuffer(unsigned int* cost_buffer) {
     cost_buffer[x] = 0;
 }
 
-__global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int height) {
+__global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int height, const uint x_start) {
     __shared__ uint local_costs[RAY_BUNDLE_WINDOW_SIZE];
     
-    const int x = threadIdx.x + (blockDim.x*blockIdx.x);
+    const int x = x_start + threadIdx.x + (blockDim.x*blockIdx.x);
     
     uint val = 0;
     for(int y = 0; y < height; y++)
@@ -442,6 +442,10 @@ void CUDADevice::makeFrameBuffer(vector::int2 size){
 }
 
 void CUDADevice::setRenderInfo(renderinfo* info) {
+    if(m_tasks.size()==0)
+        return;
+    
+    cudaSetDevice(m_device_index);
     cuda_render_info render_info = cudaConvert(info);
     
     cudaError_t error = cudaMemcpy(m_dev_render_info, &render_info, sizeof(cuda_render_info), cudaMemcpyHostToDevice);
@@ -456,14 +460,21 @@ void CUDADevice::advanceTask(int index) {
 }
 
 void CUDADevice::renderTask(int index) {
+    if(m_tasks.size()==0)
+        return;
+    
+    cudaSetDevice(m_device_index);
     dim3 threads(m_tasks[index].getWidth(), m_tasks[index].getHeight());
-    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer);
+    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_tasks[index].getX());
 }
 
 void CUDADevice::calculateCostsForTask(int index) {
+    if(m_tasks.size()==0)
+        return;
+    
     dim3 blocks(m_tasks[index].getWidth()/RAY_BUNDLE_WINDOW_SIZE);
     dim3 threads(RAY_BUNDLE_WINDOW_SIZE);
-    calculate_costs<<<blocks,threads>>>(m_pItBuffer, m_pCostBuffer, m_tasks[index].getHeight());
+    calculate_costs<<<blocks,threads>>>(m_pItBuffer, m_pCostBuffer, m_tasks[index].getHeight(), m_tasks[index].getX());
 }
 
 framebuffer_window CUDADevice::getFrameBuffer() {
@@ -499,11 +510,15 @@ framebuffer_window CUDADevice::getFrameBuffer() {
     window.window = getTotalTaskWindow();
     window.texture = m_texture;
     
+    m_transferEnd.reset();
+    
     return window;
 }
 
 unsigned char* CUDADevice::getFrame() {
-    cudaError_t error = cudaMemcpy( m_pFrame, m_pDevFramebuffer, m_frameBufferResolution.getX()*m_frameBufferResolution.getY()*3, cudaMemcpyDeviceToHost);
+    m_transferStart.reset();
+    cudaSetDevice(m_device_index);
+    cudaError_t error = cudaMemcpy( m_pFrame, m_pDevFramebuffer, getTotalTaskWindow().getWidth()*getTotalTaskWindow().getHeight()*3, cudaMemcpyDeviceToHost);
     if(cudaIsError(error)) {
         cudaPrintError(error);
         exit(1);
@@ -513,6 +528,7 @@ unsigned char* CUDADevice::getFrame() {
 }
 
 unsigned int* CUDADevice::getCosts() {
+    cudaSetDevice(m_device_index);
     cudaError_t error = cudaMemcpy( m_pCosts, m_pCostBuffer, m_frameBufferResolution.getX()/RAY_BUNDLE_WINDOW_SIZE, cudaMemcpyDeviceToHost);
     if(cudaIsError(error)) {
         cudaPrintError(error);
