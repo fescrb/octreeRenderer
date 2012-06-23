@@ -103,7 +103,7 @@ Texture *PNGReader::readImage() {
     unsigned int rowBytes = png_get_rowbytes(png_pointer, png_info_pointer);
     
     for(int i = 0; i < height; i ++) {
-        row_pointers[i] = data + (i*rowBytes);
+        row_pointers[i] = data + ((height-(i+1))*rowBytes);
     }
     
     png_read_image(png_pointer, row_pointers);

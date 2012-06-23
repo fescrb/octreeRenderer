@@ -5,20 +5,25 @@
 
 #include <cstdio>
 
+#include "Texture.h"
+
 struct triangle {
     public:
-                         triangle(){};
+                         triangle() : m_texture(0) {};
         explicit         triangle(const vertex& vertex1, 
                                   const vertex& vertex2, 
-                                  const vertex& vertex3) 
+                                  const vertex& vertex3,
+                                  Texture *texture = 0) 
                          :  m_vert0(vertex1), 
                             m_vert1(vertex2), 
-                            m_vert2(vertex3) {};
+                            m_vert2(vertex3),
+                            m_texture(texture){};
         
                          triangle(const triangle& other) 
                          :  m_vert0(other.m_vert0), 
                             m_vert1(other.m_vert1), 
-                            m_vert2(other.m_vert2) {};
+                            m_vert2(other.m_vert2),
+                            m_texture(other.m_texture) {};
         
         
         inline vertex&   operator[](const int& index) {
@@ -86,7 +91,13 @@ struct triangle {
         }
         
         inline float4    getAverageColour() const{
-            return (m_vert0.getColour() + m_vert1.getColour() + m_vert2.getColour())/3.0f;
+            if(!m_texture) {
+                //printf("text %p\n", m_texture);
+                return (m_vert0.getColour() + m_vert1.getColour() + m_vert2.getColour())/3.0f;
+            } else {
+                float2 avg_tex_coord = (m_vert0.getTexCoord() + m_vert1.getTexCoord() + m_vert2.getTexCoord())/3.0f;
+                return m_texture->getColourAt(avg_tex_coord);
+            }
         }
         
         double            getSurfaceArea() const {
@@ -108,8 +119,19 @@ struct triangle {
             return (opposite*l_l2)/2.0f;
         }
         
+        void             setTexture(Texture* texture) {
+            m_texture = texture;
+        }
+        
+        Texture         *getTexture() const {
+            return m_texture;
+        }
+        
+        void             render() const;
+        
     private:
         vertex           m_vert0, m_vert1, m_vert2;
+        Texture         *m_texture;
 };
 
 #endif //_TRIANGLE_H

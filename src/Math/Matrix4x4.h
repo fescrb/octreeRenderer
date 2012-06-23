@@ -57,7 +57,7 @@ struct matrix4x4 {
 
 
         inline vertex        operator*(const vertex& rhs) {
-            vertex vert(operator*(rhs.getPosition()), operator*(rhs.getNormal()), rhs.getColour());
+            vertex vert(operator*(rhs.getPosition()), operator*(rhs.getNormal()), rhs.getColour(), rhs.getTexCoord());
 
             return vert;
         }
@@ -66,7 +66,8 @@ struct matrix4x4 {
             triangle tri(
                 operator*(rhs.getVertex(0)),
                 operator*(rhs.getVertex(1)),
-                operator*(rhs.getVertex(2))
+                operator*(rhs.getVertex(2)),
+                rhs.getTexture()
             );
 
             return tri;

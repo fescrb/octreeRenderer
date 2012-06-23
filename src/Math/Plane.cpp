@@ -68,9 +68,9 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
             float4 normal = cross(new_vertex_one.getPosition()-vertices[0].getPosition(),new_vertex_two.getPosition()-vertices[0].getPosition());
             
             if(dot(vertices[0].getNormal(),normal) > 0) {
-                result.push_back(triangle(vertices[0],new_vertex_two,new_vertex_one));
+                result.push_back(triangle(vertices[0],new_vertex_two,new_vertex_one, triangleToCull.getTexture()));
             } else {
-                result.push_back(triangle(vertices[0],new_vertex_two,new_vertex_one));
+                result.push_back(triangle(vertices[0],new_vertex_two,new_vertex_one, triangleToCull.getTexture()));
             }
         } else {
             /*printf("vertex 0 (%f %f %f) (%f %f %f), missing vert (%f %f %f) (%f %f %f)\n"
@@ -101,11 +101,11 @@ std::vector<triangle> plane::cull(const triangle& triangleToCull) {
             float4 normal = cross(new_vertex_one.getPosition()-vertices[0].getPosition(), vertices[1].getPosition()-vertices[0].getPosition());
             
             if(dot(vertices[0].getNormal(),normal) > 0) {
-            result.push_back(triangle(vertices[0],vertices[1],new_vertex_one));
-            result.push_back(triangle(vertices[1],new_vertex_two,new_vertex_one));
+                result.push_back(triangle(vertices[0],vertices[1],new_vertex_one, triangleToCull.getTexture()));
+                result.push_back(triangle(vertices[1],new_vertex_two,new_vertex_one, triangleToCull.getTexture()));
             } else {
-                result.push_back(triangle(vertices[0],new_vertex_one,vertices[1]));
-                result.push_back(triangle(vertices[1],new_vertex_one,new_vertex_two));
+                result.push_back(triangle(vertices[0],new_vertex_one,vertices[1], triangleToCull.getTexture()));
+                result.push_back(triangle(vertices[1],new_vertex_one,new_vertex_two, triangleToCull.getTexture()));
             }
         }
     }

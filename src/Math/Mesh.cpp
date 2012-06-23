@@ -28,18 +28,6 @@ std::vector<vertex> mesh::getOuterMostVertices() const {
 }
 
 void mesh::render() const {
-    glBegin(GL_TRIANGLES);
-    
     for(int i = 0; i < m_triangles.size(); i++) 
-        for(int j = 0; j < 3; j++) {
-            vertex this_vertex = m_triangles[i].getVertex(j);
-            float4 colour = this_vertex.getColour();
-            float4 normal = this_vertex.getNormal();
-            float4 position = this_vertex.getPosition();
-            glColor4f(colour.getX(), colour.getY(), colour.getZ(), colour.getW());
-            glNormal3f(normal.getX(), normal.getY(), normal.getZ());
-            glVertex4f(position.getX(), position.getY(), position.getZ(), position.getW());
-        }
-
-    glEnd();
+        m_triangles[i].render();
 }

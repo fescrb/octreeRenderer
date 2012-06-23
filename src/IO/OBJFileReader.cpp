@@ -32,6 +32,8 @@ mesh OBJFileReader::getMesh() {
     if(backslash_loc == mtl_filename.npos)
         backslash_loc = -1;
     
+    std::vector<triangle> triangles;
+    
     MTLFileReader *mtl_reader;
     
     std::string mtl_in_use;
@@ -60,7 +62,9 @@ mesh OBJFileReader::getMesh() {
                 data->textureCoordList.push_back(tmp);
                 break;
             case TYPE_FACE_DECLARATION:
-                objMesh.appendTriangles(getFacesFromLine(line,data,cur_material));
+                triangles = getFacesFromLine(line,data,cur_material);
+                objMesh.appendTriangles(triangles);
+                //objMesh.appendTriangles(getFacesFromLine(line,data,cur_material));
                 break;
             case TYPE_MTLLIB_REF:
                 strtok(line," ");
@@ -176,18 +180,24 @@ std::vector<triangle> OBJFileReader::getFacesFromLine(char* line, const OBJFileD
         vertex secnd(data->vertexList[vertex_indices[1]]);
         vertex third(data->vertexList[vertex_indices[2]]);
         
-        if(!has_texture) {
-            first.setColour(use_mtl.diffuse);
-            secnd.setColour(use_mtl.diffuse);
-            third.setColour(use_mtl.diffuse);
+        
+        first.setColour(use_mtl.diffuse);
+        secnd.setColour(use_mtl.diffuse);
+        third.setColour(use_mtl.diffuse);
+        
+        if(has_texture && use_mtl.texture) {
+            //printf("has texture!! %p\n", use_mtl.texture);
+            first.setTexCoord(data->textureCoordList[texture_coord_indices[0]]);
+            secnd.setTexCoord(data->textureCoordList[texture_coord_indices[1]]);
+            third.setTexCoord(data->textureCoordList[texture_coord_indices[2]]);
         } else {
-            printf("has texture!!\n");
-            first.setColour(data->textureCoordList[texture_coord_indices[0]]);
-            secnd.setColour(data->textureCoordList[texture_coord_indices[1]]);
-            third.setColour(data->textureCoordList[texture_coord_indices[2]]);
+            //printf("has no texture\n");
+            has_texture = false;
         }
         
         triangle new_triangle(first, secnd, third);
+        if(has_texture)
+            new_triangle.setTexture(use_mtl.texture);
         
         if(undeclared_normal) {
             new_triangle.generateNormals();

@@ -17,7 +17,7 @@ class Image {
 		
 		void			 toBMP(const char* filename);
 		
-	private:
+	protected:
 		unsigned int 	 m_width;
 		unsigned int	 m_height;
 		char 			*m_pData;

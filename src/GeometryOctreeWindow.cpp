@@ -34,6 +34,7 @@ void GeometryOctreeWindow::initGL() {
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_2D);
 }
 
 void GeometryOctreeWindow::resize(GLint width, GLint height) {

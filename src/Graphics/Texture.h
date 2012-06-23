@@ -5,6 +5,8 @@
 
 #include "Image.h"
 
+#include "Vector.h"
+
 class Texture
 :   public Image {
     public:
@@ -15,6 +17,8 @@ class Texture
         virtual         ~Texture();
         
         GLuint           getGLTexture();
+        
+        float4           getColourAt(float2 coordinates) const;
         
     private:
         void             transferToGL();

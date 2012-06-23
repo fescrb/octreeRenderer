@@ -45,7 +45,10 @@ struct line {
             float total = distance_1+distance_2;
             distance_1/=total;
             distance_2/=total;
-            return vertex(position, v1.getNormal()*distance_2 + v2.getNormal()*distance_1, v1.getColour()*distance_2 + v2.getColour()*distance_1);
+            return vertex(position, 
+                          v1.getNormal()*distance_2 + v2.getNormal()*distance_1, 
+                          v1.getColour()*distance_2 + v2.getColour()*distance_1, 
+                          v1.getTexCoord()*distance_2 + v2.getTexCoord()*distance_1);
         }
         
     private:
