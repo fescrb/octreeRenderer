@@ -22,9 +22,9 @@ int main(int argc, char** argv) {
     //int2 resolution(1400,900);
 	//int2 resolution(1600,900);
     
-    PNGReader reader("test.png");
-    reader.readImage();
-    exit(0);
+    //PNGReader reader("test.png");
+    //reader.readImage();
+    //exit(0);
 	
 	for(int i = 2; i < argc; i++) {
 		if(!strcmp(argv[i],"resolution")){
@@ -39,6 +39,8 @@ int main(int argc, char** argv) {
     OctreeRendererWindow *window = new OctreeRendererWindow(argc, argv, resolution, state);
 	
 	state->getDeviceManager()->initialise();
+    
+    exit(0);
     
     window->run();
 }

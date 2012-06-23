@@ -6,7 +6,7 @@
 class CUDADevice
 : public Device {
     public:
-                             CUDADevice();
+                             CUDADevice(int device_index);
         virtual             ~CUDADevice();
         
         void                 printInfo();
@@ -28,6 +28,10 @@ class CUDADevice
         unsigned int        *getCosts();
         
         bool                 isCPU();
+        
+    private:
+        char                *m_pOctree;
+        char                *m_pHeader;
 };
 
 #endif //_CUDA_DEVICE_H

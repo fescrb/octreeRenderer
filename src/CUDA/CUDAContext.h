@@ -3,6 +3,8 @@
 
 #include "Context.h"
 
+#include "CUDADevice.h"
+
 class CUDAContext
 :   public Context {
     public:
@@ -14,6 +16,9 @@ class CUDAContext
         Device              *getDevice(int index);
         
         std::vector<Device*> getDeviceList();
+        
+    private:
+        CUDADevice          *m_pCUDADevice;
 };
 
 #endif //_CUDA_CONTEXT_H

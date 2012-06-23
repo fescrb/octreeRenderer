@@ -1,19 +1,38 @@
 #include "CUDAContext.h"
 
-CUDAContext::CUDAContext() {
+#include "CUDAIncludes.h"
 
+#include "CUDAUtils.h"
+
+CUDAContext::CUDAContext() {
+    int count;
+    cudaError_t error = cudaGetDeviceCount(&count);
+    if(cudaIsError(error)) {
+        cudaPrintError(error);
+        exit(1);
+    }
+    
+    m_pCUDADevice = new CUDADevice(0);
 }
 
 Device* CUDAContext::getDevice(int index) {
-
+    return m_pCUDADevice;
 }
 
-std::vector< Device* > CUDAContext::getDeviceList() {
+unsigned int CUDAContext::getNumDevices(){
+    return 1;
+}
 
+
+std::vector< Device* > CUDAContext::getDeviceList() {
+    std::vector< Device* > list = std::vector< Device* >(0);
+    list.push_back(m_pCUDADevice);
+    
+    return list;
 }
 
 void CUDAContext::printDeviceInfo() {
-
+    m_pCUDADevice->printInfo();
 }
 
 
