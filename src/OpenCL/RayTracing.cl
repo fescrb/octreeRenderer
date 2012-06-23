@@ -174,7 +174,7 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
     unsigned short it = 1;
     unsigned char depth_in_octree = 0;
 
-	float half_size = OCTREE_ROOT_HALF_SIZE;
+    const float half_size = OCTREE_ROOT_HALF_SIZE;
 
     float3 corner_far_step = (float3)(direction.x >= 0 ? half_size : -half_size,
                                       direction.y >= 0 ? half_size : -half_size,
@@ -182,9 +182,9 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
 
     const float3 vector_two = (float3)(2.0f, 2.0f, 2.0f);
 
-	float3 corner_far = corner_far_step;
+    float3 corner_far = corner_far_step;
 
-	float3 corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
+    float3 corner_close = (float3)(-corner_far.x,-corner_far.y,-corner_far.z);
 
 	float t_min = max_component((corner_close - origin) / direction);
 	float t_max = min_component((corner_far - origin) / direction);

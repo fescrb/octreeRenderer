@@ -3,6 +3,8 @@
 
 #include "Vector.h"
 
+using namespace vector;
+
 class OctreeNode {
 	public:
         virtual OctreeNode      *getChildAt(int index) = 0;

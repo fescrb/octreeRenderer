@@ -3,6 +3,10 @@
 
 #include "Device.h"
 
+#include "CUDARenderInfo.h"
+
+#include "Graphics.h"
+
 class CUDADevice
 : public Device {
     public:
@@ -30,8 +34,17 @@ class CUDADevice
         bool                 isCPU();
         
     private:
+        int                  m_device_index;
+        GLuint               m_texture;
+        
         char                *m_pOctree;
         char                *m_pHeader;
+        
+        char                *m_pDevFramebuffer;
+        short               *m_pItBuffer;
+        unsigned int        *m_pCostBuffer;
+        
+        cuda_render_info    *m_dev_render_info;
 };
 
 #endif //_CUDA_DEVICE_H

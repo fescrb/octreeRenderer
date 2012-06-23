@@ -66,12 +66,17 @@ void OctreeRendererWindow::initGL() {
 
 void OctreeRendererWindow::render() {
     high_res_timer start;
+    high_res_timer end;
     start.reset();
     
     glClear(GL_COLOR_BUFFER_BIT);
 
+    high_res_timer get_things;
+    get_things.reset();
     std::vector<framebuffer_window> fb_windows = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getrenderinfo(), m_size);
-
+    end.reset();
+    printf("get %f\n", end - get_things);
+    
     glUseProgram(m_programObject);
 
     for(int i = 0; i < fb_windows.size(); i++) {
@@ -107,8 +112,6 @@ void OctreeRendererWindow::render() {
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glutSwapBuffers();
-    
-    high_res_timer end;
     end.reset();
     
     printf("%f\n", end - start);

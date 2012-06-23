@@ -1,8 +1,8 @@
 #include "CUDAContext.h"
 
 #include "CUDAIncludes.h"
-
 #include "CUDAUtils.h"
+#include "CUDADevice.h"
 
 CUDAContext::CUDAContext() {
     int count;
@@ -11,6 +11,8 @@ CUDAContext::CUDAContext() {
         cudaPrintError(error);
         exit(1);
     }
+    
+    printf("CUDA Context: %d devices\n",count);
     
     m_pCUDADevice = new CUDADevice(0);
 }

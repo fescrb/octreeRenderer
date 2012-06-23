@@ -6,6 +6,8 @@
 #include <iostream>
 #include <fstream>
 
+using namespace vector;
+
 RenderInfoReader::RenderInfoReader(const char* path, const char* name) {
     m_sCompletePath = (char*)malloc(sizeof(char)*(strlen(path)+strlen(name)+1)+1);
     sprintf(m_sCompletePath, "%s/%s",path,name);

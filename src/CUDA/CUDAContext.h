@@ -3,7 +3,7 @@
 
 #include "Context.h"
 
-#include "CUDADevice.h"
+class CUDADevice;
 
 class CUDAContext
 :   public Context {

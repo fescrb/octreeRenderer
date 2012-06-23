@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
 	
 	state->getDeviceManager()->initialise();
     
-    exit(0);
+    //exit(0);
     
     window->run();
 }
