@@ -434,7 +434,7 @@ __global__ void ray_trace(cuda_render_info* render_info, char* header, char* oct
     float3 d = o-render_info->eyePos;
     o = render_info->eyePos;
     
-    float t_start = depth_buffer[(x/RAY_BUNDLE_WINDOW_SIZE) + ((y/RAY_BUNDLE_WINDOW_SIZE)*(gridDim.x/RAY_BUNDLE_WINDOW_SIZE)) ];
+    float t_start = 0;//depth_buffer[(x/RAY_BUNDLE_WINDOW_SIZE) + ((y/RAY_BUNDLE_WINDOW_SIZE)*(gridDim.x/RAY_BUNDLE_WINDOW_SIZE)) ];
     
     struct collision col = find_collision(octree, o, d, t_start, render_info->pixel_half_size);
     
@@ -442,7 +442,7 @@ __global__ void ray_trace(cuda_render_info* render_info, char* header, char* oct
     float ambient = 0.2f;
     
     // Change later?
-    int row_stride = gridDim.x;
+    int row_stride = gridDim.x*blockDim.x;
     
     int index = ( x + (y * row_stride));
     it_buffer[index] = col.it;
@@ -479,7 +479,7 @@ __global__ void clear_framebuffer(char* framebuffer) {
     const int x = threadIdx.x + (blockDim.x*blockIdx.x); 
     const int y = threadIdx.y + (blockDim.y*blockIdx.y);
     
-    const int index = ( x + (y * gridDim.x) ) * 3;
+    const int index = ( x + (y * (gridDim.x*blockDim.x)) ) * 3;
     
     framebuffer[index + 0] = 0;
     framebuffer[index + 1] = 0;
@@ -490,7 +490,7 @@ __global__ void clear_itbuffer(short* it_buffer) {
     const int x = threadIdx.x + (blockDim.x*blockIdx.x); 
     const int y = threadIdx.y + (blockDim.y*blockIdx.y);
     
-    const int index = ( x + (y * gridDim.x) );
+    const int index = ( x + (y * gridDim.x*blockDim.x) );
     
     it_buffer[index] = 0;
 }
@@ -508,7 +508,7 @@ __global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int h
     
     uint val = 0;
     for(int y = 0; y < height; y++)
-        val += (it_buffer[x + (y*gridDim.x)]);
+        val += (it_buffer[x + (y*(gridDim.x*blockDim.x))]);
     
     local_costs[threadIdx.x] = val;
     
@@ -603,9 +603,10 @@ void CUDADevice::makeFrameBuffer(vector::int2 size){
     }
     Device::makeFrameBuffer(size);
     
-    dim3 threads(size.getX(), size.getY());
-    clear_framebuffer<<<threads,1>>>(m_pDevFramebuffer);
-    clear_itbuffer<<<threads,1>>>(m_pItBuffer);
+    dim3 block_size_in_threads(4,64);
+    dim3 grid_size_in_blocks(size.getX()/4, size.getY()/64);
+    clear_framebuffer<<<grid_size_in_blocks,block_size_in_threads>>>(m_pDevFramebuffer);
+    clear_itbuffer<<<grid_size_in_blocks,block_size_in_threads>>>(m_pItBuffer);
     clear_costbuffer<<<size.getX()/RAY_BUNDLE_WINDOW_SIZE,1>>>(m_pCostBuffer);
 }
 
@@ -633,7 +634,7 @@ void CUDADevice::advanceTask(int index) {
     //rect window = m_tasks[index];
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
     
-    trace_budle<<<threads,1>>>(m_pOctree, m_pHeader, m_dev_render_info, m_pDepthBuffer, m_tasks[index].getX()/RAY_BUNDLE_WINDOW_SIZE);
+    //trace_budle<<<threads,1>>>(m_pOctree, m_pHeader, m_dev_render_info, m_pDepthBuffer, m_tasks[index].getX()/RAY_BUNDLE_WINDOW_SIZE);
 }
 
 void CUDADevice::renderTask(int index) {
@@ -641,12 +642,14 @@ void CUDADevice::renderTask(int index) {
         return;
     
     cudaSetDevice(m_device_index);
-    dim3 threads(m_tasks[index].getWidth(), m_tasks[index].getHeight());
+    dim3 block(4,64);
+    dim3 threads(m_tasks[index].getWidth()/block.x, m_tasks[index].getHeight()/block.y);
+    
     
     //rect window = m_tasks[index];
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
     
-    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_pDepthBuffer, m_pItBuffer, m_tasks[index].getX());
+    ray_trace<<<threads,block>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_pDepthBuffer, m_pItBuffer, m_tasks[index].getX());
 }
 
 void CUDADevice::calculateCostsForTask(int index) {
