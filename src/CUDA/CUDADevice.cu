@@ -460,8 +460,10 @@ __global__ void ray_trace(cuda_render_info* render_info, char* header, char* oct
         float3 normal = getNormal(attributes);
         
         float diffuse_coefficient = dot(direction_towards_light,normal);
-        if(diffuse_coefficient<0)
+        if(diffuse_coefficient<0.0f)
             diffuse_coefficient=0.0f;
+        if(diffuse_coefficient>1.0f)
+            diffuse_coefficient=1.0f;
         
         red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
         green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
@@ -607,7 +609,8 @@ void CUDADevice::makeFrameBuffer(vector::int2 size){
     dim3 grid_size_in_blocks(size.getX()/4, size.getY()/64);
     clear_framebuffer<<<grid_size_in_blocks,block_size_in_threads>>>(m_pDevFramebuffer);
     clear_itbuffer<<<grid_size_in_blocks,block_size_in_threads>>>(m_pItBuffer);
-    clear_costbuffer<<<size.getX()/RAY_BUNDLE_WINDOW_SIZE,1>>>(m_pCostBuffer);
+    int multiprocessors = ((CUDADeviceInfo*)m_pDeviceInfo)->getMultiprocessorCount();
+    clear_costbuffer<<<multiprocessors, (size.getX()/RAY_BUNDLE_WINDOW_SIZE)/multiprocessors>>>(m_pCostBuffer);
 }
 
 void CUDADevice::setRenderInfo(renderinfo* info) {
@@ -634,7 +637,7 @@ void CUDADevice::advanceTask(int index) {
     //rect window = m_tasks[index];
     //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
     
-    //trace_budle<<<threads,1>>>(m_pOctree, m_pHeader, m_dev_render_info, m_pDepthBuffer, m_tasks[index].getX()/RAY_BUNDLE_WINDOW_SIZE);
+    trace_budle<<<threads,1>>>(m_pOctree, m_pHeader, m_dev_render_info, m_pDepthBuffer, m_tasks[index].getX()/RAY_BUNDLE_WINDOW_SIZE);
 }
 
 void CUDADevice::renderTask(int index) {

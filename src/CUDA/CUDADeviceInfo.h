@@ -14,6 +14,8 @@ class CUDADeviceInfo
         
         char            *getName();
         
+        int              getMultiprocessorCount();
+        
     private:
         cudaDeviceProp   m_properties;
 };

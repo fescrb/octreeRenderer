@@ -35,6 +35,8 @@ if len(sys.argv) > 1 :
             extra_defs = extra_defs + ' -DDONT_USE_OPENMP="Yes" '
         if command == "noocl":
             use_ocl = ' -DDONT_USE_OPENCL="Yes" '
+        if command == "nocuda":
+            extra_defs = extra_defs + ' -DDONT_USE_CUDA="Yes" '
         if command == "debugfindocl":
             extra_defs = extra_defs + ' -DDEBUG_FINDOPENCL="Yes" '
 

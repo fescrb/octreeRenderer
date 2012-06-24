@@ -9,6 +9,8 @@
 
 class OpenCLProgram;
 
+using namespace vector;
+
 class OpenCLDevice:
 	public Device{
 

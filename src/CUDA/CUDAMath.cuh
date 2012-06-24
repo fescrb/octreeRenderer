@@ -35,12 +35,16 @@ inline __device__ float dot(const float3 lhs, const float3 rhs) {
     return (rhs.x*lhs.x) + (rhs.y*lhs.y) + (rhs.z*lhs.z);
 }
 
+inline __device__ float magnitude(const float3 v) {
+    return sqrt(dot(v,v));
+}
+
 inline __device__ float3 normalize(const float3 v) {
-    return v/sqrt(dot(v,v));
+    return v/magnitude(v);
 }
 
 inline __device__ float fixed_point_8bit_to_float(const char fixed) {
-    const float range =127.0f; // Max value of a 7 bit unsigned integer.
+    const float range =128.0f; // Max value of a 7 bit unsigned integer.
     const float step = 1.0f/range;
     return fixed*step;
 }

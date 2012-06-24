@@ -16,6 +16,10 @@ char* CUDADeviceInfo::getName() {
     m_properties.name;
 }
 
+int CUDADeviceInfo::getMultiprocessorCount() {
+    return m_properties.multiProcessorCount;
+}
+
 void CUDADeviceInfo::printInfo() {
     printf("\n");
     printf("Name:                               %s\n",m_properties.name);

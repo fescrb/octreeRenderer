@@ -37,8 +37,8 @@ inline float max_component(const float3 vector) {
 }
 
 inline float fixed_point_8bit_to_float(const char fixed) {
-    float range =127.0f; // Max value of a 7 bit unsigned integer.
-    float step = 1.0f/range;
+    const float range =128.0f; // Max value of a 7 bit unsigned integer.
+    const float step = 1.0f/range;
     return fixed*step;
 }
 
@@ -70,12 +70,14 @@ float4 getNormal(read_only global char* attr) {
     char y = 0 | (normals_short & 254);
     normal.y = fixed_point_8bit_to_float(y);
     
-    float z = sqrt(1 - (normal.x*normal.x) - (normal.y*normal.y));
+    float z = sqrt((1 - (normal.x*normal.x)) - (normal.y*normal.y));
     if(normals_short & 1)
-        z*=-1.0f;
+        z = -z;
     
     normal.z = z;
     normal.w = 0.0f;
+
+    //normal = normalize(normal);
     
     return normal;
 }
@@ -174,11 +176,9 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
     unsigned short it = 1;
     unsigned char depth_in_octree = 0;
 
-    const float half_size = OCTREE_ROOT_HALF_SIZE;
-
-    float3 corner_far_step = (float3)(direction.x >= 0 ? half_size : -half_size,
-                                      direction.y >= 0 ? half_size : -half_size,
-                                      direction.z >= 0 ? half_size : -half_size);
+    float3 corner_far_step = (float3)(direction.x >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                      direction.y >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                      direction.z >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE);
 
     const float3 vector_two = (float3)(2.0f, 2.0f, 2.0f);
 
@@ -195,7 +195,7 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
         t = t_min;
 			
 	read_only global char* curr_address = octree;
-    read_only global uint* curr_adress_int = (read_only global int*)curr_address;
+    read_only global uint* curr_adress_int = (read_only global uint*)curr_address;
     uint node_header = curr_adress_int[0];
 
 	float3 voxelCentre = (float3)(0.0f);
@@ -216,8 +216,8 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                 float3 t_centre_vector = (voxelCentre - origin) / direction;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
-                float nodeHalfSize = half_size/2.0f;
                 float3 tmp_corner_far_step = corner_far_step/vector_two;
+                float nodeHalfSize = fabs(tmp_corner_far_step.x);
                 
                 float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
                                                  xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
@@ -239,14 +239,13 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                     curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
                     curr_address = getChild(node_header, curr_address, xyz_flag);
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
 
                     voxelCentre = tmpNodeCentre;
                     t_max = tmp_max;
 
                     depth_in_octree++;
-                    half_size = nodeHalfSize;
                     corner_far_step = tmp_corner_far_step;
                     
                 } else {
@@ -260,23 +259,22 @@ struct collission find_collission(read_only global char* octree, float3 origin, 
                     /* Pop that stack! */
                     voxelCentre = short_stack[curr_index].node_centre;
                     curr_address = short_stack[curr_index].address;
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
                     t_max = short_stack[curr_index].t_max;
-                    half_size*=2;
                     corner_far_step*=vector_two;
                     depth_in_octree--;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
                     curr_index = 0;
                     curr_address = octree;
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
-                    half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
-                    corner_far_step*=vector_two;
-                    corner_far = (float3)(corner_far_step);
-                    t_max = min_component((corner_far - origin) / direction);
+                    corner_far_step=(float3)(direction.x >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                             direction.y >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                             direction.z >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE);
+                    t_max = t_out;
                     depth_in_octree = 0;
                 }
             }
@@ -367,11 +365,13 @@ kernel void ray_trace(read_only global char* octree,
         float4 normal = getNormal(attr);
         // K_diff is always 1, for now
         float diffuse_coefficient = dot(direction_towards_light,normal);
-        if(diffuse_coefficient<0)
+        if(diffuse_coefficient<0.0f)
             diffuse_coefficient=0.0f;
-        red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
-        green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
-        blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
+        if(diffuse_coefficient>1.0f)
+            diffuse_coefficient=1.0f;
+        red=((uchar)(red*diffuse_coefficient*(1.0f-ambient)))+(red*ambient);
+        green=((uchar)(green*diffuse_coefficient*(1.0f-ambient)))+(green*ambient);
+        blue=((uchar)(blue*diffuse_coefficient*(1.0f-ambient)))+(blue*ambient);
 
         if(get_image_channel_data_type(frameBuff) == CLK_UNSIGNED_INT8) {
             uint4 color = (uint4)(red, green, blue, 255);
@@ -382,8 +382,9 @@ kernel void ray_trace(read_only global char* octree,
             //float4 color = (float4)(col.iterations/255.0f, col.iterations/255.0f, col.iterations/255.0f, 1.0f);
             //char color_per_level = 255/(((global int*)header)[0] - 1);
             //uint4 color = (uint4)(col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, col.depth_in_octree*color_per_level, 255);
-            //float dep = fabs(dot(rayPos, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
-            //uint4 color = (uint4)(255*dep, 255*dep, 255*dep, 255);
+            //float dep = fabs(dot(d * col.t, info.viewDir))/(OCTREE_ROOT_HALF_SIZE*2.0f);
+            //float4 color = (float4)((normal.x+1.0f)/2.0f, (normal.y+1.0f)/2.0f, (normal.z+1.0f)/2.0f, 1);
+            //float4 color = (float4)(dep, dep, dep, 1);
 
             write_imagef ( frameBuff, (int2)(x, y), color);
         }
@@ -415,15 +416,13 @@ kernel void trace_bundle(read_only global char* octree,
     float t = 0.0f;
     float t_prev = t;
 
-    float half_size = OCTREE_ROOT_HALF_SIZE;
+    float3 corner_far_step = (float3)(direction.x >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                      direction.y >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                      direction.z >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE);
 
-    float3 corner_far_step = (float3)(direction.x >= 0 ? half_size : -half_size,
-                                      direction.y >= 0 ? half_size : -half_size,
-                                      direction.z >= 0 ? half_size : -half_size);
-
-    float3 corner_far_step_upper_left = (float3)(d_upper_left.x >= 0 ? half_size : -half_size,
-                                                 d_upper_left.y >= 0 ? half_size : -half_size,
-                                                 d_upper_left.z >= 0 ? half_size : -half_size);
+    float3 corner_far_step_upper_left = (float3)(d_upper_left.x >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                                 d_upper_left.y >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE,
+                                                 d_upper_left.z >= 0 ? OCTREE_ROOT_HALF_SIZE : -OCTREE_ROOT_HALF_SIZE);
 
     const float3 vector_two = (float3)(2.0f, 2.0f, 2.0f);
 
@@ -440,7 +439,7 @@ kernel void trace_bundle(read_only global char* octree,
         t = t_min;
             
     read_only global char* curr_address = octree;
-    read_only global uint* curr_adress_int = (read_only global int*)curr_address;
+    read_only global uint* curr_adress_int = (read_only global uint*)curr_address;
     uint node_header = curr_adress_int[0];
     float3 voxelCentre = (float3)(0.0f);
     bool collission = false;    
@@ -477,8 +476,8 @@ kernel void trace_bundle(read_only global char* octree,
                 float3 t_centre_vector = (voxelCentre - origin) / direction;
 
                 char xyz_flag = makeXYZFlag(t_centre_vector, t, direction);
-                float nodeHalfSize = half_size/2.0f;
                 float3 tmp_corner_far_step = corner_far_step/vector_two;
+                float nodeHalfSize = fabs(tmp_corner_far_step.x);
                 
                 float3 tmpNodeCentre = (float3)( xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
                                                  xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
@@ -494,12 +493,11 @@ kernel void trace_bundle(read_only global char* octree,
                     curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
                     
                     curr_address = getChild(node_header, curr_address, xyz_flag);
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
 
                     voxelCentre = tmpNodeCentre;
                     t_max = tmp_max;
-                    half_size = nodeHalfSize;
                     corner_far_step = tmp_corner_far_step;
                     corner_far_step_upper_left = tmp_corner_far_step_upper_left;
 
@@ -515,25 +513,23 @@ kernel void trace_bundle(read_only global char* octree,
                     /* Pop that stack! */
                     voxelCentre = short_stack[curr_index].node_centre;
                     curr_address = short_stack[curr_index].address;
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
                     t_max = short_stack[curr_index].t_max;
                     corner_far_step*=vector_two;
                     corner_far_step_upper_left*=vector_two;
-                    half_size*=2;
                 } else {
                     /* Since we are using a short stack, we restart from the root node. */
                     curr_index = 0;
                     curr_address = octree;
-                    curr_adress_int = (read_only global int*)curr_address;
+                    curr_adress_int = (read_only global uint*)curr_address;
                     node_header = curr_adress_int[0];
-                    half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
-                    corner_far = (float3)(direction.x >= 0 ? half_size : -half_size,
-                                          direction.y >= 0 ? half_size : -half_size,
-                                          direction.z >= 0 ? half_size : -half_size);
+                    corner_far_step = (float3)(direction.x >= 0 ? OCTREE_ROOT_HALF_SIZE : OCTREE_ROOT_HALF_SIZE,
+                                               direction.y >= 0 ? OCTREE_ROOT_HALF_SIZE : OCTREE_ROOT_HALF_SIZE,
+                                               direction.z >= 0 ? OCTREE_ROOT_HALF_SIZE : OCTREE_ROOT_HALF_SIZE);
 
-                    t_max = min_component((corner_far - origin) / direction);
+                    t_max = t_out;
                 }
             }
         }
