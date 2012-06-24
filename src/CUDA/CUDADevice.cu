@@ -154,6 +154,162 @@ inline __device__ int push(struct stack* short_stack, int curr_index, char* curr
     return curr_index;
 }
 
+__global__ void trace_budle(char* octree, char* header, cuda_render_info* render_info, float* depth_buffer, int x_start) {
+    int x = threadIdx.x + (blockDim.x*blockIdx.x); 
+    int y = threadIdx.y + (blockDim.y*blockIdx.y);
+    
+    int x_real = x + x_start;
+    
+    float3 origin = render_info->eyePos;
+    float3 from_centre_to_start = -(render_info->viewStep/2.0f) - (render_info->up/2.0f);
+    float3 d_lower_left = ((render_info->viewPortStart + 
+                           (render_info->viewStep * (x_real*RAY_BUNDLE_WINDOW_SIZE)) + 
+                           (render_info->up * (y*RAY_BUNDLE_WINDOW_SIZE)))-origin);
+    d_lower_left=d_lower_left+from_centre_to_start;
+    float3 d_upper_left = ((render_info->viewPortStart + 
+                           (render_info->viewStep * (x_real*RAY_BUNDLE_WINDOW_SIZE)) + 
+                           (render_info->up * ((y+1)*RAY_BUNDLE_WINDOW_SIZE)))-origin);
+    d_upper_left=d_upper_left+from_centre_to_start;
+    float3 d_lower_right = ((render_info->viewPortStart + 
+                           (render_info->viewStep * ((x_real+1)*RAY_BUNDLE_WINDOW_SIZE)) + 
+                           (render_info->up * (y*RAY_BUNDLE_WINDOW_SIZE)))-origin);
+    d_lower_right=d_lower_right+from_centre_to_start;
+    float3 d_upper_right = ((render_info->viewPortStart + 
+                           (render_info->viewStep * ((x_real+1)*RAY_BUNDLE_WINDOW_SIZE)) + 
+                           (render_info->up * ((y+1)*RAY_BUNDLE_WINDOW_SIZE)))-origin);
+    d_upper_right=d_upper_right+from_centre_to_start;
+    
+    float3 d = d_lower_left;
+    
+    float t = 0.0f;
+    float t_prev = t;
+    
+    float half_size = OCTREE_ROOT_HALF_SIZE;
+    
+    float3 corner_far_step = make_float3(d.x >= 0.0f ? half_size : -half_size,
+                                         d.y >= 0.0f ? half_size : -half_size,
+                                         d.z >= 0.0f ? half_size : -half_size);
+    
+    float3 corner_far_step_upper_left = make_float3(d_upper_left.x >= 0.0f ? half_size : -half_size,
+                                                    d_upper_left.y >= 0.0f ? half_size : -half_size,
+                                                    d_upper_left.z >= 0.0f ? half_size : -half_size);
+    
+    float3 corner_far = corner_far_step;
+    
+    float3 corner_close = make_float3(-corner_far.x,-corner_far.y, -corner_far.z);
+    
+    float t_min = max_component((corner_close- origin)/d);
+    float t_max = min_component((corner_far- origin)/d);
+    float t_out = t_max;
+    
+    if(t < t_min)
+        t = t_min;
+    
+    char* curr_address = octree;
+    uint* curr_address_uint = (uint*) curr_address;
+    
+    uint node_header = curr_address_uint[0];
+    float3 voxelCentre = make_float3(0.0f, 0.0f, 0.0f);
+    bool collision = false;
+    
+    int curr_index = 0;
+    struct stack short_stack[STACK_SIZE];
+    
+    while(!collision) {
+        if(t >= t_out) {
+            collision = true;
+            curr_address = 0;
+        } else if (no_children(node_header)) {
+            collision = true;
+        } else {
+            if(t < t_max) {
+                float3 tmp_corner_far_step_upper_left = corner_far_step_upper_left / 2.0f;
+                corner_far = voxelCentre+tmp_corner_far_step_upper_left;
+                corner_close = voxelCentre-tmp_corner_far_step_upper_left;
+                if(max_component((corner_close - origin)/d_lower_right) >= min_component((corner_far - origin) / d_lower_right)) 
+                    collision = true;
+                
+                if(max_component((corner_close - origin)/d_upper_left) >= min_component((corner_far - origin) / d_upper_left)) 
+                    collision = true;
+                
+                if(max_component((corner_close - origin)/d_upper_right) >= min_component((corner_far - origin) / d_upper_right)) 
+                    collision = true;
+                
+                if(collision) {
+                    t = t_prev;
+                    break;
+                }
+                
+                float3 t_centre_vector = (voxelCentre - origin) / d;
+                
+                char xyz_flag = makeXYZFlag(t_centre_vector, t, d);
+                float nodeHalfSize = half_size/2.0f;
+                float3 tmp_corner_far_step = corner_far_step/2.0f;
+                
+                float3 tmpNodeCentre = make_float3(xyz_flag & 1 ? voxelCentre.x + nodeHalfSize : voxelCentre.x - nodeHalfSize,
+                                                   xyz_flag & 2 ? voxelCentre.y + nodeHalfSize : voxelCentre.y - nodeHalfSize,
+                                                   xyz_flag & 4 ? voxelCentre.z + nodeHalfSize : voxelCentre.z - nodeHalfSize);
+                
+                float3 tmp_node_far = tmpNodeCentre+tmp_corner_far_step;
+                
+                float tmp_max = min_component((tmp_node_far-origin)/d);
+                
+                if(node_has_child_at(node_header, xyz_flag)) {
+                    curr_index = push(short_stack, curr_index, curr_address, voxelCentre, t_max);
+                    
+                    curr_address = get_child(node_header, curr_address, xyz_flag);
+                    curr_address_uint = (uint*)curr_address;
+                    node_header = curr_address_uint[0];
+                    
+                    voxelCentre = tmpNodeCentre;
+                    t_max = tmp_max;
+                    half_size = nodeHalfSize;
+                    corner_far_step = tmp_corner_far_step;
+                    corner_far_step_upper_left = tmp_corner_far_step_upper_left;
+                } else {
+                    /* If the child is empty, we step the ray. */
+                    t_prev = t;
+                    t = tmp_max;
+                }
+            } else {
+                /* We are outside the node. Pop the stack */
+                curr_index--;
+                if(curr_index>=0) {
+                    /* Pop that stack! */
+                    voxelCentre = short_stack[curr_index].node_centre;
+                    curr_address = short_stack[curr_index].address;
+                    curr_address_uint = (uint*)curr_address;
+                    node_header = curr_address_uint[0];
+                    t_max = short_stack[curr_index].t_max;
+                    half_size*=2.0f;
+                    corner_far_step=corner_far_step*2.0f;
+                    corner_far_step_upper_left= corner_far_step_upper_left*2.0f;
+                } else {
+                    /* Since we are using a short stack, we restart from the root node. */
+                    curr_index = 0;
+                    curr_address = octree;
+                    curr_address_uint = (uint*)curr_address;
+                    node_header = curr_address_uint[0];
+                    half_size = OCTREE_ROOT_HALF_SIZE;
+                    //collission = true;
+                    corner_far_step = make_float3(d.x >= 0.0f ? half_size : -half_size,
+                                                  d.y >= 0.0f ? half_size : -half_size,
+                                                  d.z >= 0.0f ? half_size : -half_size);
+    
+                    corner_far_step_upper_left = make_float3(d_upper_left.x >= 0.0f ? half_size : -half_size,
+                                                             d_upper_left.y >= 0.0f ? half_size : -half_size,
+                                                             d_upper_left.z >= 0.0f ? half_size : -half_size);
+    
+                    corner_far = (float3)(corner_far_step);
+                    t_max = t_out;
+                }
+            }
+        }
+    }
+    
+    depth_buffer[x + ( y * gridDim.x )] = t_prev;
+}
+
 __device__ collision find_collision(char *octree, const float3 o, const float3 d, float t, const float pixel_half_size){
     unsigned short it = 1;
     unsigned char depth_in_octree = 0;
@@ -252,8 +408,10 @@ __device__ collision find_collision(char *octree, const float3 o, const float3 d
                     node_header = curr_address_uint[0];
                     half_size = OCTREE_ROOT_HALF_SIZE;
                     //collission = true;
-                    corner_far_step=corner_far_step*2.0f;
-                    corner_far = (float3)(corner_far_step);
+                    corner_far_step = make_float3(d.x >= 0.0f ? half_size : -half_size,
+                                                  d.y >= 0.0f ? half_size : -half_size,
+                                                  d.z >= 0.0f ? half_size : -half_size);
+                    corner_far = corner_far_step;
                     t_max = min_component((corner_far - o) / d);
                     depth_in_octree = 0;
                 }
@@ -268,7 +426,7 @@ __device__ collision find_collision(char *octree, const float3 o, const float3 d
     return col;
 }
 
-__global__ void ray_trace(cuda_render_info* render_info,char* header, char* octree, char* framebuffer, short* it_buffer, const int x_start) {
+__global__ void ray_trace(cuda_render_info* render_info, char* header, char* octree, char* framebuffer, float* depth_buffer, short* it_buffer, const int x_start) {
     int x = threadIdx.x + (blockDim.x*blockIdx.x); 
     int y = threadIdx.y + (blockDim.y*blockIdx.y);
     
@@ -276,7 +434,7 @@ __global__ void ray_trace(cuda_render_info* render_info,char* header, char* octr
     float3 d = o-render_info->eyePos;
     o = render_info->eyePos;
     
-    float t_start = 0.0f;
+    float t_start = depth_buffer[(x/RAY_BUNDLE_WINDOW_SIZE) + ((y/RAY_BUNDLE_WINDOW_SIZE)*(gridDim.x/RAY_BUNDLE_WINDOW_SIZE)) ];
     
     struct collision col = find_collision(octree, o, d, t_start, render_info->pixel_half_size);
     
@@ -373,7 +531,9 @@ CUDADevice::CUDADevice(int device_index)
 :   Device(false),
     m_device_index(device_index),
     m_pDevFramebuffer(0),
-    m_pItBuffer(0) {
+    m_pItBuffer(0),
+    m_pCostBuffer(0),
+    m_pDepthBuffer(0) {
     m_pDeviceInfo = new CUDADeviceInfo(device_index);
     
     cudaSetDevice(m_device_index);
@@ -433,10 +593,13 @@ void CUDADevice::makeFrameBuffer(vector::int2 size){
             m_pItBuffer = 0;
             cudaFree(m_pCostBuffer);
             m_pCostBuffer = 0;
+            cudaFree(m_pDepthBuffer);
+            m_pDepthBuffer = 0;
         }
         cudaMalloc(&m_pDevFramebuffer, size.getX()*size.getY()*3);
         cudaMalloc(&m_pItBuffer, size.getX()*size.getY()*sizeof(short));
         cudaMalloc(&m_pCostBuffer, (size.getX()/RAY_BUNDLE_WINDOW_SIZE)*sizeof(uint));
+        cudaMalloc(&m_pDepthBuffer, (size.getX()/RAY_BUNDLE_WINDOW_SIZE)*(size.getY()/RAY_BUNDLE_WINDOW_SIZE)*sizeof(float));
     }
     Device::makeFrameBuffer(size);
     
@@ -461,7 +624,16 @@ void CUDADevice::setRenderInfo(renderinfo* info) {
 }
 
 void CUDADevice::advanceTask(int index) {
-
+    if(m_tasks.size()==0)
+        return;
+    
+    cudaSetDevice(m_device_index);
+    dim3 threads(m_tasks[index].getWidth()/RAY_BUNDLE_WINDOW_SIZE, m_tasks[index].getHeight()/RAY_BUNDLE_WINDOW_SIZE);
+    
+    //rect window = m_tasks[index];
+    //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
+    
+    trace_budle<<<threads,1>>>(m_pOctree, m_pHeader, m_dev_render_info, m_pDepthBuffer, m_tasks[index].getX()/RAY_BUNDLE_WINDOW_SIZE);
 }
 
 void CUDADevice::renderTask(int index) {
@@ -471,10 +643,10 @@ void CUDADevice::renderTask(int index) {
     cudaSetDevice(m_device_index);
     dim3 threads(m_tasks[index].getWidth(), m_tasks[index].getHeight());
     
-    rect window = m_tasks[index];
-    printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
+    //rect window = m_tasks[index];
+    //printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
     
-    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_pItBuffer, m_tasks[index].getX());
+    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_pDepthBuffer, m_pItBuffer, m_tasks[index].getX());
 }
 
 void CUDADevice::calculateCostsForTask(int index) {
@@ -552,13 +724,13 @@ unsigned int* CUDADevice::getCosts() {
         exit(1);
     }
     
-    if(getTotalTaskWindow().getWidth() ) {
+    /*if(getTotalTaskWindow().getWidth() ) {
         printf("this %p ", this);
         for(int x = 0; x < (m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE); x++) {
             printf("%d ", m_pCosts[x]);
         }
         printf("\n");
-    }
+    }*/
     
     return m_pCosts;
 }

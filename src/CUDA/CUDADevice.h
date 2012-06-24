@@ -45,6 +45,7 @@ class CUDADevice
         char                *m_pDevFramebuffer;
         short               *m_pItBuffer;
         unsigned int        *m_pCostBuffer;
+        float               *m_pDepthBuffer;
         
         cuda_render_info    *m_dev_render_info;
 };

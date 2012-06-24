@@ -11,6 +11,10 @@ inline __device__ float3 operator-(const float3 lhs, const float3 rhs){
     return make_float3(lhs.x-rhs.x, lhs.y-rhs.y, lhs.z-rhs.z);
 }
 
+inline __device__ float3 operator-(const float3 v){
+    return make_float3(-v.x, -v.y, -v.z);
+}
+
 inline __device__ float3 operator*(const float3 lhs, const int rhs){
     return make_float3(lhs.x*rhs, lhs.y*rhs, lhs.z*rhs);
 }
