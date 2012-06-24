@@ -286,6 +286,9 @@ __global__ void ray_trace(cuda_render_info* render_info,char* header, char* octr
     // Change later?
     int row_stride = gridDim.x;
     
+    int index = ( x + (y * row_stride));
+    it_buffer[index] = col.it;
+    
     if(col.node) {
         char* attributes = get_attributes(col.node);
         
@@ -305,10 +308,6 @@ __global__ void ray_trace(cuda_render_info* render_info,char* header, char* octr
         red=(red*diffuse_coefficient*(1.0f-ambient))+(red*ambient);
         green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
-        
-        int index = ( x + (y * row_stride));
-        
-        it_buffer[index] = col.it;
         
         index*=3;
         
@@ -341,7 +340,7 @@ __global__ void clear_itbuffer(short* it_buffer) {
 __global__ void clear_costbuffer(unsigned int* cost_buffer) {
     const int x = threadIdx.x + (blockDim.x*blockIdx.x);
     
-    cost_buffer[x] = 1;
+    cost_buffer[x] = 0;
 }
 
 __global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int height, const uint x_start) {
