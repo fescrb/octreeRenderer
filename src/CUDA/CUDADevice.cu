@@ -131,6 +131,7 @@ inline __device__ float3 getNormal(char* attr) {
 struct collision {
     char *node;
     float t;
+    short it;
 };
 
 struct stack{
@@ -263,10 +264,11 @@ __device__ collision find_collision(char *octree, const float3 o, const float3 d
     struct collision col;
     col.node = curr_address;
     col.t = t;
+    col.it = it;
     return col;
 }
 
-__global__ void ray_trace(cuda_render_info* render_info,char* header, char* octree, char* framebuffer, const int x_start) {
+__global__ void ray_trace(cuda_render_info* render_info,char* header, char* octree, char* framebuffer, short* it_buffer, const int x_start) {
     int x = threadIdx.x + (blockDim.x*blockIdx.x); 
     int y = threadIdx.y + (blockDim.y*blockIdx.y);
     
@@ -304,7 +306,11 @@ __global__ void ray_trace(cuda_render_info* render_info,char* header, char* octr
         green=(green*diffuse_coefficient*(1.0f-ambient))+(green*ambient);
         blue=(blue*diffuse_coefficient*(1.0f-ambient))+(blue*ambient);
         
-        int index = ( x + (y * row_stride)) * 3;
+        int index = ( x + (y * row_stride));
+        
+        it_buffer[index] = col.it;
+        
+        index*=3;
         
         framebuffer[index + 0] = red;
         framebuffer[index + 1] = green;
@@ -335,13 +341,13 @@ __global__ void clear_itbuffer(short* it_buffer) {
 __global__ void clear_costbuffer(unsigned int* cost_buffer) {
     const int x = threadIdx.x + (blockDim.x*blockIdx.x);
     
-    cost_buffer[x] = 0;
+    cost_buffer[x] = 1;
 }
 
 __global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int height, const uint x_start) {
     __shared__ uint local_costs[RAY_BUNDLE_WINDOW_SIZE];
     
-    const int x = x_start + threadIdx.x + (blockDim.x*blockIdx.x);
+    const int x = threadIdx.x + (blockDim.x*blockIdx.x);
     
     uint val = 0;
     for(int y = 0; y < height; y++)
@@ -355,7 +361,7 @@ __global__ void calculate_costs(short *it_buffer, uint* cost_buffer, const int h
         for(int i = 1; i < RAY_BUNDLE_WINDOW_SIZE; i++) {
             val+= local_costs[i];
         }
-        cost_buffer[x/RAY_BUNDLE_WINDOW_SIZE] = val;
+        cost_buffer[(x_start+x)/RAY_BUNDLE_WINDOW_SIZE] = val;
     }
     
 }
@@ -431,14 +437,14 @@ void CUDADevice::makeFrameBuffer(vector::int2 size){
         }
         cudaMalloc(&m_pDevFramebuffer, size.getX()*size.getY()*3);
         cudaMalloc(&m_pItBuffer, size.getX()*size.getY()*sizeof(short));
-        cudaMalloc(&m_pCostBuffer, size.getX()/RAY_BUNDLE_WINDOW_SIZE);
+        cudaMalloc(&m_pCostBuffer, (size.getX()/RAY_BUNDLE_WINDOW_SIZE)*sizeof(uint));
     }
     Device::makeFrameBuffer(size);
     
     dim3 threads(size.getX(), size.getY());
     clear_framebuffer<<<threads,1>>>(m_pDevFramebuffer);
     clear_itbuffer<<<threads,1>>>(m_pItBuffer);
-    clear_costbuffer<<<threads.x,1>>>(m_pCostBuffer);
+    clear_costbuffer<<<size.getX()/RAY_BUNDLE_WINDOW_SIZE,1>>>(m_pCostBuffer);
 }
 
 void CUDADevice::setRenderInfo(renderinfo* info) {
@@ -465,16 +471,28 @@ void CUDADevice::renderTask(int index) {
     
     cudaSetDevice(m_device_index);
     dim3 threads(m_tasks[index].getWidth(), m_tasks[index].getHeight());
-    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_tasks[index].getX());
+    
+    rect window = m_tasks[index];
+    printf("device %p task %d start %d %d size %d %d\n", this, index, window.getX(), window.getY(), window.getWidth(), window.getHeight());
+    
+    ray_trace<<<threads,1>>>(m_dev_render_info, m_pHeader, m_pOctree, m_pDevFramebuffer, m_pItBuffer, m_tasks[index].getX());
 }
 
 void CUDADevice::calculateCostsForTask(int index) {
     if(m_tasks.size()==0)
         return;
     
+    cudaSetDevice(m_device_index);
     dim3 blocks(m_tasks[index].getWidth()/RAY_BUNDLE_WINDOW_SIZE);
     dim3 threads(RAY_BUNDLE_WINDOW_SIZE);
     calculate_costs<<<blocks,threads>>>(m_pItBuffer, m_pCostBuffer, m_tasks[index].getHeight(), m_tasks[index].getX());
+}
+
+void CUDADevice::renderEnd() {
+    cudaSetDevice(m_device_index);
+    cudaDeviceSynchronize();
+    
+    Device::renderEnd();
 }
 
 framebuffer_window CUDADevice::getFrameBuffer() {
@@ -529,10 +547,18 @@ unsigned char* CUDADevice::getFrame() {
 
 unsigned int* CUDADevice::getCosts() {
     cudaSetDevice(m_device_index);
-    cudaError_t error = cudaMemcpy( m_pCosts, m_pCostBuffer, m_frameBufferResolution.getX()/RAY_BUNDLE_WINDOW_SIZE, cudaMemcpyDeviceToHost);
+    cudaError_t error = cudaMemcpy( m_pCosts, m_pCostBuffer, m_frameBufferResolution.getX()/RAY_BUNDLE_WINDOW_SIZE*sizeof(uint), cudaMemcpyDeviceToHost);
     if(cudaIsError(error)) {
         cudaPrintError(error);
         exit(1);
+    }
+    
+    if(getTotalTaskWindow().getWidth() ) {
+        printf("this %p ", this);
+        for(int x = 0; x < (m_frameBufferResolution[0]/RAY_BUNDLE_WINDOW_SIZE); x++) {
+            printf("%d ", m_pCosts[x]);
+        }
+        printf("\n");
     }
     
     return m_pCosts;

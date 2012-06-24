@@ -202,9 +202,9 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
         dev_c.it_per_second = per_device_work_done[m_vDeviceCharacteristics.size()]/((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getTotalTime());
         
         
-        /*printf("New Device pps %f per_device_work_done %d render time %f transfer time %f\n", dev_c.it_per_second,  per_device_work_done[m_vDeviceCharacteristics.size()],
+        printf("New Device pps %f per_device_work_done %d render time %f transfer time %f\n", dev_c.it_per_second,  per_device_work_done[m_vDeviceCharacteristics.size()],
                                                                       ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getRenderTime()), 
-                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));*/
+                                                                      ((double)m_vDeviceList[m_vDeviceCharacteristics.size()]->getBufferToTextureTime()));
         m_vDeviceCharacteristics.push_back(dev_c);
     } else {
         m_frameCount++;

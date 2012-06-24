@@ -31,6 +31,8 @@ class CUDADevice
         unsigned char       *getFrame();
         unsigned int        *getCosts();
         
+        void                 renderEnd();
+        
         bool                 isCPU();
         
     private:
