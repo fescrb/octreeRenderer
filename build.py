@@ -7,6 +7,7 @@ use_ocl = " "
 build_type = ' -DCMAKE_BUILD_TYPE="Debug" ' 
 test = 0
 extra_defs = ''
+dont_use_cuda = ' -DDONT_USE_CUDA="Yes" '
 
 if len(sys.argv) > 1 :
     argc = 1
@@ -35,8 +36,8 @@ if len(sys.argv) > 1 :
             extra_defs = extra_defs + ' -DDONT_USE_OPENMP="Yes" '
         if command == "noocl":
             use_ocl = ' -DDONT_USE_OPENCL="Yes" '
-        if command == "nocuda":
-            extra_defs = extra_defs + ' -DDONT_USE_CUDA="Yes" '
+        if command == "cuda":
+            dont_use_cuda = ''
         if command == "debugfindocl":
             extra_defs = extra_defs + ' -DDEBUG_FINDOPENCL="Yes" '
 
@@ -49,7 +50,7 @@ if not os.path.exists('bin'):
     
 os.chdir('obj')
 
-cmake_command = 'cmake .. ' + build_type + use_ocl + extra_defs + ' '
+cmake_command = 'cmake .. ' + build_type + use_ocl + extra_defs + dont_use_cuda + ' '
 make_command = 'make ' + verbose
 install_command = 'make install '
 

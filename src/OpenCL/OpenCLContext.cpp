@@ -42,11 +42,11 @@ OpenCLContext::OpenCLContext() {
             }
         #endif*/
         
-        std::string name(m_vpPlatforms[m_vpPlatforms.size()-1]->getInfo()->getName());
+        /*std::string name(m_vpPlatforms[m_vpPlatforms.size()-1]->getInfo()->getName());
         if(name.find("NVIDIA")!=name.npos) {
             delete m_vpPlatforms[i];
             m_vpPlatforms.pop_back();
-        }
+        }*/
 	}
 }
 

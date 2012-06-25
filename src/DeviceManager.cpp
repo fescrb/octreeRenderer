@@ -36,7 +36,7 @@ void DeviceManager::detectDevices() {
     #endif //USE_CUDA
     
     #ifdef USE_OPENCL
-        //m_vContext.push_back(new OpenCLContext());
+        m_vContext.push_back(new OpenCLContext());
     #endif //USE_OPENCL
 
     #ifdef USE_OPENMP

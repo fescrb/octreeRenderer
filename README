@@ -24,4 +24,26 @@ Then invoke the makefile:
 
 	make
 	
-You will find the executable in src/octreeRenderer from the current directory.
+You will find the executable in ./src/octreeRenderer.
+
+[Generating Data]
+
+Some test data has been put into the /data folder of the source.
+
+This data can be converted to octrees by by executing the geometryToOctree executable. 
+
+For example, if the current directory is the folder where this README resides, and the project was built using the python script run:
+
+    bin/geometryToOctree data/sphere.obj sphere10 10
+
+This will create a 11-level octree (from 0 to 10, inclusive). In the current directory. This will be a folder named sphere11.voct.
+
+[Rendering]
+
+After data has been generated, it can be rendered using the octreeRenderer executable.
+
+For example, if you have followed the README up to here, you can execute:
+
+    bin/octreeRenderer sphere11
+
+And the sphere scene will be rendered.

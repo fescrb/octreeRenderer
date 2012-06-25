@@ -14,11 +14,11 @@ OpenCLPlatform::OpenCLPlatform(cl_platform_id platform_id)
     m_pPlatformInfo(new OpenCLPlatformInfo(platform_id)){
 	cl_uint device_num;
     
-    // We do not want NVIDIAfor testing.
+    /*// We do not want NVIDIAfor testing.
     std::string name(m_pPlatformInfo->getName());
     if(name.find("NVIDIA")!=name.npos) {
         return;
-    }
+    }*/
 
 	// Get the number of devices for this platform.
 	cl_int err = clGetDeviceIDs(m_PlatformID, CL_DEVICE_TYPE_ALL, 0, NULL, &device_num);
