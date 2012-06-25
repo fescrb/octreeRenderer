@@ -33,14 +33,6 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 		clPrintError(err); return;
 	}
 
-    // Create octree memory in the object, the host will only write, not read. And the device will only read.
-    // We make it 512MB for now
-    m_memory = clCreateBuffer(context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 350*1024*1024, NULL, &err);
-
-    if(clIsError(err)){
-        clPrintError(err); return;
-    }
-
     m_pProgram = new OpenCLProgram(this, "RayTracing.cl");
 
 	m_rayTraceKernel = m_pProgram->getOpenCLKernel("ray_trace");
@@ -59,7 +51,16 @@ OpenCLDevice::OpenCLDevice(cl_device_id device_id, cl_context context)
 }
 
 OpenCLDevice::~OpenCLDevice(){
-
+    clReleaseCommandQueue(m_commandQueue);
+    
+    delete m_pProgram;
+    
+    clReleaseKernel(m_rayTraceKernel);
+    clReleaseKernel(m_rayBundleTraceKernel);
+    clReleaseKernel(m_clearBufferKernel);
+    clReleaseKernel(m_clearFrameBufferKernel);
+    clReleaseKernel(m_calculateCostsKernel);
+    clReleaseKernel(m_clearCostsKernel);
 }
 
 void OpenCLDevice::printInfo() {
@@ -199,7 +200,17 @@ void OpenCLDevice::makeFrameBuffer(int2 size) {
 }
 
 void OpenCLDevice::sendData(Bin bin){
-    cl_int error = clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
+    cl_int error;
+    
+    // Create octree memory in the object, the host will only write, not read. And the device will only read.
+    // We make it 512MB for now
+    m_memory = clCreateBuffer(m_context, CL_MEM_COPY_HOST_WRITE_ONLY | CL_MEM_READ_ONLY, 350*1024*1024, NULL, &error);
+
+    if(clIsError(error)){
+        clPrintError(error); return;
+    }
+    
+    error = clEnqueueWriteBuffer(m_commandQueue, m_memory, CL_FALSE, 0, bin.getSize(), (void*)bin.getDataPointer(), 0, NULL, NULL);
     if(clIsError(error)){
         clPrintError(error); exit(1);
     }

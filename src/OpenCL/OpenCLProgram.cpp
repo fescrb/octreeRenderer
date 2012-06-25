@@ -48,6 +48,11 @@ OpenCLProgram::OpenCLProgram(OpenCLDevice* device, const char* sourceFilename)
 	}*/
 }
 
+OpenCLProgram::~OpenCLProgram() {
+    clReleaseProgram(m_program);
+}
+
+
 cl_kernel OpenCLProgram::getOpenCLKernel(const char* kernel_name) {
 	int err;
 	cl_kernel kernel = clCreateKernel( m_program, kernel_name, &err);

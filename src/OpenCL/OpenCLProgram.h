@@ -14,6 +14,7 @@ class OpenCLDevice;
 class OpenCLProgram {
 	public:
 		explicit				 OpenCLProgram(OpenCLDevice* device, const char* sourceFilename);
+        virtual                 ~OpenCLProgram();
 		
 		cl_kernel				 getOpenCLKernel(const char* kernel_name);
 		

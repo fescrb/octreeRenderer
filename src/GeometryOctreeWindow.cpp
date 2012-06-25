@@ -16,7 +16,7 @@ GeometryOctreeWindow::GeometryOctreeWindow(int argc, char** argv, int2 dimension
 
     initGL();
     
-    m_fov = 30.0f;
+    m_fov = 40.0f;
     m_near_plane = 0.01f;
     m_far_plane =  mag(m_octreeCreator->getMeshAxisAlignedBoundingBox().getSizes());
     m_eye_position = float4(1.0f * m_far_plane, 1.0f * m_far_plane, 1.0f * m_far_plane, 1.0f);

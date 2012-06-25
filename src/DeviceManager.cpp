@@ -31,13 +31,13 @@ DeviceManager::DeviceManager(DataManager *dataManager, int2 resolution)
 }
 
 void DeviceManager::detectDevices() {
-	#ifdef USE_OPENCL
-		m_vContext.push_back(new OpenCLContext());
-	#endif //USE_OPENCL
-        
     #ifdef USE_CUDA
         m_vContext.push_back(new CUDAContext());
     #endif //USE_CUDA
+    
+    #ifdef USE_OPENCL
+        //m_vContext.push_back(new OpenCLContext());
+    #endif //USE_OPENCL
 
     #ifdef USE_OPENMP
         m_vContext.push_back(new OpenMPContext());
@@ -216,9 +216,9 @@ void DeviceManager::getFrameTimeResults(int2 domain_resolution) {
                 m_vDeviceCharacteristics[i].it_per_second*=0.95f;
                 printf("after %f ",m_vDeviceCharacteristics[i].it_per_second);
             }*/
-            printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
+            /*printf("Device %d render time %f transfer time %f total time %f\n", i, ((double)m_vDeviceList[i]->getRenderTime()), 
                                                                                    ((double)m_vDeviceList[i]->getBufferToTextureTime()),
-                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));
+                                                                                   ((double)m_vDeviceList[i]->getTotalTime()));*/
         }
     }
 }

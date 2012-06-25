@@ -71,11 +71,11 @@ void OctreeRendererWindow::render() {
     
     glClear(GL_COLOR_BUFFER_BIT);
 
-    high_res_timer get_things;
-    get_things.reset();
+    //high_res_timer get_things;
+    //get_things.reset();
     std::vector<framebuffer_window> fb_windows = m_pProgramState->getDeviceManager()->renderFrame(m_pProgramState->getrenderinfo(), m_size);
-    end.reset();
-    printf("get %f\n", end - get_things);
+    //end.reset();
+    //printf("get %f\n", end - get_things);
     
     glUseProgram(m_programObject);
 
